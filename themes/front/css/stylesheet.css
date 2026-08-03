@@ -1,0 +1,221 @@
+
+body {font-size:12px; color:#414141; font-family:Arial, Helvetica, sans-serif; line-height: 18px; background-color: #ffffff; padding:0px; margin:0px;}
+
+/***************************************************
+ * Layout *
+****************************************************/
+.header {background-color:#50a053; padding:10px; height:100px;}
+.logo {color:#FFFFFF; font-size:30px; font-weight:bold; padding-left:25px;}
+
+.content-left,.content-right {background-color:#cccccc; font-size:12px; padding:10px; width:250px; margin-left:0px;}
+.content-center {background-color:#dedede; font-size:12px; padding:10px;}
+
+.footer {background-color:#50a053; padding:10px; text-align:center; height: 60px;}
+.footer a {font-size:12px; color:#ffffff; text-decoration:none; padding:0px 8px;}
+.footer a:hover {color:#ffffff; text-decoration:underline; cursor:pointer;}
+
+/***************************************************
+ * Menu *
+****************************************************/
+.navigation {background:#333333; height:40px;}
+
+#menu ul.menu {float:left;	font-size:14px; padding:0px; margin:0px;}
+#menu ul.menu li {position:relative; float: left; list-style-type: none;}
+#menu ul.menu li a {position:relative; display: block; float:left;	line-height:40px; padding:0 16px; text-decoration: none; z-index: 100; font-size:13px; font-weight:normal;}
+#menu ul.menu > li:first-child > a {border-left: 0;}
+#menu ul.menu > li:last-child > a {border-right: 0;}
+
+/** Sub Menu - Tier 2 **/
+#menu ul.menu li ul.sub-menu {position: absolute; top:38px;  display: none; margin: 0; padding: 0; background:#000; width:180px; left:0;}
+#menu ul.menu li:hover ul.sub-menu {display: block;	float: left; position: absolute; z-index: 200; top:38px;}
+#menu ul.menu li ul.sub-menu > li:first-child {margin:0 0;}
+#menu ul.menu li ul.sub-menu li {float:none !important; display:block; border:0 !important;}
+#menu ul.menu li ul.sub-menu li a {display: block; float:none; font-size:12px; line-height:16px; padding:7px 18px;}
+#menu ul.menu li ul.sub-menu li:first-child > a {border-top: 0;}
+#menu ul.menu li ul.sub-menu li:last-child > a {border-bottom: 0;}
+#menu ul.menu li ul.sub-menu li a:hover {display: block;}
+
+/** Sub Menu - Tier 3 **/
+#menu ul.menu li ul.sub-menu li ul {position:absolute; display: none; left:180px; background:#000; padding:0px; margin:0px;}
+#menu ul.menu li ul.sub-menu li ul li{ }
+#menu ul.menu li ul.sub-menu li:hover ul {display: block; float: left; position: absolute; top: 0;}
+#menu ul.menu li ul.sub-menu li ul li a {width: 140px; display: block;}
+
+#menu ul.menu li a {color: #FFF;}
+#menu ul.menu > li > a {border-right:1px solid #545454;}
+#menu ul.menu li:hover > a, #menu ul.menu li a:hover {color:#fff; background:#7d7d7d;}
+#menu ul.menu li ul.sub-menu li a {border-bottom:1px solid #303030;}
+#menu ul.menu li ul.sub-menu li a.last {border:0;}
+
+/** Arrow Styles **/
+#menu ul.menu > li > a.haschild {padding-right:30px; background:url(../images/down.png) no-repeat right 18px;}
+#menu ul.menu > li:hover > a.haschild {background:#7d7d7d url(../images/down.png) no-repeat right 18px;}
+#menu ul.menu li ul.sub-menu li a.haschild {background:url(../images/menu-right.png) no-repeat right center;}
+#menu ul.menu li:hover ul.sub-menu li:hover a.haschild {background:#7d7d7d url(../images/menu-right.png) no-repeat right center;}
+.warning-msg {
+    color: #A84846;
+    font-size: 10px;
+}
+.alert {
+    background: none repeat scroll 0 0 #FFEDBB;
+    border: 1px solid #F2D083;
+    color: #72612B;
+    padding:8px 15px; position:relative; font-weight:bold;
+}
+.alert h6 {
+    margin: 0;
+}
+.alert .close {
+    color: #72612B;
+    line-height: 20px;
+    opacity: 0.8;
+    position: absolute;
+    right:21px;
+    top:5px; border:0; background:0; cursor:pointer;
+}
+.alert.widget {
+    margin-bottom: 30px;
+}
+.alert-error{ margin-top:16px;}
+.alert-success{ margin-top:16px;}
+.alert-info{ margin-top:16px;}
+.alert-success .close, .alert-danger .close, .alert-error .close, .alert-info .close {
+    color: #FFFFFF;
+}
+.alert-success {
+    background: none repeat scroll 0 0 #75C386;
+    color: #FFFFFF;
+}
+.alert-danger, .alert-error {
+    background: none repeat scroll 0 0 #DC6868;
+    color: #FFFFFF;
+}
+.alert-info {
+    background: none repeat scroll 0 0 #6FBBD4;
+    color: #FFFFFF;
+}
+.alert-block {
+    padding-bottom: 8px;
+    padding-top: 12px;
+}
+.alert-block > p, .alert-block > ul {
+    margin-bottom: 0;
+}
+.alert-block p + p {
+    margin-top: 5px;
+}
+.alert-success, .alert-danger, .alert-error, .alert-info {
+    border: medium none;
+}
+div#ajaxloader {
+    background: none repeat scroll 0 0 rgba(0, 0, 0, 0.7);
+    display: none;
+    height: 100%;
+    left: 0;
+    margin-left: 0;
+    margin-top: 0;
+    overflow: auto;
+    position: fixed;
+    text-align: center;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+}
+#ajaxImage {
+    left: 50%;
+    position: absolute;
+    top: 50%;
+}
+div#ajaxloader {
+    text-align: center;
+}
+
+.float_left{
+    float:left;
+}
+div.pagination
+{
+    padding: 3px;
+    margin: 3px;
+}
+
+div.pagination a
+{
+    padding: 2px 5px 2px 5px;
+    margin: 2px;
+    border: 1px solid #AAAADD;
+    text-decoration: none; /* no underline */
+    color: #000099;
+}
+
+div.pagination a:hover, div.pagination a:active
+{
+    border: 1px solid #000099;
+    color: #000;
+}
+
+div.pagination span.current
+{
+    padding: 2px 5px 2px 5px;
+    margin: 2px;
+    border: 1px solid #000099;
+    font-weight: bold;
+    background-color: #BE0909;
+    color: #FFF;
+}
+div.pagination span.disabled
+{
+    padding: 2px 5px 2px 5px;
+    margin: 2px;
+    border: 1px solid #EEE;
+    color: #DDD;
+}
+div#ajaxloader {
+    background: none repeat scroll 0 0 rgba(0, 0, 0, 0.7);
+    display: none;
+    height: 100%;
+    left: 0;
+    margin-left: 0;
+    margin-top: 0;
+    overflow: auto;
+    position: fixed;
+    text-align: center;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+}
+#ajaxImage {
+    left: 50%;
+    position: absolute;
+    top: 50%;
+}
+div#ajaxloader {
+    text-align: center;
+}
+
+.pagination{ float:left; padding-top:4px;}
+.pagination ul li{ float:left; color:#414141; margin-right:2px;}
+.pagination ul li a{ color:#414141; padding:3px 5px; border:1px solid #f8f8f8; line-height:13px; display:block; float:left;}
+.pagination ul li.active{ color:#414141; padding:3px 5px; border:1px solid #f8f8f8; line-height:13px; display:block; float:left;border:1px solid #e4e4e4;}
+.pagination ul li.active{color:#1d5283;}
+.pagination ul li:hover{color:#1d5283; text-decoration:none;}
+.pagination-info{ float:right;}
+.page-size{ float:right; border-left:1px solid #e4e4e4; padding-left:10px; *padding:3px 0 4px 10px;}
+.items-info{ float:right; margin-right:10px; line-height:15px; line-height:13px\0/; padding-top:7px;}
+
+.prev a{ padding:6px 5px !important;}
+.next a{ padding:6px 5px !important;}
+.first a{ padding:6px 5px !important;}
+.last a{ padding:6px 5px !important;}
+.grid-data-table th{ padding-left:6px;}
+.grid-data-table td{ padding-left:6px;}
+
+
+/***************************************************
+ * menu selection css *
+****************************************************/
+
+#menu ul.menu li.active > a, #menu ul.menu li a.active{
+    color: #ffffff;
+    background: #7d7d7d;
+}

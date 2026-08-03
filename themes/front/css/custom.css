@@ -1,0 +1,26 @@
+.login-form #btnLogin { margin-top: 18px; border:0px; }
+.login-form #btnCancel { margin-top: 0px; border:0px; }
+.list_sorted{background: #ddd;}
+.helprow{padding-top: 10px;}
+.error, .validation_error{color:#B94A48 !important;}
+.input-control.error{border:1px solid #B94A48;}
+.input-control.error:focus{border:1px solid #B94A48;}
+
+.btn-red:after{background:#d9534f;}
+.btn-red:hover:after,.btn-red:hover{border-color:#d9534f;}
+.btn-green:after{background:#22a16d;}
+.btn-green:hover:after,.btn-green:hover{ border-color: #22a16d;}
+.btn-yellow:after{background:#f0a636;}
+.btn-yellow:hover:after,.btn-yellow:hover{ border-color: #f0a636;}
+.sorting{float: right;}
+.asterisk{color: #D9534F;}
+.alert-error {
+  background-image: linear-gradient(to bottom, #f2dede 0px, #e7c3c3 100%);
+  background-repeat: repeat-x;
+  border-color: #dca7a7;
+}
+
+.login-form .has-success .form-control,.login-form .has-success .form-control:focus,.login-form .has-error .form-control,.login-form .has-error .form-control:focus{ box-shadow:none; }
+.login-form{ min-height: 540px; }
+
+.login-container .cms-form p{text-align: left;}

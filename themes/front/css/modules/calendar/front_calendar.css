@@ -1,0 +1,99 @@
+body {font-size:12px; color:#414141; font-family:Arial, Helvetica, sans-serif; line-height: 18px; background-color: #ffffff; padding:0px; margin:0px;}
+
+div.pagination 
+{
+    padding: 3px;
+    margin: 3px;
+}
+
+div.pagination a 
+{
+    padding: 2px 5px 2px 5px;
+    margin: 2px;
+    border: 1px solid #AAAADD;
+    text-decoration: none; /* no underline */
+    color: #000099;
+}
+
+div.pagination a:hover, div.pagination a:active 
+{
+    border: 1px solid #000099;
+    color: #000;
+}
+
+div.pagination span.current 
+{
+    padding: 2px 5px 2px 5px;
+    margin: 2px;
+    border: 1px solid #000099;
+    font-weight: bold;
+    background-color: #BE0909;
+    color: #FFF;
+}
+div.pagination span.disabled 
+{
+    padding: 2px 5px 2px 5px;
+    margin: 2px;
+    border: 1px solid #EEE;
+    color: #DDD;
+}
+.clearfix:after, .clearfix:before {  content:""; display:table;}/* ----- clear fix for floats ----- */
+.clearfix:after { clear:both; padding:0; margin:0; line-height:0;}
+.clearfix{zoom:1;}
+.main-container{ }
+.main-container-middle{ padding:20px;}
+.breadcrumb ul li{ float:left; color:#1d5283; font-weight:400; font-size:12px; line-height:14px;}
+.breadcrumb ul li:first-child{ padding-left:0;}
+.breadcrumb ul li a{ font-size:12px; color:#626262; font-weight:normal; line-height:14px;}
+.breadcrumb ul li a:hover{ text-decoration:underline;}
+.page-title h1{ font-size:22px; color:#1d5283; line-height:22px; padding:5px 0 0 0; font-weight:600;}
+.grid-data .add-new{ text-align:right; padding-bottom:6px;}
+.grid-data table tr th{ text-align:left; background:#DEDEDE; padding-bottom:6px; padding-top:6px;}
+.grid-data table tr td a{ color:#414141; font-weight:bold;}
+.star{ color:#FF0033;}
+input {border:#E3E3E3 1px solid; background:#ffffff; color: #414141; font-size:11px; padding:4px; font-family:"Segoe UI",arial;} /* default class for the textboxes for whole project */
+textarea {border: #E3E3E3 1px solid; padding:4px; font-size:12px; background: url(../images/textboxbg.gif) #ffffff repeat-x; font-size:11px; color:#414141; font-family:"Segoe UI",arial; } /* default class for the textarea for whole project */
+select { border:#E3E3E3 1px solid; padding:4px; font-size:11px; background:#ffffff; color: #414141; font-family:"Segoe UI",arial;} /* default class for the list menu/dropdown(like to select countries or state) for whole project */
+.inputbutton {cursor: pointer; color:#fff; text-align:center; background:#414141; border:0; font-size:12px; font-weight:bold; padding:3px 8px 5px; height:27px; padding:3px 8px 4px 8px; font-family:"Segoe UI",arial; overflow:visible;}
+.inputbutton:hover{ background:#7D7D7D;}
+.warning-msg{ display:block; padding-top:3px; color:#A84846; font-size:10px;}
+.profile-content{ display:none;}
+.profile-content table th{ text-align:left; background:#DBE7ED; padding:6px;}
+.add-user-form-box{ background:#fff;}
+.add-user-form-box{ padding:20px;}
+.pagination{ float:left; padding-top:4px;}
+.pagination ul li{ float:left; color:#414141; margin-right:2px;}
+.pagination ul li a{ color:#414141; padding:3px 5px; border:1px solid #f8f8f8; line-height:13px; display:block; float:left;}
+.pagination ul li.active{ color:#414141; padding:3px 5px; border:1px solid #f8f8f8; line-height:13px; display:block; float:left;border:1px solid #e4e4e4;}
+.pagination ul li.active{color:#1d5283;}
+.pagination ul li:hover{color:#1d5283; text-decoration:none;}
+.pagination-info{ float:right;}
+.page-size{ float:right; border-left:1px solid #e4e4e4; padding-left:10px; padding:3px 0 4px 10px;}
+.submit-btns{ border-bottom:4px solid #ededed; background:#F8F8F8; padding:6px; border-left:1px solid #e6ecf2; border-right:1px solid #e6ecf2; text-align:right;}
+.add-new a{ font-size:12px; color:#414141; font-weight:bold;}
+.add-new a:hover{ text-decoration:underline;}
+.sorting{ float:right; width:10px; text-align:center; padding-top:3px;}
+.sorting a{ display:block; padding-bottom:2px;}
+.edit{ float:left; margin-right:7px;}
+.delete{ float:left;}
+.share{ float:left;}
+a{ text-decoration:none; color:#414141;}
+a:hover{ text-decoration:underline;}
+
+
+
+.main-content{ /*float:left;*/}
+.main-content-top{ padding:10px 0 10px 20px; border-bottom:1px solid #D9E5EB; background:#ECF3F7;}
+.main-container{ }
+.main-container-middle{ padding:20px;}
+.search-box{ border:1px solid #ededed; padding:10px; background:#F6F6F6; margin-bottom:20px;}
+.grid-data .add-new{ text-align:right; padding-bottom:6px;}
+.main-container table tr th{ text-align:left; background:silver; padding-bottom:6px; padding-top:6px;}
+.add-new a{ font-size:12px; color:#1d5283; font-weight:bold;}
+.add-new a:hover{ text-decoration:underline;}
+.odd-row td{ padding-top:6px; padding-bottom:6px;}
+.odd-row{ background:#fff;}
+.even-row{ background:#DEDEDE;}
+.even-row td{ padding-top:6px; padding-bottom:6px;}
+
+.main-container table tr td a{ color:#1D5283; font-weight:bold;}

@@ -1,0 +1,28 @@
+.clearfix:after, .clearfix:before { content: ""; display: table; }
+.clearfix:after { clear: both; line-height: 0; margin: 0; padding: 0; }
+.paging { background: none repeat scroll 0 0 #F8F8F8; border-bottom: 4px solid #EDEDED; border-left: 1px solid #E6ECF2; border-right: 1px solid #E6ECF2; padding: 6px; }
+.prdimg_div{ width:190px;height:170px; }
+.category-details p{text-align: justify; padding: 5px; }
+.product-div{ box-shadow:2px 0px 4px 1px #CCCCCC; }
+.product-div h3{ text-decoration:underline;}
+.navigation-sub{ background: none repeat scroll 0 0 #333333; color: #FFFFFF; font-weight: bold; height: 40px; line-height: 40px; text-align: center;  }
+.content-left-sc, .content-right-sc {background-color: #FFFFFF;border: 1px solid #DEDEDE;font-size: 12px;margin-left: 0;padding: 10px;width: 18%;}
+.content-center{background-color: #FFFFFF;padding: 0px !important; width:60%;}
+.fproduct{  width:100%; float:left; padding:0px; margin:0px;}
+.fproduct li{  width: 30%; float: left;list-style-type:none; padding:0px 8px 25px; text-align:center;}
+.fproduct-img{  border:solid 1px #dedede; padding: 5px; text-align: center;}
+.home-category{ padding-left:5px;}
+.home-category li{ list-style-type:none; line-height: 30px; font-size:14px; font-weight:bold;}
+.home-category li a{text-decoration: none;}
+.home-category li a img{padding-right:5px;}
+.home-category ul{ padding-left:15px;}
+.category-details img{ padding:10px;}
+.most-view-item{width:98%;  background-color: #FFFFFF;  border: 1px solid #DEDEDE; margin-left: 0;padding: 10px; height: 175px; font-size: 12px;}
+.most-view-item-div{width:20%; float:left; text-align:center;}
+.best-seller-item-div{float:left; text-align:center;}
+.green{ color: green;}
+.red{ color: red;}
+.cart-btn{ background:none repeat scroll 0 0 #333333; border: 0 none; color:#FFFFFF; cursor:pointer; height:27px; font-size:12px; font-weight: bold; overflow:visible; padding: 3px 8px 5px; text-align:center;}
+.even-row { background: none repeat scroll 0 0 #F3F7FA;}
+.odd-row {background: none repeat scroll 0 0 #FFFFFF;}
+.shopping-table tr th {background: none repeat scroll 0 0 #DBE7ED; padding-bottom: 6px; padding-top: 6px; text-align: left; }

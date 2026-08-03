@@ -1,0 +1,113 @@
+<?php
+if (!defined('BASEPATH'))
+    exit('No direct script access allowed');
+?>
+<script type="text/javascript" src="<?php echo site_url(); ?>themes/default/js/gstatic_loader.js"></script>
+<script type="text/javascript" src="<?php echo site_url(); ?>themes/default/js/google_charts.js"></script>
+<script type="text/javascript" src="<?php echo site_url(); ?>themes/default/js/corechart.js"></script>
+<script type="text/javascript" src="<?php echo site_url(); ?>themes/default/js/corechart-1.js"></script>
+
+<div id="ajax_table" class="report-detail">
+    <?php
+    $CI = get_instance();
+    $getData = $CI->input->get();
+    $curent_id = 0;
+    if (!empty($getData)) {
+        $curent_id = $getData['ni'];
+    }
+
+    if($getData['type'] == 'annual'){
+        $template = 'admin_index_template_annual';
+    }else if($getData['type'] == 'mytd'){
+        $template = 'admin_index_template_mytd';
+    }else{
+        echo 'END';exit;
+    }
+
+    foreach ($sites as $site) {
+        $id = $site['site_detail']['id'];
+        echo $CI->load->view($template, $site);
+    }
+
+    foreach ($sites as $key => $site) {
+        $id = $site['site_detail']['id'];
+        $attributes = array('name' => 'report_form_' . $id, 'id' => 'report_form_' . $id, 'enctype' => 'multipart/form-data');
+        
+        echo form_open('reportscron?ni=' . $id, $attributes);
+        echo form_hidden('view_type', 'pdf', 'view_type');
+        echo form_hidden('columnChartImg_' . $id, '', 'columnChartImg_' . $id);
+        echo form_hidden('columnChartCarbonFootprintImg_' . $id, '', 'columnChartCarbonFootprintImg_' . $id);
+        echo form_hidden('columnChartCarbonFootprintMonthlyImg_' . $id, '', 'columnChartCarbonFootprintMonthlyImg_' . $id);
+        echo form_hidden('columnChartCarbonFootprintAnnualImg_' . $id, '', 'columnChartCarbonFootprintAnnualImg_' . $id);
+        echo form_hidden('columnChartImg_hidden_' . $id, '', 'columnChartImg_hidden_' . $id);
+        echo form_hidden('columnChartImg_monthly_' . $id, '', 'columnChartImg_monthly_' . $id);
+        echo form_hidden('columnChartImg_monthly_month_' . $id, '', 'columnChartImg_monthly_month_' . $id);
+        echo form_hidden('pieChartImg_' . $id, '', 'pieChartImg_' . $id);
+        echo form_hidden('pieChartNewImg_' . $id, '', 'pieChartNewImg_' . $id);
+        echo form_hidden('pieChartImg_hidden_' . $id, '', 'pieChartImg_hidden_' . $id);
+        echo form_hidden('pieChartNewImg_hidden_' . $id, '', 'pieChartNewImg_hidden_' . $id);
+        echo form_hidden('pieChartNew2Img_' . $id, '', 'pieChartNew2Img_' . $id);
+        echo form_hidden('pieChartNew3Img_' . $id, '', 'pieChartNew3Img_' . $id);
+        echo form_hidden('wasteChartImg_' . $id, '', 'wasteChartImg_' . $id);
+        echo form_hidden('wastePieChartImg_' . $id, '', 'wastePieChartImg_' . $id);
+        echo form_hidden('wasteLandfillPieChartImg_' . $id, '', 'wasteLandfillPieChartImg_' . $id);
+        echo form_hidden('pieAnnualChartNewImg_hidden_' . $id, '', 'pieAnnualChartNewImg_hidden_' . $id);
+        echo form_hidden('pieAnnualLandfillImg_hidden_' . $id, '', 'pieAnnualLandfillImg_hidden_' . $id);
+        echo form_hidden('wasteMonthlyChartImg_' . $id, '', 'wasteMonthlyChartImg_' . $id);
+        echo form_hidden('wasteMonthlyChartImg_month_' . $id, '', 'wasteMonthlyChartImg_month_' . $id);
+        echo form_hidden('wastePieMonthlyChartImg_' . $id, '', 'wastePieMonthlyChartImg_' . $id);
+        echo form_hidden('wastePieMonthlyChartImg_month_' . $id, '', 'wastePieMonthlyChartImg_month_' . $id);
+        echo form_hidden('wastePieLandfillMonthlyChartImg_' . $id, '', 'wastePieLandfillMonthlyChartImg_' . $id);
+        echo form_hidden('wasteChartPreImg_hidden_' . $id, '', 'wasteChartPreImg_hidden_' . $id);
+    
+        echo form_hidden('current_id', $curent_id, 'current_id');
+        if(date('m') == 1){
+            echo form_hidden('monthly_report_month', 12, 'monthly_report_month');
+            echo form_hidden('monthly_report_year', (date('Y')-1), 'monthly_report_month');
+        }else{
+            echo form_hidden('monthly_report_month', (date('m')-1), 'monthly_report_month');
+            echo form_hidden('monthly_report_year', (date('Y')), 'monthly_report_month');
+        }
+        ?>
+        <div class="form-btn-outer" style="float: right; margin-bottom: 50px;">
+            <button type="submit" class="btn btn-secondary btn-submit hidden" id="report_btn_<?php echo $id; ?>" name="submit" value="report_btn">Generate Report</button>
+        </div>
+        <?php
+        echo form_close();
+    }
+    
+    ?>
+
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        blockUI();
+        setTimeout(function () {
+            var querystring = getUrlVars();
+            var action = $('#report_form_'+querystring['ni']).attr("action");
+            if("ni" in querystring){
+                if("type" in querystring){
+                    $('#report_form_'+querystring['ni']).attr("action", action + "&type=" + querystring['type']);
+                }
+                $('#report_btn_'+querystring['ni']).trigger('click');
+                
+            }
+        }, 5000);
+        unblockUI();
+
+        function getUrlVars()
+        {
+            var vars = [], hash;
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for (var i = 0; i < hashes.length; i++)
+            {
+                hash = hashes[i].split('=');
+                vars.push(hash[0]);
+                vars[hash[0]] = hash[1];
+            }
+            return vars;
+        }
+    });
+
+</script>
+

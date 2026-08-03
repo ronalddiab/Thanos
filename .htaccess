@@ -1,0 +1,14 @@
+RewriteEngine on
+
+#php_value upload_max_filesize 100M
+#php_value post_max_size 100M
+#php_value memory_limit 1G
+
+#RewriteCond %{HTTP_HOST} !^www\.hotel_portal\.com [NC]
+#RewriteRule ^(.*)$ http://www.hotel_portal.com/$1 [R=301,NC,L]
+
+RewriteCond %{SERVER_PORT} 80 
+RewriteRule ^(.*)$ https://www.heportal.net/Thanos/$1 [R,L]
+
+RewriteCond $1 !^(index\.php|assets|themes|user_guide|phpdoc|knowledgebase)
+RewriteRule ^(.*)$ index.php/$1 [L]

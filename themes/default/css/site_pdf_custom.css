@@ -1,0 +1,125 @@
+* {
+    font-family: arial !important;
+    font-size: 8px !important;
+}
+
+body {
+    background-color: #FFF !important;
+
+}
+.gradient{
+    width: 100%;
+    margin: 0px;
+    border: 1px solid black;
+    border-radius: 5px; 
+}
+.site-wrapper{
+    background-color: #EAEAEA !important;
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    top: 0;
+    bottom: 0;
+}
+
+.main-panel {
+    margin-left: 0px !important;
+    background-color: #D9D7D7 !important;
+}
+
+.notification_div {
+    overflow-y: unset;
+}
+
+.card-block {
+    margin-top: 15px !important;
+    margin-bottom: 15px;
+}
+
+.card-title {
+    font-size: 8px;
+}
+
+.article-content {
+    font-size: 10px !important;
+}
+
+.article-thumb {
+    width: 40px;
+    height: 40px !important;
+    padding: 5px !important;
+}
+
+.card {
+    box-shadow: none !important;
+    padding-bottom: 0px !important;
+    margin-bottom: 0px !important;
+}
+
+.site-container {
+    margin-bottom: 10px !important;
+}
+
+.site-name-box {
+    margin-top: 15px !important;
+}
+
+.yellow, .blue, .green {
+    margin-left: 10px;
+}
+
+.article-content-wrapper {
+    width: 30% !important;
+    margin: 0px 15px 0px 15px !important;
+    padding: 0px !important;
+}
+
+.yellow {
+    color: #FFA200 !important;
+}
+
+.blue {
+    color: #65C3DF !important;
+}
+
+.green {
+    color: #2ECC71 !important;
+}
+
+.indicator-left-content {
+    color: #000000 !important;
+}
+
+.font-size-9 {
+    font-size: 9px !important;
+}
+
+.font-size-12 {
+    font-size: 12px !important;
+}
+
+.font-size-14 {
+    font-size: 14px !important;
+}
+
+.default-listing li {
+    list-style-type: disc !important;
+}
+
+.padding-zero {
+    padding: 0px !important;
+}
+
+.notification-status-increased {
+    color: red !important;
+}
+.notification-status-decreased {
+    color: #007856 !important;
+}
+
+.consumption-card {
+    height: 182px !important;
+}
+.site-name-box {
+    height: 177px !important;
+}

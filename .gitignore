@@ -1,0 +1,90 @@
+# ==========================
+# CodeIgniter (CI) app folders
+# ==========================
+application/logs/*
+!application/logs/index.html
+!application/logs/.htaccess
+
+application/cache/*
+!application/cache/index.html
+!application/cache/.htaccess
+
+application/sessions/*
+!application/sessions/index.html
+
+application/cache/persistent/*
+!application/cache/persistent/index.html
+
+# Uploads / user-generated cache (adjust path if different in this repo)
+application/uploads/cache/*
+!application/uploads/cache/index.html
+
+# ==========================
+# Config / secrets
+# ==========================
+.env
+.env.*
+application/config/database.php
+application/config/production/
+application/config/development/
+
+# ==========================
+# Dependencies
+# ==========================
+vendor/
+node_modules/
+composer.lock
+
+# ==========================
+# OS / editor junk
+# ==========================
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ==========================
+# Build / deploy artifacts
+# ==========================
+*.zip
+*.tar.gz
+*.log
+error_log
+debug.log
+
+# ==========================
+# CI/CD (GitHub Actions local runs, etc.)
+# ==========================
+.github/workflows/*.log
+.deploy-cache/
+.lftp-cache/
+
+# Keep the actual workflow files tracked!
+!.github/workflows/*.yml
+
+user_guide_src/build/*
+user_guide_src/cilexer/build/*
+user_guide_src/cilexer/dist/*
+user_guide_src/cilexer/pycilexer.egg-info/*
+
+# IDE Files
+#-------------------------
+/nbproject/
+.idea/*
+
+## Sublime Text cache files
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+/tests/tests/
+/tests/results/
+license.txt
+logs.txt
+readme.rst
+contributing.md

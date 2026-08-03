@@ -1,0 +1,34 @@
+TODO:
+
+Medium-prio:
+* (testsuite) Provide ~100% automated test coverage of all functionality.
+
+Low-prio:
+* (feature) Intercept renaming of pages.
+* (feature) Provide flexible handling of zero edits, for example suppress if
+	there is no edit comment, mark them with "is zero edit" flag viewable
+	to the moderator, add an option (disabled by default) to suppress
+	zero edits completely, etc.
+* (interface) For non-automoderated users: show a message on their
+	Special:Contributions ensuring them that their edits will
+	appear there when they are approved.
+
+Background-prio (may not be needed):
+* (feature) Post factum elimination of duplicate anonymous edits (e.g. when one
+	of those edits is preloaded by the user).
+* (refactoring) Replace getUserpageByModId() with something more logical.
+* (interface) Ask "Really approve all edits from <user>?" when
+	clicking "Approve all" (NOT via JavaScript).
+* (interface) For each folder, display the number of new entries there
+	in the last day and week.
+* (interface) After the actions like Approve return to the moderation page,
+	displaying the message like "Approved N edits" in the page header.
+* (feature) Support uploads via API.
+
+Tests to implement:
+- preview test (modaction=preview)
+
+FIXME (hard to fix properly):
+- when user removes the section header (== here ==) while editing this
+	section, text of this section will be overwritten by the text taken
+	from the next section. Detect cases like that.
