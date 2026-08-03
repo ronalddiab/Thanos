@@ -1,0 +1,24 @@
+h3, p {padding: 0; margin: 0;}
+#banner { margin: 0px auto 10px auto; position: relative;}
+#slider { margin: 0px auto; border: none;}
+#slidercontent {width: 1000px; height: 300px; float:left; position: relative;}
+#slider div #img {width: 1000px; height: 300px; } 
+#slider div #title { background-color: buttonface; opacity: 0.6; padding: 5px 10px 5px 10px; color: black; position: absolute; bottom: 50px;}
+#nav { z-index: 50; position: absolute; bottom: 10px; left: 415px; float: left;}
+#nav a { margin: 0 5px; padding: 3px 5px; border: 1px solid #ccc; background: #414141; text-decoration: none; color: #FFF; }
+#nav a.activeSlide { background: #FFF; color: #414141; }
+#nav a:focus { outline: none; }
+/*#prev2 {z-index: 50; background : #cff; position: absolute; bottom: 10px; left: 0px; border: 1px solid #ccc;  text-decoration: none}*/
+/*#next2 {z-index: 50; position: absolute; bottom: 10px;right: 0px; padding: 3px 5px; border: 1px solid #ccc; background: #cff; text-decoration: none}*/
+#prev2 {z-index: 50; background : none; position: absolute; bottom: 10px; left: 0px; border: 1px solid #ccc;  text-decoration: none}
+#next2 {z-index: 50; background : none; position: absolute; bottom: 10px; right: 0px; border: 1px solid #ccc;  text-decoration: none}
+img {border: none;}
+.ad_left{position: relative;float:left; padding: 10px;max-height: 200px;max-width: 200px;text-align: center}
+.ad_right{position: relative;float:right;padding: 10px;max-width: 200px;max-height: 200px;text-align: center}
+.ad_top{position:relative;float: left;padding: 10px;max-height: 200px;max-width: 1000px;text-align: center}
+.ad_bottom{position: relative;float:left;padding: 10px;max-height: 200px;max-width: 1000px;text-align: center}
+
+.ad_left img{max-height: 200px;max-width:200px;padding: 10px;vertical-align: middle}
+.ad_right img{max-height: 200px;max-width: 200px;padding: 10px;vertical-align: middle}
+.ad_top img{max-height: 200px;max-width: 1000px;padding:10px;vertical-align: middle}
+.ad_bottom img{max-height: 200px;max-width: 1000px;padding: 10px;vertical-align: middle;}
