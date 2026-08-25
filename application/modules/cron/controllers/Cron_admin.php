@@ -536,8 +536,6 @@ class Cron_admin extends Base_Admin_Controller {
 
 		$result = $this->callCddHddApi($postXml);
 
-
-
 		if (isset($result->Failure) && !empty($result->Failure->Code->__toString())) {
 
 		    log_message('error', 'updateMonthlyCddHdd: CDD/HDD API failure for site_id ' . $site['id'] . ', code ' . $result->Failure->Code->__toString());
@@ -546,7 +544,28 @@ class Cron_admin extends Base_Admin_Controller {
 
 		}
 
+		$dataSets = $result->LocationDataResponse->DataSets ?? null;
 
+		if (empty($dataSets)) {
+			log_message('error', 'updateMonthlyCddHdd: no DataSets for site_id ' . $site['id']);
+			continue;
+		}
+
+		// Check for failures on either dataset
+		$hasFailure = false;
+		if (isset($dataSets->Failure)) {
+			foreach ($dataSets->Failure as $failure) {
+				$key = (string) $failure->attributes()->key;
+				$code = (string) $failure->Code;
+				$msg = (string) $failure->Message;
+				log_message('error', "updateMonthlyCddHdd: API failure for site_id {$site['id']} key={$key} code={$code} msg={$msg}");
+				$hasFailure = true;
+			}
+		}
+
+		if ($hasFailure || !isset($dataSets->DatedDataSet)) {
+			continue;
+		}
 
 		foreach ($result->LocationDataResponse->DataSets->DatedDataSet[0]->Values->V as $v) {
 
@@ -557,8 +576,6 @@ class Cron_admin extends Base_Admin_Controller {
 		    $dataList[$site['id']][$date]['hdd'] = $value;
 
 		}
-
-
 
 		foreach ($result->LocationDataResponse->DataSets->DatedDataSet[1]->Values->V as $v) {
 
@@ -681,12 +698,28 @@ class Cron_admin extends Base_Admin_Controller {
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 	$responseXml = curl_exec($ch);
+    $curlErrno = curl_errno($ch);
+    $curlError = curl_error($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
 
-	curl_close($ch);
+    // TEMP DEBUG - remove once root cause confirmed
+    $fh = fopen('logs.txt', 'a');
+    fwrite($fh, date("Y-m-d H:i:s") . " callCddHddApi curl_errno=$curlErrno curl_error=$curlError http_code=$httpCode\n");
+    fwrite($fh, "raw_response: " . substr((string)$responseXml, 0, 2000) . "\n---\n");
+    fclose($fh);
 
+    if ($curlErrno !== 0 || empty($responseXml)) {
+        log_message('error', 'callCddHddApi: curl failed - errno ' . $curlErrno . ' - ' . $curlError);
+        return false;
+    }
 
-
-	$result = new SimpleXMLElement($responseXml);
+    try {
+        $result = new SimpleXMLElement($responseXml);
+    } catch (Exception $e) {
+        log_message('error', 'callCddHddApi: XML parse failed - ' . $e->getMessage());
+        return false;
+    }
 
 	return $result;
 
@@ -757,7 +790,7 @@ class Cron_admin extends Base_Admin_Controller {
 
 	    $utilities = $this->utilities_model->getUtility();
 
-	    if (empty($utilities) || $utilities['total_electricity_kwh'] == 0) {
+		if (empty($utilities) || $utilities['total_electricity_kwh'] == 0) {
 
 		$NoDataAvailableSites[] = $siteKey;
 

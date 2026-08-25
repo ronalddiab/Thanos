@@ -961,6 +961,7 @@ if (!empty($groupUtilityChartDataArray)) {
 			    $performanceChartConstant = [
 				'utility_consumption'  => 'Total Energy Consumption',
 				'carbon_footprint' => 'Carbon Emissions',
+				'carbon_emissions_kgco2_gn' => 'Carbon Emissions kgCO2/GN',
 				'utility_consumption_intesity_per_square_footage' => 'Total Energy Consumption Intensity (per square '.getLocalUnitFullText($site_id).')',
 				'utility_consumption_intensity_per_room_night' => 'Total Energy Consumption Intensity (per room-night)',
 				'diversion_rate' => 'Waste Diversion Rate',

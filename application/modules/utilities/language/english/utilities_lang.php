@@ -140,7 +140,7 @@ $lang['utilities-title'] = 'Utilities';
 $lang['utilities-title-monthly'] = 'Monthly';
 $lang['utilities-title-quarterly'] = 'Quarterly';
 $lang['utilities-title-daily'] = 'Daily';
-$lang['utilities-current-export'] = 'Export Current Year Utilities';
+$lang['utilities-current-export'] = 'Export Utilities';
 $lang['utilities-waste-title'] = 'Waste';
 
 $lang['hdd-label'] = '(HDD)';

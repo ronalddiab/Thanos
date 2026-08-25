@@ -176,6 +176,39 @@ if ($utility_select && $utility_select == 'mtd') {
 <script>
     monthToReportHighchart();
 
+    function getAxisMaxAndTickInterval(values, preferredTickCount) {
+        preferredTickCount = preferredTickCount || 6;
+        var maxValue = 0;
+        values.forEach(function(val) {
+            var num = parseFloat(val);
+            if (!isNaN(num) && num > maxValue) {
+                maxValue = num;
+            }
+        });
+        if (maxValue <= 0) {
+            return { max: 10, tickInterval: 2 };
+        }
+        var rawInterval = maxValue / preferredTickCount;
+        var exponent = Math.floor(Math.log10(rawInterval));
+        var fraction = rawInterval / Math.pow(10, exponent);
+        var niceFraction;
+        if (fraction <= 1) {
+            niceFraction = 1;
+        } else if (fraction <= 2) {
+            niceFraction = 2;
+        } else if (fraction <= 5) {
+            niceFraction = 5;
+        } else {
+            niceFraction = 10;
+        }
+        var tickInterval = niceFraction * Math.pow(10, exponent);
+        var max = Math.ceil(maxValue / tickInterval) * tickInterval;
+        if (max <= maxValue) {
+            max += tickInterval;
+        }
+        return { max: max, tickInterval: tickInterval };
+    }
+
     function monthToReportHighchart() {
         <?php if ($is_report_data && $utility_select == 'mtd') { ?>
             var utilityMonthlyReportArray = '<?php echo json_encode($monthly_report_data_array); ?>';
@@ -222,6 +255,17 @@ if ($utility_select && $utility_select == 'mtd') {
                     }, );
                 }
             });
+            var costValues = [];
+            var occupancyValues = [];
+            Object.entries(chartMonthData).forEach(function([key, value]) {
+                if (key == occupancyYearSelected || key == occupancyYearSelectedPrevious) {
+                    occupancyValues = occupancyValues.concat(value);
+                } else {
+                    costValues = costValues.concat(value);
+                }
+            });
+            var costAxis = getAxisMaxAndTickInterval(costValues, 6);
+            var occupancyAxis = getAxisMaxAndTickInterval(occupancyValues, 6);
             Highcharts.chart('monthly_report_chart', {
                 chart: {
                     type: 'column'
@@ -257,9 +301,8 @@ if ($utility_select && $utility_select == 'mtd') {
                 },
                 yAxis: [{
                     min: 0,
-                    max: 600000,
-                    tickInterval: 100000,
-                    tickAmount: 8,
+                    max: costAxis.max,
+                    tickInterval: costAxis.tickInterval,
                     title: {
                         text: '<?php echo lang("utility-cost-chart-yaxis-0-title"); ?>',
                         style: {
@@ -271,8 +314,8 @@ if ($utility_select && $utility_select == 'mtd') {
                     }
                 }, {
                     min: 0,
-                    max: 100,
-                    tickInterval: 10,
+                    max: occupancyAxis.max,
+                    tickInterval: occupancyAxis.tickInterval,
                     title: {
                         text: '<?php echo lang("occupancy"); ?>',
                         style: {

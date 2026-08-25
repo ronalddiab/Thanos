@@ -313,7 +313,7 @@ class Import_admin extends Base_Admin_Controller
 
 		/*
 		* Walk every header index (0..n). Do NOT shrink by counting only non-empty
-		* headers — empty/hidden/foreign labels in the middle would otherwise
+		* headers ï¿½ empty/hidden/foreign labels in the middle would otherwise
 		* cause trailing mapped columns to be skipped.
 		*/
 		$maxColIndex = max((int) $numberCol, count($titleCells) - 1);
@@ -369,7 +369,7 @@ class Import_admin extends Base_Admin_Controller
 				$rawHeader = isset($dataCells[0][$j]) ? $dataCells[0][$j] : '';
 				$headerKey = trim(iconv("UTF-8", "ISO-8859-1", strtolower($rawHeader)), " \t\n\r\0\x0B\xA0");
 				if ($headerKey === '' || !isset($colmuns[$headerKey])) {
-					// empty / hidden / foreign label — skip this cell, keep scanning
+					// empty / hidden / foreign label ï¿½ skip this cell, keep scanning
 					continue;
 				}
 
@@ -448,7 +448,7 @@ class Import_admin extends Base_Admin_Controller
 				'lpg_kitchen', 'lpg_kitchen_rate', 'lpg_total_budget', 'lpg_total_budget_cost',
 				'district_heating_total_budget', 'district_heating_total_budget_cost',
 				'water_total_consumption_budget', 'water_total_consumption_budget_cost',
-				'vehicle_petrol', 'fleet_petrol', 'total_fleet_petrol_cost',
+				'vehicle_petrol',
 				'total_maximum_demand', 'total_purchased_electricity', 'total_purchased_electricity_cost',
 				'average_purchased_electricity', 'total_electricity_kwh', 'total_electricity_cost', 'average_cost_per_kwh',
 				'fuel_oil_hot_water_boilers', 'fuel_oil_hot_water_boilers_rate', 'fuel_oil_hot_water_boilers_cost',
@@ -480,7 +480,7 @@ class Import_admin extends Base_Admin_Controller
 				}
 			}
 			$dataInsert['forex'] = (!empty($dataInsert['forex'])) ? $dataInsert['forex'] : 1;
-			// CDD/HDD: do NOT default to empty/0 — leave unset so model keeps existing DB values
+			// CDD/HDD: do NOT default to empty/0 ï¿½ leave unset so model keeps existing DB values
 
 			$v = function ($key) use (&$dataInsert) {
 				return isset($dataInsert[$key]) && $dataInsert[$key] !== '' ? $dataInsert[$key] : 0;

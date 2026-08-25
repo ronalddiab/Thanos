@@ -4764,19 +4764,23 @@ class Sites_admin extends Base_Admin_Controller
 					$sites[$key]['last_update_by'] = $audit_detail['last_update_by'];
 				}
 			} else {
-				$indexWasteData = 0;
-				foreach ($sites as $keyWasteSetting => $wasteSetting) {
+				// Build month rows into a new array — do not mutate $sites while
+				// foreach-ing it (PHP re-visits new/overwritten keys → duplicate site months).
+				$expandedSites = [];
+				foreach ($sites as $wasteSetting) {
 					$siteWasteUtility = $this->site_waste_model->get_site_waste_utility_data($wasteSetting['id']);
-					foreach ($siteWasteUtility as $keyWasteData => $wasteData) {
+					foreach ($siteWasteUtility as $wasteData) {
 						if ($wasteData['month_id'] <= 12 && $wasteData['month_id'] >= 1 && $wasteData['year_id'] >= 2016) {
-							$sites[$indexWasteData] = $wasteSetting;
-							$sites[$indexWasteData]['year_id'] = $wasteData['year_id'];
-							$sites[$indexWasteData]['month_id'] = $wasteData['month_id'];
-							$siteWasteUtilityData[$wasteData['site_id']][$wasteData['month_id']][$wasteData['year_id']] = isset($wasteData) && $wasteData != 0 ? $wasteData : '';
-							$indexWasteData++;
+							$row = $wasteSetting;
+							$row['year_id'] = $wasteData['year_id'];
+							$row['month_id'] = $wasteData['month_id'];
+							$expandedSites[] = $row;
+							$siteWasteUtilityData[$wasteData['site_id']][$wasteData['month_id']][$wasteData['year_id']] =
+								(!empty($wasteData)) ? $wasteData : '';
 						}
 					}
 				}
+				$sites = $expandedSites;
 			}
 
 			// Display data from row 4 for each site

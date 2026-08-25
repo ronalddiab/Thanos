@@ -10484,7 +10484,7 @@ class Reports_admin extends Base_Admin_Controller
 	$this->utilities_model->utilities_year = $currYear - 3;
 	$getUtilityData_minus_three_year = $this->utilities_model->getSiteUtilityLastYear();
 	foreach ($getUtilityData as $getUtilities) {
-	    $totalElectricyKwhValue = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'];
+	    $totalElectricyKwhValue = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production'];
 	    $totalFuelOilCostValue = $getUtilities['total_fuel_oil_cost'] - $getUtilities['onsite_generators_fuel_oil_quantity'];
 	    $totalNaturalGasValue = $getUtilities['total_natural_gas_cost'] - $getUtilities['onsite_generators_natural_gas_quantity'];
 	    $carbon_footPrint += ($totalElectricyKwhValue * $site_detials['electricity_emission_factor']) + ($getUtilities['total_lpg_cost'] * $site_detials['lpg_emission_factor']) + ($totalFuelOilCostValue * $site_detials['fuel_emission_factor']) + ($totalNaturalGasValue * $site_detials['natural_gas_emission_factor']) + ($getUtilities['district_heating_cost'] * $site_detials['district_heating_emission_factor']) + ($getUtilities['district_cooling_cost'] * $site_detials['district_cooling_emission_factor']);
@@ -10499,7 +10499,7 @@ class Reports_admin extends Base_Admin_Controller
 	    $utility_kwh_total += ($electricity_value + $fuel_value + $lpg_value + $natural_gas_value + $heating_district_value + $cooling_district_value);
 	}
 	foreach ($getUtilityData_prev as $getUtilities) {
-	    $totalElectricyKwhValue_prev = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'];
+	    $totalElectricyKwhValue_prev = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production'];
 	    $totalFuelOilCostValue_prev = $getUtilities['total_fuel_oil_cost'] - $getUtilities['onsite_generators_fuel_oil_quantity'];
 	    $totalNaturalGasValue_prev = $getUtilities['total_natural_gas_cost'] - $getUtilities['onsite_generators_natural_gas_quantity'];
 	    $carbon_footPrint_prev += ($totalElectricyKwhValue_prev * $site_detials['electricity_emission_factor']) + ($getUtilities['total_lpg_cost'] * $site_detials['lpg_emission_factor']) + ($totalFuelOilCostValue_prev * $site_detials['fuel_emission_factor']) + ($totalNaturalGasValue_prev * $site_detials['natural_gas_emission_factor']) + ($getUtilities['district_heating_cost'] * $site_detials['district_heating_emission_factor']) + ($getUtilities['district_cooling_cost'] * $site_detials['district_cooling_emission_factor']);
@@ -10514,7 +10514,7 @@ class Reports_admin extends Base_Admin_Controller
 	    $utility_kwh_total_prev += ($electricity_value + $fuel_value + $lpg_value + $natural_gas_value + $heating_district_value + $cooling_district_value);
 	}
 	foreach ($getUtilityData_minus_two_year as $getUtilities) {
-	    $totalElectricyKwhValue_minus_two_year = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'];
+	    $totalElectricyKwhValue_minus_two_year = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production'];
 	    $totalFuelOilCostValue_minus_two_year = $getUtilities['total_fuel_oil_cost'] - $getUtilities['onsite_generators_fuel_oil_quantity'];
 	    $totalNaturalGasValue_minus_two_year = $getUtilities['total_natural_gas_cost'] - $getUtilities['onsite_generators_natural_gas_quantity'];
 	    $carbon_footPrint_minus_two_year += ($totalElectricyKwhValue_minus_two_year * $site_detials['electricity_emission_factor']) + ($getUtilities['total_lpg_cost'] * $site_detials['lpg_emission_factor']) + ($totalFuelOilCostValue_minus_two_year * $site_detials['fuel_emission_factor']) + ($totalNaturalGasValue_minus_two_year * $site_detials['natural_gas_emission_factor']) + ($getUtilities['district_heating_cost'] * $site_detials['district_heating_emission_factor']) + ($getUtilities['district_cooling_cost'] * $site_detials['district_cooling_emission_factor']);
@@ -10529,7 +10529,7 @@ class Reports_admin extends Base_Admin_Controller
 	    $utility_kwh_total_minus_two_year += ($electricity_value + $fuel_value + $lpg_value + $natural_gas_value + $heating_district_value + $cooling_district_value);
 	}
 	foreach ($getUtilityData_minus_three_year as $getUtilities) {
-	    $totalElectricyKwhValue_minus_three_year = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'];
+	    $totalElectricyKwhValue_minus_three_year = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production'];
 	    $totalFuelOilCostValue_minus_three_year = $getUtilities['total_fuel_oil_cost'] - $getUtilities['onsite_generators_fuel_oil_quantity'];
 	    $totalNaturalGasValue_minus_three_year = $getUtilities['total_natural_gas_cost'] - $getUtilities['onsite_generators_natural_gas_quantity'];
 	    $carbon_footPrint_minus_three_year += ($totalElectricyKwhValue_minus_three_year * $site_detials['electricity_emission_factor']) + ($getUtilities['total_lpg_cost'] * $site_detials['lpg_emission_factor']) + ($totalFuelOilCostValue_minus_three_year * $site_detials['fuel_emission_factor']) + ($totalNaturalGasValue_minus_three_year * $site_detials['natural_gas_emission_factor']) + ($getUtilities['district_heating_cost'] * $site_detials['district_heating_emission_factor']) + ($getUtilities['district_cooling_cost'] * $site_detials['district_cooling_emission_factor']);
@@ -10616,7 +10616,7 @@ class Reports_admin extends Base_Admin_Controller
 		$getUtilities['total_natural_gas_cost'] = ($getUtilities['total_natural_gas_cost'] != '') ? $getUtilities['total_natural_gas_cost'] : 0;
 		$getUtilities['district_heating_cost'] = ($getUtilities['district_heating_cost'] != '') ? $getUtilities['district_heating_cost'] : 0;
 		$getUtilities['district_cooling_cost'] = ($getUtilities['district_cooling_cost'] != '') ? $getUtilities['district_cooling_cost'] : 0;
-		$totalelectricitykwh = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'];
+		$totalelectricitykwh = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production'];
 		$totalfueloil = $getUtilities['total_fuel_oil_cost']; // - $getUtilities['onsite_generators_fuel_oil_quantity'];
 		$totalnaturalgas = $getUtilities['total_natural_gas_cost']; // - $getUtilities['onsite_generators_natural_gas_quantity'];
 
@@ -10650,7 +10650,7 @@ class Reports_admin extends Base_Admin_Controller
 		$utilitiesSameMonthPreviousYear['district_heating'] = ($utilitiesSameMonthPreviousYear['district_heating'] != '') ? $utilitiesSameMonthPreviousYear['district_heating'] : 0;
 		$utilitiesSameMonthPreviousYear['district_cooling'] = ($utilitiesSameMonthPreviousYear['district_cooling'] != '') ? $utilitiesSameMonthPreviousYear['district_cooling'] : 0;
 
-		$totalelectricitykwhprev = $utilitiesSameMonthPreviousYear['total_electricity_kwh'] - $utilitiesSameMonthPreviousYear['onsite_generators_quantity'];
+		$totalelectricitykwhprev = $utilitiesSameMonthPreviousYear['total_electricity_kwh'] - $utilitiesSameMonthPreviousYear['onsite_generators_quantity'] - $utilitiesSameMonthPreviousYear['total_renewable_energy_production'];
 		$totalfueloilprev = $utilitiesSameMonthPreviousYear['total_fuel_oil']; // - $utilitiesSameMonthPreviousYear['onsite_generators_fuel_oil_quantity'];
 		$totalnaturalgasprev = $utilitiesSameMonthPreviousYear['total_natural_gas']; // - $utilitiesSameMonthPreviousYear['onsite_generators_natural_gas_quantity'];
 		$SameMonthPreviousYear_footPrint = ($electricity_mmbtu_rate * $totalelectricitykwhprev * $site_detials['electricity_emission_factor']) + ($lpg_mmbtu_rate * $utilitiesSameMonthPreviousYear['total_lpg'] * $site_detials['lpg_emission_factor']) + ($fuel_mmbtu_rate * $totalfueloilprev * $site_detials['fuel_emission_factor']) + ($natural_gas_mmbtu_rate * $totalnaturalgasprev * $site_detials['natural_gas_emission_factor']) + ($heating_district_mmbtu_rate * $utilitiesSameMonthPreviousYear['district_heating'] * $site_detials['district_heating_emission_factor']) + ($cooling_district_mmbtu_rate * $utilitiesSameMonthPreviousYear['district_cooling'] * $site_detials['district_cooling_emission_factor']);
