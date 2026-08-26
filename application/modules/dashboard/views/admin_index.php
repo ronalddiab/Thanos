@@ -822,7 +822,7 @@ if (!empty($groupUtilityChartDataArray)) {
 							if ($progress_chart_utility == 'energy') {
 								$unitDrodownConstant = [
 									'per_rn' => 'EUI (kWh/RN)',
-									'per_meter' => 'EUI (kWh/m²)',
+									'per_meter' => 'EUI (kWh/m\u{00B2})',
 								];
 							} else {
 								$unitDrodownConstant = [

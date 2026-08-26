@@ -2059,7 +2059,9 @@ class Sites_model extends Base_Model
 	public function get_regional_sites_for_corporate_user()
 	{
 		$user_id = $this->session->userdata[$this->section_name]['user_id'];
-		$site_id = array();
+		$role_id = isset($this->session->userdata[$this->section_name]['role_id'])
+			? $this->session->userdata[$this->section_name]['role_id']
+			: 6;
 		$region_id = array();
 		$this->db->select('*');
 		$this->db->from('user_regions');
@@ -2073,9 +2075,9 @@ class Sites_model extends Base_Model
 				$region_id[] = $result['region_id'];
 			}
 		}
-		$regionalSitesData = $this->get_site_detail_with_region_filter(0, 0, $role_id, $data['region_id']);
+		$regionalSitesData = $this->get_site_detail_with_region_filter(0, $user_id, $role_id, $region_id);
 		$regionalSites = isset($regionalSitesData) ? array_column($regionalSitesData, 'id') : [];
-		$site_id = array_unique($regionalSites);
+		$site_id = array_values(array_unique($regionalSites));
 		return $site_id;
 	}
 	public function getCarbonRecords($site_id, $site_detials)
@@ -2722,7 +2724,7 @@ class Sites_model extends Base_Model
 			) AS cost_roomNight,
 
 			-- Total Electricity kWh (minus onsite generators)
-			(COALESCE(total_electricity_kwh, 0) - COALESCE(onsite_generators_quantity, 0) - COALESCE(total_renewable_energy, 0)) AS totalelectricitykwh,
+			(COALESCE(total_electricity_kwh, 0) - COALESCE(onsite_generators_quantity, 0) - COALESCE(total_renewable_energy_production, 0)) AS totalelectricitykwh,
 
 			-- Carbon Footprint
 			(

@@ -9794,7 +9794,7 @@ class Reports_admin extends Base_Admin_Controller
 	$objPHPExcel->setActiveSheetIndex(0)
 	    ->setCellValue('B' . $newSortedTableStartRow, "Site")
 	    ->setCellValue('C' . $newSortedTableStartRow, "Consumption (GJ)")
-	    ->setCellValue('D' . $newSortedTableStartRow, "Energy Intensity (KWH/m2)")
+	    ->setCellValue('D' . $newSortedTableStartRow, "Energy Intensity (kWh/m\u{00B2})")
 	    ->setCellValue('E' . $newSortedTableStartRow, "")
 	    ->setCellValue('F' . $newSortedTableStartRow, 'CO2 (Tons CO2e) ')
 	    ->setCellValue('G' . $newSortedTableStartRow, 'Carbon Intensity (kgCO<sub>2</sub>/m2)');

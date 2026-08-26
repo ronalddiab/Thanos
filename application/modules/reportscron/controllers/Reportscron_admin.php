@@ -6169,7 +6169,7 @@ class Reportscron_admin extends Base_Admin_Controller
 		$data = ($isPerMeter) ? array_column($ranking, 'eui_per_meter') : array_column($ranking, 'eui');
 		$siteCount = count($categories);
     	$chartHeight = max(280, ($siteCount * 24) + 120);
-		$Unit = $isPerMeter ? 'kWh/m²' : 'kWh/RN';
+		$Unit = $isPerMeter ? 'kWh/m\u{00B2}' : 'kWh/RN';
 		$chartData = [
 			"chart" => [
 				"type" => "bar",
@@ -6879,7 +6879,7 @@ class Reportscron_admin extends Base_Admin_Controller
 					</li>
 					<li>
 						<strong>EUI Comparison Chart:</strong>
-						An End-Use Intensity (kWh/m²) comparative chart of all your properties on HEP.
+						An End-Use Intensity (kWh/m\u{00B2}) comparative chart of all your properties on HEP.
 					</li>
 					<li>
 						<strong>Detailed Data Spreadsheet:</strong>
