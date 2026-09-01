@@ -283,7 +283,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 				$total_sum_pre_data_sum += $total_sum_pre_data_electricity;
 				$total_sum_data_sum += $total_sum_data_electricity;
 			    }
-			    if (!empty($site_detail['show_utility_fuel'])) {
+			    if (!empty($site_detail['show_utility_fuel_oil'])) {
 				$total_sum_pre_data_sum += $total_sum_pre_data_fuel;
 				$total_sum_data_sum += $total_sum_data_fuel;
 			    }
@@ -295,11 +295,11 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 				$total_sum_pre_data_sum += $total_sum_pre_data_natural_gas;
 				$total_sum_data_sum += $total_sum_data_natural_gas;
 			    }
-			    if (!empty($site_detail['show_utility_heating_district'])) {
+			    if (!empty($site_detail['show_utility_district_heating'])) {
 				$total_sum_pre_data_sum += $total_sum_pre_data_heating_district;
 				$total_sum_data_sum += $total_sum_data_heating_district;
 			    }
-			    if (!empty($site_detail['show_utility_cooling_district'])) {
+			    if (!empty($site_detail['show_utility_district_cooling'])) {
 				$total_sum_pre_data_sum += $total_sum_pre_data_cooling_district;
 				$total_sum_data_sum += $total_sum_data_cooling_district;
 			    }
@@ -670,7 +670,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
 
 
-						    <?php if($totalFuel_utility_cost_pre && $site_detail['show_utility_fuel']){ ?>
+						    <?php if($totalFuel_utility_cost_pre && $site_detail['show_utility_fuel_oil']){ ?>
 
 						    <tr>
 
@@ -712,7 +712,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
 
 
-						    <?php if($totalHeatingDistrict_utility_cost_pre && $site_detail['show_utility_heating_district']){ ?>
+						    <?php if($totalHeatingDistrict_utility_cost_pre && $site_detail['show_utility_district_heating']){ ?>
 
 						    <tr>
 
@@ -726,7 +726,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
 
 
-						    <?php if($totalCoolingDistrict_utility_cost_pre && $site_detail['show_utility_cooling_district']){ ?>
+						    <?php if($totalCoolingDistrict_utility_cost_pre && $site_detail['show_utility_district_cooling']){ ?>
 
 						    <tr>
 
@@ -764,7 +764,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
 						    <?php } ?>
 
-						    <?php if($totalFuel_utility_cost_pre && $site_detail['show_utility_fuel']){ ?>
+						    <?php if($totalFuel_utility_cost_pre && $site_detail['show_utility_fuel_oil']){ ?>
 
 						    <tr>
 
@@ -800,7 +800,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
 						    <?php } ?>
 
-						    <?php if($totalHeatingDistrict_utility_cost_pre && $site_detail['show_utility_heating_district']){ ?>
+						    <?php if($totalHeatingDistrict_utility_cost_pre && $site_detail['show_utility_district_heating']){ ?>
 
 						    <tr>
 
@@ -812,7 +812,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
 						    <?php } ?>
 
-						    <?php if($totalCoolingDistrict_utility_cost_pre && $site_detail['show_utility_cooling_district']){ ?>
+						    <?php if($totalCoolingDistrict_utility_cost_pre && $site_detail['show_utility_district_cooling']){ ?>
 
 						    <tr>
 
@@ -846,7 +846,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
 						    <?php } ?>
 
-						    <?php if($totalFuel_utility_cost_pre && $site_detail['show_utility_fuel']){ ?>
+						    <?php if($totalFuel_utility_cost_pre && $site_detail['show_utility_fuel_oil']){ ?>
 
 						    <tr>
 
@@ -876,7 +876,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
 						    <?php } ?>
 
-						    <?php if($totalHeatingDistrict_utility_cost_pre && $site_detail['show_utility_heating_district']){ ?>
+						    <?php if($totalHeatingDistrict_utility_cost_pre && $site_detail['show_utility_district_heating']){ ?>
 
 						    <tr>
 
@@ -886,7 +886,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
 						    <?php } ?>
 
-						    <?php if($totalCoolingDistrict_utility_cost_pre && $site_detail['show_utility_cooling_district']){ ?>
+						    <?php if($totalCoolingDistrict_utility_cost_pre && $site_detail['show_utility_district_cooling']){ ?>
 
 						    <tr>
 

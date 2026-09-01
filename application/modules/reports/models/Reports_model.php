@@ -696,6 +696,9 @@ class Reports_model extends Base_Model
 			    COALESCE(u.total_purchased_electricity, 0) as total_purchased_electricity,
 
 			    COALESCE(u.total_purchased_electricity_cost, 0) as total_purchased_electricity_cost,
+			    COALESCE(u.fleet_petrol, 0) as fleet_petrol,
+			    COALESCE(u.total_fleet_petrol_cost, 0) as total_fleet_petrol_cost,
+
 			    (COALESCE(u.total_electricity_kwh, 0) - COALESCE(u.onsite_generators_quantity, 0) - COALESCE(u.total_renewable_energy_production, 0)) as total_electricity_kwh_carbon,
 			    COALESCE(u.total_electricity_kwh, 0) as total_electricity_kwh,
 
@@ -2671,9 +2674,30 @@ class Reports_model extends Base_Model
 	return $this->fetchUpdatedRoomKeys($result);
     }
 
+    /**
+     * Conversion factors for SQL interpolation. Empty/missing values become 1 so the query stays valid.
+     */
+    private function getMmbtuFactorsForQuery()
+    {
+	$keys = ['electricity', 'fuel_oil', 'lpg', 'natural_gas', 'district_heating', 'district_cooling', 'water'];
+	$dataFactor = getMmbtuFactorConversionAllUtility($this->site_id);
+	if (!is_array($dataFactor)) {
+	    $dataFactor = [];
+	}
+	foreach ($keys as $key) {
+	    $value = isset($dataFactor[$key]) ? $dataFactor[$key] : null;
+	    if (function_exists('sanitizeMmbtuFactorForQuery')) {
+		$dataFactor[$key] = sanitizeMmbtuFactorForQuery($value);
+	    } else {
+		$dataFactor[$key] = ($value === null || $value === '' || !is_numeric($value)) ? 1 : (float) $value;
+	    }
+	}
+	return $dataFactor;
+    }
+
     function monthlyUtilityProgress($filters = array())
     {
-	$dataFactor = getMmbtuFactorConversionAllUtility($this->site_id);
+	$dataFactor = $this->getMmbtuFactorsForQuery();
 
 	// For Jan month of new year
 	$default_pre_month = date('n') - 1;
@@ -2727,7 +2751,7 @@ class Reports_model extends Base_Model
      */
     function monthlyUtilityProgressOnTarget($filters = array())
     {
-        $dataFactor = getMmbtuFactorConversionAllUtility($this->site_id);
+        $dataFactor = $this->getMmbtuFactorsForQuery();
         $dateParams = getProgressWidgetDateParams();
         
         $default_pre_month = $dateParams['month'];
@@ -2839,7 +2863,7 @@ class Reports_model extends Base_Model
 
 	function groupUtilityChart()
 	{
-		$dataFactor = getMmbtuFactorConversionAllUtility($this->site_id);
+		$dataFactor = $this->getMmbtuFactorsForQuery();
 
 		if(date('n') == 1){
 			$startMonth = 1;
@@ -2878,7 +2902,7 @@ class Reports_model extends Base_Model
 
 
 	function fetchReferenceYearEnergyTarget($filterTargetMonthly, $isRoomNight = false) {
-		$dataFactor = getMmbtuFactorConversionAllUtility($this->site_id);
+		$dataFactor = $this->getMmbtuFactorsForQuery();
 		$filterTargetMonthly['year_id'] = is_numeric($filterTargetMonthly['year_id']) && !empty($filterTargetMonthly['year_id']) ? $filterTargetMonthly['year_id'] : date('Y') - 1;
 
 		$query = "SELECT ((COALESCE(u.total_electricity_kwh,0) * " . $dataFactor['electricity'] . ") +
@@ -2908,7 +2932,7 @@ class Reports_model extends Base_Model
 
     function getPerformanceChartData($filters)
     {
-	$dataFactor = getMmbtuFactorConversionAllUtility($this->site_id);
+	$dataFactor = $this->getMmbtuFactorsForQuery();
 	$dataFactor['water'] = 1;
 	$multiplyValue = '1';
 	$areaUnit = [
@@ -3031,6 +3055,9 @@ class Reports_model extends Base_Model
 
 		//Calculation of Utility Carbon footprint
 		$performanceReportData['CarbonFootprint'][$result['month_id']][$result['year_id']] =  round($totalCarbonFootprint) ?? 0;
+
+		//Calculation of Utility Carbon footprint per guest night
+		$performanceReportData['CarbonFootprintGuestNight'][$result['month_id']][$result['year_id']] = isset($result['total_guests']) && $result['total_guests'] != 0 ? round($totalCarbonFootprint / $result['total_guests'], 2) : 0;
 
 		$totalUtilityConsumption = ($utilityConsumptionElectricityKwh + $utilityConsumptionDistrictHeatingKwh + $utilityConsumptionDistrictCoolingKwh + $utilityConsumptionFuelKwh + $utilityConsumptionLpgKwh + $utilityConsumptionNaturalGasKwh) - $onsite_generators_quantityKWH - ($result['total_renewable_energy_production'] ?? 0);
 		//Setting the Utility Consumption

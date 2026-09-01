@@ -184,10 +184,12 @@
 
                 <?php if (!empty($sites)) { ?>
                     <?php
-                    foreach ($sites as $key => $value) {
-                        if ($key <= 0) { // Start from 2nd site because first is already added 
+                    $rendered_site_ids = array((int) $site_id);
+                    foreach ($sites as $value) {
+                        if (in_array((int) $value, $rendered_site_ids, true)) {
                             continue;
                         }
+                        $rendered_site_ids[] = (int) $value;
                         ?>
                         <div class="row add-row sit_dynaminc-row">
                             <div class="form-col-10">
@@ -205,6 +207,13 @@
                     }
                     ?>
                 <?php } ?>
+				<?php
+				if (!empty($hidden_sites)) {
+					foreach ($hidden_sites as $hidden_site) {
+						echo form_hidden('site_id[]', $hidden_site);
+					}
+				}
+				?>
             </li>  
 
             <?php // }  ?> 
@@ -478,14 +487,9 @@
         if (selected_role_ready.value == 6) {
             $('.for_region_div').show();
             $('#if_multi_region').show();
-            var sitesLength = $("[name='sites_length']").val();
-            if(sitesLength > 0) {
-                $('.for_site_div').show();
-                $('#if_multi_site').hide();
-                $('.if_corporate_user').hide();
-            } else {
-                $('.for_site_div').hide();
-            }
+            $('.for_site_div').show();
+            $('#if_multi_site').show();
+            $('.if_corporate_user').show();
         } else {
             $('.for_site_div').show();
 
@@ -624,17 +628,19 @@
             $('.for_region_div').hide();
             $('#if_multi_region').hide();
         }
-        if (for_role_value == 1 || for_role_value == 5 || for_role_value == 6) {
+        if (for_role_value == 1 || for_role_value == 5) {
             $('.for_site_div').hide();
-            if (for_role_value == 6) {
-                $('.for_region_div').show();
-                $('#if_multi_region').show();
-            } else {
-                $('.for_region_div').hide();
-                $('#if_multi_region').hide();
-            }
+            $('.for_region_div').hide();
+            $('#if_multi_region').hide();
         }
-        if (for_role_value == 2) {
+        if (for_role_value == 6) {
+            $('.for_site_div').show();
+            $('#if_multi_site').show();
+            $('.if_corporate_user').show();
+            $('.for_region_div').show();
+            $('#if_multi_region').show();
+        }
+        if (for_role_value == 2 || for_role_value == 6) {
             $('#if_multi_site').show();
         } else {
             $('#if_multi_site').hide();

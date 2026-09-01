@@ -963,6 +963,7 @@ function getUtilityUnitFactorForConversion($id = 0, $utility)
 {
     if(!empty($id) && !empty($utility)) {
 	$utility_name = GetSiteUtilityUnitName($id, $utility);
+	$factor = 1;
 	switch ($utility) {
 	    case 'electricity':
 		$factor = 1;
@@ -975,9 +976,9 @@ function getUtilityUnitFactorForConversion($id = 0, $utility)
 		    $factor = 1;
 		} else if ($utility_name == 'Kg') {
 			//if($id == 13) { //for Amman Rotana
-				$factor = 6.9;
+				// $factor = 6.9;
 			//} else {
-				// $factor = 13.1388888888889;
+				$factor = 13.1388888888889;
 			//}
 		} else if ($utility_name == 'Liters') {
 		    $factor =  6.653; //7.12304438163687;
@@ -1673,14 +1674,24 @@ function getNotificationStaticList($site_id = 0) {
     return $site_notification_lists;
 }
 function getMmbtuFactorConversionAllUtility($site_id) {
-	$dataFactor['electricity'] = getUtilityUnitFactorForConversion($site_id, 'electricity');
-	$dataFactor['fuel_oil'] = getUtilityUnitFactorForConversion($site_id, 'fuel_oil');
-	$dataFactor['lpg'] = getUtilityUnitFactorForConversion($site_id, 'lpg');
-	$dataFactor['natural_gas'] = getUtilityUnitFactorForConversion($site_id, 'natural_gas');
-	$dataFactor['district_heating'] = getUtilityUnitFactorForConversion($site_id, 'district_heating');
-	$dataFactor['district_cooling'] = getUtilityUnitFactorForConversion($site_id, 'district_cooling');
-	$dataFactor['water'] = getUtilityUnitFactorForConversion($site_id, 'water');
+	$keys = ['electricity', 'fuel_oil', 'lpg', 'natural_gas', 'district_heating', 'district_cooling', 'water'];
+	$dataFactor = [];
+	foreach ($keys as $key) {
+		$dataFactor[$key] = sanitizeMmbtuFactorForQuery(getUtilityUnitFactorForConversion($site_id, $key));
+	}
 	return $dataFactor;
+}
+
+/**
+ * Ensure a conversion factor is a finite number so it can be interpolated into SQL.
+ * Missing/empty/non-numeric values default to 1 (pass-through, same as electricity).
+ */
+function sanitizeMmbtuFactorForQuery($factor)
+{
+	if ($factor === null || $factor === '' || !is_numeric($factor) || !is_finite((float) $factor)) {
+		return 1;
+	}
+	return (float) $factor;
 }
 
 function formatNumberAbbreviation($number) {
@@ -2003,7 +2014,8 @@ function applyHeaderColorsWaste($sheet)
         'N:P'   => 'dark_blue',
         'Q:S'   => 'peach_light',
         'T:V'   => 'peach',
-        'W:Y'   => 'brown_light'
+        'W:Y'   => 'brown_light',
+		'Z:AB'	=> 'pink'
     ];
 
 	foreach ($groups as $range => $color) {
@@ -2240,4 +2252,60 @@ function calculateProgressOnTarget($progressOnTarget, $current_month, $current_y
         'total_waste_YTD' => $current['total_waste_target'] ?? 0,
         'total_waste_Baseline_YTD' => $baseline['total_waste_target'] ?? 0
     ];
+}
+
+/**
+ * Matches NAN / INF tokens that PHP prints when a division by zero or a missing
+ * denominator reaches the output layer. Word boundaries keep real words such as
+ * "info" or "Infrastructure" untouched.
+ */
+define('REPORT_NON_FINITE_PATTERN', '/(?<![A-Za-z0-9_])-?(?:nan|inf(?:inity)?)(?![A-Za-z0-9_])/i');
+
+/**
+ * Strip literal "nan" / "inf" artefacts out of rendered report HTML just before
+ * it is written into a PDF.
+ */
+function sanitize_report_output_html($html, $fallback = '0')
+{
+    if (!is_string($html) || $html === '') {
+        return $html;
+    }
+
+    return preg_replace(REPORT_NON_FINITE_PATTERN, $fallback, $html);
+}
+
+/**
+ * Replace non-finite values across every populated cell of a PHPExcel workbook
+ * just before it is handed to the writer.
+ */
+function sanitize_report_spreadsheet($objPHPExcel, $fallback = 0)
+{
+    if (!is_object($objPHPExcel) || !method_exists($objPHPExcel, 'getWorksheetIterator')) {
+        return $objPHPExcel;
+    }
+
+    foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) {
+        foreach ($worksheet->getRowIterator() as $row) {
+            try {
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(true);
+            } catch (Exception $e) {
+                continue; // empty row
+            }
+
+            foreach ($cellIterator as $cell) {
+                if ($cell === null) {
+                    continue;
+                }
+                $value = $cell->getValue();
+                if (is_float($value) && !is_finite($value)) {
+                    $cell->setValue($fallback);
+                } elseif (is_string($value) && preg_match(REPORT_NON_FINITE_PATTERN, $value)) {
+                    $cell->setValue(preg_replace(REPORT_NON_FINITE_PATTERN, (string) $fallback, $value));
+                }
+            }
+        }
+    }
+
+    return $objPHPExcel;
 }

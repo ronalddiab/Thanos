@@ -32,6 +32,8 @@ if ($filters["start_year"] == $filters["end_year"]) { // If start and end year i
     $resultkeys[$filters["end_year"]] = $endmonthsarray;
 }
 $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
+$carbon_chart_year = (int) $filters['start_year'];
+$carbon_chart_prev_year = $carbon_chart_year - 1;
 ?>
 
 <div class="card-wrap">
@@ -68,17 +70,17 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
 				$colorWater = ($totalWater != 0) ? $chart_legend_colors['Water'] : '';
 				$colorHeatingDistrict = ($totalHeatingDistrict != 0) ? $chart_legend_colors['District_Heating'] : '';
 				$colorCoolingDistrict = ($totalCoolingDistrict != 0) ? $chart_legend_colors['District_Cooling'] : '';
-				$colorlastYear = $chart_legend_colors[date('Y') - 1];
-				$colorCurrentYear = $chart_legend_colors[date('Y')];
+				$colorlastYear = isset($chart_legend_colors[$carbon_chart_prev_year]) ? $chart_legend_colors[$carbon_chart_prev_year] : $chart_legend_colors[date('Y') - 1];
+				$colorCurrentYear = isset($chart_legend_colors[$carbon_chart_year]) ? $chart_legend_colors[$carbon_chart_year] : $chart_legend_colors[date('Y')];
 
 		?>
 			var arrTitle = ['Month'];
 			var arrValuesMulti = [];
-			arrTitle.push('<?php echo date('Y') - 1 ?>');
-			arrTitle.push('<?php echo date('Y') ?>');
+			arrTitle.push('<?php echo $carbon_chart_prev_year; ?>');
+			arrTitle.push('<?php echo $carbon_chart_year; ?>');
 
-			arrTitle.push('<?php echo lang("occupancy")."-".$last_year; ?>');
-			arrTitle.push('<?php echo lang("occupancy")."-".$current_year; ?>');
+			arrTitle.push('<?php echo lang("occupancy")."-".$carbon_chart_prev_year; ?>');
+			arrTitle.push('<?php echo lang("occupancy")."-".$carbon_chart_year; ?>');
 			arrValuesMulti.push(arrTitle);
 
 
@@ -255,8 +257,9 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
 	    $AVG_pre_data_budget = ($total_sum_pre_data_budget/$total_months);
 
 	    // Average Current year data
-	    // $YTD_total_months = $total_months;
-		if(date('n') == 1) {
+		if ($carbon_chart_year != (int) date('Y')) {
+			$YTD_total_months = $total_months;
+		} elseif (date('n') == 1) {
 			$YTD_total_months = 12;
 		} else {
 			$YTD_total_months = date('n') - 1;
@@ -351,13 +354,13 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
 		arrAvg.push(<?php echo !empty($AVG_data_occupancy) && is_finite($AVG_data_occupancy) ? $AVG_data_occupancy : 0; ?>);
 		var carbonFootprintDataArray = [];
 		var carbonFootprintDataArrayFormatted = [];
-		var yearSelectedCarbonFootprint = '<?php echo $year; ?>';
-		var yearSelectedPreCarbonFootprint = '<?php echo $year - 1; ?>';
+		var yearSelectedCarbonFootprint = '<?php echo $carbon_chart_year; ?>';
+		var yearSelectedPreCarbonFootprint = '<?php echo $carbon_chart_prev_year; ?>';
 		var occupancy = 'Occupancy-';
 		var occupancyCarbonFootprintYear = occupancy.concat('', yearSelectedCarbonFootprint);
 		var occupancyCarbonFootprintYearPrevious = occupancy.concat('', yearSelectedPreCarbonFootprint);
-		var currentYear = '<?php echo date('Y'); ?>';
-		var lastYear = '<?php echo date('Y') - 1; ?>';
+		var currentYear = '<?php echo $carbon_chart_year; ?>';
+		var lastYear = '<?php echo $carbon_chart_prev_year; ?>';
 		var carbonFootprintSubtitle = arrValuesMulti[0];
 		carbonFootprintSubtitleName = carbonFootprintSubtitle.filter(value => value !== "Month");
 		$.each(carbonFootprintSubtitleName, function(i) {

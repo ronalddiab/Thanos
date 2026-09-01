@@ -237,6 +237,8 @@ class Import_admin extends Base_Admin_Controller
 		    $colmuns['Food Covers'] = "total_fb_services";
 		    $colmuns['Revenue'] = "revenue";
 		    $colmuns['Vehicle Petrol (Liter)'] = "vehicle_petrol";
+		$colmuns['Other fleets Petrol (Litres)'] = "fleet_petrol";
+		$colmuns['Total Fleet Petrol Cost ($)'] = "total_fleet_petrol_cost";
 		    $colmuns['Total F and B Sales'] = "total_f_b_sales";
 
 		    $colmuns['Heating Fixed Cost'] = "district_heating_fixed_cost";
@@ -318,6 +320,33 @@ class Import_admin extends Base_Admin_Controller
 		*/
 		$maxColIndex = max((int) $numberCol, count($titleCells) - 1);
 
+		$identityColumns = array('site_id', 'month_id', 'year_id', 'date_id', 'cdd', 'hdd');
+		for ($scanRow = 1; $scanRow <= $numberRow; $scanRow++) {
+		    if (!isset($dataCells[$scanRow][0]) || $dataCells[$scanRow][0] == '') {
+			continue;
+		    }
+		    for ($scanCol = 0; $scanCol <= $maxColIndex; $scanCol++) {
+			if (!array_key_exists($scanCol, $dataCells[$scanRow])) {
+			    continue;
+			}
+			$rawHeader = isset($dataCells[0][$scanCol]) ? $dataCells[0][$scanCol] : '';
+			$headerKey = trim(iconv("UTF-8", "ISO-8859-1", strtolower($rawHeader)), " \t\n\r\0\x0B\xA0");
+			if ($headerKey === '' || !isset($colmuns[$headerKey])) {
+			    continue;
+			}
+			$dbColumn = $colmuns[$headerKey];
+			if (in_array($dbColumn, $identityColumns, true)) {
+			    continue;
+			}
+			$cellValue = $dataCells[$scanRow][$scanCol];
+			if ($this->is_negative_import_value($cellValue)) {
+			    $this->theme->set_message("File upload has negative values please check and re-upload.", 'error');
+			    redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import');
+			    exit;
+			}
+		    }
+		}
+
 		$siteNames = array();
 		for ($i = 1; $i <= $numberRow; $i++) {
 			if (!isset($dataCells[$i][0])) {
@@ -369,7 +398,7 @@ class Import_admin extends Base_Admin_Controller
 				$rawHeader = isset($dataCells[0][$j]) ? $dataCells[0][$j] : '';
 				$headerKey = trim(iconv("UTF-8", "ISO-8859-1", strtolower($rawHeader)), " \t\n\r\0\x0B\xA0");
 				if ($headerKey === '' || !isset($colmuns[$headerKey])) {
-					// empty / hidden / foreign label � skip this cell, keep scanning
+					// empty / hidden / foreign label — skip this cell, keep scanning
 					continue;
 				}
 
@@ -395,12 +424,12 @@ class Import_admin extends Base_Admin_Controller
 					}
 				}
 
+				if ($this->is_negative_import_value($cellValue) && !in_array($dbColumn, array('site_id', 'month_id', 'year_id', 'cdd', 'hdd'), true)) {
+					$this->theme->set_message("File upload has negative values please check and re-upload.", 'error');
+					redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import');
+					exit;
+				}
 				if (!in_array($dbColumn, $keyNotExists, true)) {
-					if (is_numeric($cellValue) && $cellValue < 0) {
-						$this->theme->set_message("File upload has negative values please check and re-upload.", 'error');
-						redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import');
-						exit;
-					}
 					$dataInsert[$dbColumn] = $cellValue;
 				}
 			}
@@ -448,7 +477,7 @@ class Import_admin extends Base_Admin_Controller
 				'lpg_kitchen', 'lpg_kitchen_rate', 'lpg_total_budget', 'lpg_total_budget_cost',
 				'district_heating_total_budget', 'district_heating_total_budget_cost',
 				'water_total_consumption_budget', 'water_total_consumption_budget_cost',
-				'vehicle_petrol',
+				'vehicle_petrol', 'fleet_petrol', 'total_fleet_petrol_cost',
 				'total_maximum_demand', 'total_purchased_electricity', 'total_purchased_electricity_cost',
 				'average_purchased_electricity', 'total_electricity_kwh', 'total_electricity_cost', 'average_cost_per_kwh',
 				'fuel_oil_hot_water_boilers', 'fuel_oil_hot_water_boilers_rate', 'fuel_oil_hot_water_boilers_cost',
@@ -480,7 +509,7 @@ class Import_admin extends Base_Admin_Controller
 				}
 			}
 			$dataInsert['forex'] = (!empty($dataInsert['forex'])) ? $dataInsert['forex'] : 1;
-			// CDD/HDD: do NOT default to empty/0 � leave unset so model keeps existing DB values
+			// CDD/HDD: do NOT default to empty/0 — leave unset so model keeps existing DB values
 
 			$v = function ($key) use (&$dataInsert) {
 				return isset($dataInsert[$key]) && $dataInsert[$key] !== '' ? $dataInsert[$key] : 0;
@@ -863,7 +892,13 @@ class Import_admin extends Base_Admin_Controller
 			    }
 			}
 			if (!in_array($colmuns[trim($data->sheets[0]['cells'][1][$j])], $keyNotExists)) {
-			    $dataInsert[$colmuns[trim($data->sheets[0]['cells'][1][$j])]] = $data->sheets[0]['cells'][$i][$j];
+			    $cellValue = $data->sheets[0]['cells'][$i][$j];
+			    if ($this->is_negative_import_value($cellValue)) {
+				$this->theme->set_message("File upload has negative values please check and re-upload.", 'error');
+				redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import');
+				exit;
+			    }
+			    $dataInsert[$colmuns[trim($data->sheets[0]['cells'][1][$j])]] = $cellValue;
 			}
 		    } else {
 			continue;
@@ -922,7 +957,7 @@ class Import_admin extends Base_Admin_Controller
 		$dataInsert['average_purchased_electricity'] = ($sumTotalElectricity != 0) ? $sumTotalElectricityCost / $sumTotalElectricity : 0;
 		$dataInsert['average_purchased_electricity'] = round($dataInsert['average_purchased_electricity'], $decimal_places);
 
-		$dataInsert['total_electricity_kwh'] = $dataInsert['total_purchased_electricity'] + $dataInsert['onsite_generators_quantity'] + $dataInsert['total_renewable_energy_production'] - $dataInsert['total_renewable_energy_exported'];
+		$dataInsert['total_electricity_kwh'] = $dataInsert['total_purchased_electricity'] + $dataInsert['onsite_generators_quantity'] + $dataInsert['total_renewable_energy_production'];
 		//$dataInsert['total_electricity_cost'] = $dataInsert['total_purchased_electricity_cost']+$dataInsert['total_onsite_generators_cost'];
 
 		$dataInsert_total_maximum_demand = (!empty($dataInsert['total_maximum_demand'])) ? $dataInsert['total_maximum_demand'] : 0;
@@ -930,8 +965,7 @@ class Import_admin extends Base_Admin_Controller
 		$dataInsert_total_purchased_electricity_cost = (!empty($dataInsert['total_purchased_electricity_cost'])) ? $dataInsert['total_purchased_electricity_cost'] : 0;
 		$dataInsert_total_onsite_generators_cost = (!empty($dataInsert['total_onsite_generators_cost'])) ? $dataInsert['total_onsite_generators_cost'] : 0;
 		$dataInsert_total_renewable_energy_production_cost = (!empty($dataInsert['total_renewable_energy_production_cost'])) ? $dataInsert['total_renewable_energy_production_cost'] : 0;
-		$dataInsert_total_renewable_energy_exported_cost = (!empty($dataInsert['total_renewable_energy_exported_cost'])) ? $dataInsert['total_renewable_energy_exported_cost'] : 0;
-		$dataInsert['total_electricity_cost'] = $dataInsert_total_maximum_demand + $dataInsert_fixed_fees + $dataInsert_total_purchased_electricity_cost + $dataInsert_total_onsite_generators_cost + $dataInsert_total_renewable_energy_production_cost - $dataInsert_total_renewable_energy_exported_cost;
+		$dataInsert['total_electricity_cost'] = $dataInsert_total_maximum_demand + $dataInsert_fixed_fees + $dataInsert_total_purchased_electricity_cost + $dataInsert_total_onsite_generators_cost + $dataInsert_total_renewable_energy_production_cost;
 
 		$dataInsert['average_cost_per_kwh'] = $dataInsert['total_electricity_cost'] / $dataInsert['total_electricity_kwh'];
 		$dataInsert['average_cost_per_kwh'] = round($dataInsert['average_cost_per_kwh'], $decimal_places);
@@ -1233,6 +1267,11 @@ class Import_admin extends Base_Admin_Controller
 						unset($selectCondition[$sKey]);
 					    }
 					}
+					if ($this->first_negative_import_field($value)) {
+					    $this->theme->set_message("File upload has negative values please check and re-upload.", 'error');
+					    redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import/daily');
+					    exit;
+					}
 					// Remove unused utilities from
 					if (!$allSiteids[$value['site_id']]['show_utility_electricity']) {
 					    unset($value["total_electricity_kwh"]);
@@ -1408,6 +1447,11 @@ class Import_admin extends Base_Admin_Controller
 				    foreach ($staticColmuns as $key1 => $value1) {
 					$staticDataInsert[$value1] = is_numeric($value[$key1]) ? $value[$key1] : 0;
 				    }
+				    if ($this->first_negative_import_field($staticDataInsert)) {
+					$this->theme->set_message("File upload has negative values please check and re-upload.", 'error');
+					redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import/daily');
+					exit;
+				    }
 				    // Store fixed daily data in database
 				    $insertBulkFixedData[] = $staticDataInsert;
 
@@ -1424,6 +1468,11 @@ class Import_admin extends Base_Admin_Controller
 					    $dynamicDataInsert['year_id'] = $staticDataInsert['year_id'];
 					    $dynamicDataInsert['utility_title_id'] = $value2['id'];
 					    $dynamicDataInsert['value'] = is_numeric($value[$value2['title']]) ? $value[$value2['title']] : 0;
+					    if ($this->is_negative_import_value($dynamicDataInsert['value'])) {
+						$this->theme->set_message("File upload has negative values please check and re-upload.", 'error');
+						redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import/daily');
+						exit;
+					    }
 					    $key = $dynamicDataInsert['site_id'] . '_' . $dynamicDataInsert['year_id'] . '_' . $dynamicDataInsert['month_id'] . '_' . $dynamicDataInsert['date_id'] . '_' . $dynamicDataInsert['utility_title_id'];
 					    $bulkInsertData[$key] = $dynamicDataInsert;
 					    unset($dynamicDataInsert);
@@ -1699,8 +1748,12 @@ class Import_admin extends Base_Admin_Controller
 		}
 
 		if ($process) {
-		    // Success
-		    $this->theme->set_message("File imported successfully.", 'success');
+		    $divergences = $this->import_model->getDailyMonthlyDivergences();
+		    if (!empty($divergences)) {
+			$this->theme->set_message("File imported successfully. " . count($divergences) . " daily vs monthly divergence(s) found. Download Compare Utilities to review.", 'warning');
+		    } else {
+			$this->theme->set_message("File imported successfully.", 'success');
+		    }
 
 		    // Save audit trail
 		    $site_id = $this->session->userdata[$this->section_name]['site_id'];
@@ -2193,10 +2246,15 @@ class Import_admin extends Base_Admin_Controller
 			    $colmuns['Site Name'] = "site_id";
 			    $colmuns['Month'] = "month_id";
 			    $colmuns['Year'] = "year_id";
+				$colmuns['Rebates'] = 'rebates';
 
 			    $colmuns['Total (per Unit) bottles cans'] = 'unit_measure_bottles_cans';
 
 			    $colmuns['Total cost bottles cans'] = 'total_bottles_cans';
+
+			    $colmuns['Total (per Unit) waste to energy'] = 'unit_measure_wastetoenergy';
+
+			    $colmuns['Total cost waste to energy'] = 'total_wastetoenergy';
 
 			    $colmuns['Total (per Unit) cardboard'] = 'unit_measure_cardboard';
 
@@ -2463,6 +2521,7 @@ class Import_admin extends Base_Admin_Controller
 					$this->site_waste_model->site_id = (int)$siteId;
 					$this->site_waste_model->month_id = (int)$getMonth;
 					$this->site_waste_model->year_id = (int)$getYear;
+					$this->site_waste_model->rebates = $dataInsert['rebates'];
 					$dataInsert['user_id'] = (int)$this->session->userdata[$this->section_name]['user_id'];
 					$dataInsert['site_id'] = (int)$siteId;
 					$dataInsert['month_id'] = (int)$getMonth;
@@ -2839,6 +2898,81 @@ class Import_admin extends Base_Admin_Controller
 	$this->theme->view($data);
     }
 
+    /**
+     * True when a mapped import row contains a negative reading (not date/site/weather keys).
+     */
+    private function first_negative_import_field($row)
+    {
+	$skip = array('site_id', 'month_id', 'year_id', 'date_id', 'hour', 'cdd', 'hdd');
+	if (empty($row) || !is_array($row)) {
+	    return false;
+	}
+	foreach ($row as $field => $value) {
+	    if (in_array($field, $skip, true)) {
+		continue;
+	    }
+	    if ($this->is_negative_import_value($value)) {
+		return $field;
+	    }
+	}
+	return false;
+    }
+
+    private function is_negative_import_value($value)
+    {
+	if ($value === null || $value === '') {
+	    return false;
+	}
+	if (is_string($value)) {
+	    $value = str_replace(array(',', ' ', "\xC2\xA0"), '', trim($value));
+	}
+	return is_numeric($value) && (float) $value < 0;
+    }
+
+    private function write_simple_excel_sheet($objPHPExcel, $sheetIndex, $title, $columns, $rows)
+    {
+	while ($objPHPExcel->getSheetCount() <= $sheetIndex) {
+	    $objPHPExcel->createSheet();
+	}
+	$objPHPExcel->setActiveSheetIndex($sheetIndex);
+	$style = array('font' => array('bold' => true), 'align' => array(PHPExcel_Style_Alignment::HORIZONTAL_CENTER => true));
+	$objPHPExcel->getActiveSheet()->setTitle($title);
+	$objPHPExcel->getActiveSheet()->getStyle('1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+	$objPHPExcel->getActiveSheet()->getStyle('1')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+	$objPHPExcel->getActiveSheet()->getStyle('1')->getAlignment()->setWrapText(true);
+	$objPHPExcel->getActiveSheet()->getStyle('1')->applyFromArray($style);
+	$objPHPExcel->getActiveSheet()->getRowDimension('1')->setRowHeight(70);
+	$cells = array();
+	$later1 = "";
+	$later2 = 'A';
+	$flag = 0;
+	foreach ($columns as $key => $column) {
+	    $objPHPExcel->setActiveSheetIndex($sheetIndex)->setCellValue($later1 . $later2 . "1", $column);
+	    $cells[$key] = $later1 . $later2;
+	    $objPHPExcel->getActiveSheet()->getColumnDimension($later1 . $later2)->setWidth(18);
+	    if ($later2 == 'Z') {
+		if ($flag == 0) {
+		    $later1 = 'A';
+		    $flag = 1;
+		} else {
+		    $later1++;
+		}
+		$later2 = 'A';
+	    } else {
+		$later2++;
+	    }
+	}
+	$row = 2;
+	foreach ($rows as $data) {
+	    foreach ($data as $key => $val) {
+		if (array_key_exists($key, $cells)) {
+		    $objPHPExcel->setActiveSheetIndex($sheetIndex)->setCellValue($cells[$key] . $row, $val);
+		}
+	    }
+	    $row++;
+	}
+    }
+
     public function checkNegative() {
 		ini_set('memory_limit', '-1');
 		require_once APPPATH . 'libraries/PHPExcel/PHPExcel.php';
@@ -2849,6 +2983,7 @@ class Import_admin extends Base_Admin_Controller
 		$site_detail = $this->sites_model->get_site_detail_custom($site_id);
 		$months = array (1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'May',6=>'Jun',7=>'Jul',8=>'Aug',9=>'Sep',10=>'Oct',11=>'Nov',12=>'Dec');
 		$worksheetTitles = ['Monthly Utilities','Daily Utilities'];
+		$skipNegativeFields = array('id', 'site_id', 'month_id', 'year_id', 'date_id', 'hour', 'cdd', 'hdd', 'created', 'modified', 'user_id', 'site_location_name');
 		for($index=0; $index < 2; $index++) {
 			// Add new sheet
 			$objPHPExcel->createSheet();
@@ -2862,27 +2997,19 @@ class Import_admin extends Base_Admin_Controller
 			$objPHPExcel->getActiveSheet()->getStyle('1')->applyFromArray($style);
 			$objPHPExcel->getActiveSheet()->getRowDimension('1')->setRowHeight(70);
 			$excelNegativeReport = $columns = [];
-			
-			$this->load->model('utilities/utilities_model');
-			$this->utilities_model->utilities_year = date('Y');
-			$this->utilities_model->site_id = 0;
-			if($index == 0) {
-				$currentYearUTilities = $this->utilities_model->getSiteUtility();
-			} else {
-				$currentYearUTilities = $this->utilities_model->getSiteUtilityDaily();
-			}
-	    $this->utilities_model->site_id = $site_id;
+			$currentYearUTilities = $this->import_model->getNegativeUtilityRows($index == 1);
 	    $i = 0;
 	    foreach ($currentYearUTilities as $key => $value) {
 		foreach ($value as $elementField => $elementValue) {
-		    if(!empty($elementValue) && isset($elementValue) && is_numeric($elementValue) && $elementValue < 0) {
-			$this->load->model('sites/sites_model');
-			$siteDetail = $this->sites_model->get_site_detail($value['site_id'],1,1);                        
-			$excelNegativeReport[$i]['Site Name'] = $siteDetail['site_location_name'];
+		    if (in_array($elementField, $skipNegativeFields, true)) {
+			continue;
+		    }
+		    if ($this->is_negative_import_value($elementValue)) {
+			$excelNegativeReport[$i]['Site Name'] = isset($value['site_location_name']) ? $value['site_location_name'] : '';
 			$columns['Site Name'] = 'Site Name';
 			$excelNegativeReport[$i]['Year'] = $value['year_id'];
 			$columns['Year'] = 'Year';
-			$excelNegativeReport[$i]['Month'] = $months[$value['month_id']];
+			$excelNegativeReport[$i]['Month'] = isset($months[$value['month_id']]) ? $months[$value['month_id']] : $value['month_id'];
 			$columns['Month'] = 'Month';
 			if($index != 0) {
 			    $excelNegativeReport[$i]['Day'] = $value['date_id'];
@@ -2928,6 +3055,23 @@ class Import_admin extends Base_Admin_Controller
 		$row++;
 	    }
 	}
+	$reconcileRows = $this->import_model->getDailyMonthlyDivergences();
+	foreach ($reconcileRows as $rKey => $rRow) {
+	    if (isset($months[$rRow['Month']])) {
+		$reconcileRows[$rKey]['Month'] = $months[$rRow['Month']];
+	    }
+	}
+	$reconcileColumns = array(
+	    'Site Name' => 'Site Name',
+	    'Year' => 'Year',
+	    'Month' => 'Month',
+	    'Utility Name' => 'Utility Name',
+	    'Value Daily' => 'Value Daily',
+	    'Value Monthly' => 'Value Monthly',
+	    'Difference' => 'Difference',
+	    'Flag' => 'Flag',
+	);
+	$this->write_simple_excel_sheet($objPHPExcel, 2, 'Daily vs Monthly', $reconcileColumns, $reconcileRows);
 	$data_action = 'Export';
 	$site_id = $_SESSION['admin']['site_id'];
 	$user_id = $_SESSION['admin']['user_id'];
@@ -2954,65 +3098,22 @@ class Import_admin extends Base_Admin_Controller
 
 	$site_id = $this->session->userdata[$this->section_name]['site_id'];
 	$months = array (1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'May',6=>'Jun',7=>'Jul',8=>'Aug',9=>'Sep',10=>'Oct',11=>'Nov',12=>'Dec');
-	$excelCompareReport = $columns = [];
-	$this->load->model('utilities/utilities_model');
-	$this->utilities_model->utilities_year = date('Y');
-	$this->utilities_model->site_id = $site_id;
-	$currentYearMonthlyUTilities = $this->utilities_model->getSiteUtility();
-	$utilityMonthly = [
-	    'electricity' => 'total_electricity_kwh',
-	    'fuel_oil' => 'total_fuel_oil',
-	    'lpg' => 'total_lpg',
-	    'natural_gas' => 'total_natural_gas',
-	    'district_heating' => 'district_heating',
-	    'district_cooling' => 'district_cooling',
-	    'water' => 'water_total_consumption',
-	];
-	$utilityDaily = [
-	    'electricity' => 'total_electricity_kwh',
-	    'fuel_oil' => 'total_diesel_fuel',
-	    'lpg' => 'total_lpg_consumption',
-	    'natural_gas' => 'total_natural_gas_consumption',
-	    'district_heating' => 'total_district_heating_consumption',
-	    'district_cooling' => 'total_district_cooling_consumption',
-	    'water' => 'total_water_consumption',
-	];
-	$checkDisplay = [
-	    'electricity' => 'show_utility_electricity',
-	    'fuel_oil' => 'show_utility_fuel_oil',
-	    'lpg' => 'show_utility_lpg',
-	    'natural_gas' => 'show_utility_natural_gas',
-	    'district_heating' => 'show_utility_district_heating',
-	    'district_cooling' => 'show_utility_district_cooling',
-	    'water' => 'show_utility_water'
-	];
+	$excelCompareReport = $this->import_model->getDailyMonthlyDivergences(1, $site_id);
+	foreach ($excelCompareReport as $key => $row) {
+	    if (isset($months[$row['Month']])) {
+		$excelCompareReport[$key]['Month'] = $months[$row['Month']];
+	    }
+	}
 	$columns = [
 	    'Site Name' => 'Site Name',
 	    'Year' => 'Year',
 	    'Month' => 'Month',
 	    'Utility Name' => 'Utility Name',
 	    'Value Daily' => 'Value Daily',
-	    'Value Monthly' => 'Value Monthly'
+	    'Value Monthly' => 'Value Monthly',
+	    'Difference' => 'Difference',
+	    'Flag' => 'Flag',
 	];
-	foreach ($currentYearMonthlyUTilities as $key => $value) {
-	    $this->load->model('sites/sites_model');
-		$this->sites_model->id = $value['site_id'];
-	    $siteDetail = $this->sites_model->get_site_detail($value['site_id'],1,1);
-	    foreach ($utilityDaily as $keyUtility => $utility_name) {
-		if ($siteDetail[$checkDisplay[$keyUtility]] == 1) {
-		    $dailyData = $this->utilities_model->getSiteDailyByMonthlyUtility($value['site_id'],$value['year_id'],$value['month_id'],$utility_name, $keyUtility);
-		    if ($value[$utilityMonthly[$keyUtility]] !== $dailyData[$keyUtility]) {
-			$excelCompareReport[$i]['Site Name'] = $siteDetail['site_location_name'];
-			$excelCompareReport[$i]['Year'] = $value['year_id'];
-			$excelCompareReport[$i]['Month'] = $months[$value['month_id']];
-			$excelCompareReport[$i]['Utility Name'] = ucwords(str_replace('_', ' ', $keyUtility));
-			$excelCompareReport[$i]['Value Daily'] = $dailyData[$keyUtility];
-			$excelCompareReport[$i]['Value Monthly'] = $value[$utilityMonthly[$keyUtility]];
-			$i++;
-		    }
-		}
-	    }
-	}
 	// Add new sheet
 	$objPHPExcel->createSheet();
 	$objPHPExcel->setActiveSheetIndex(0);
@@ -3049,9 +3150,6 @@ class Import_admin extends Base_Admin_Controller
 	foreach ($excelCompareReport as $data) {
 	    foreach ($data as $key => $val) {
 		if (array_key_exists($key, $cells)) {
-		    if($val == 0) {
-			$val = '';
-		    }
 		    $objPHPExcel->setActiveSheetIndex(0)->setCellValue($cells[$key] . $row, $val);
 		}
 	    }
@@ -3066,12 +3164,9 @@ class Import_admin extends Base_Admin_Controller
 	header('Content-Type: application//vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 	header('Content-Disposition: attachment;filename="Compare Utilities Report.xlsx"');
 	header('Cache-Control: max-age=0');
-	// If you're serving to IE 9, then the following may be needed
 	header('Cache-Control: max-age=1');
-
-	// If you're serving to IE over SSL, then the following may be needed
-	header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-	header('Pragma: public'); // HTTP/1.0
+	header('Cache-Control: cache, must-revalidate');
+	header('Pragma: public');
 
 	$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 	$objWriter->save('php://output');
