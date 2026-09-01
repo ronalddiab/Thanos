@@ -818,6 +818,7 @@ class Reportscron_admin extends Base_Admin_Controller
 			$totalHeatingDistrict = 0;
 
 			$totalCoolingDistrict = 0;
+			$totalFleetPetrol = 0;
 
 			$totalFuelConsumption = 0;
 
@@ -830,6 +831,7 @@ class Reportscron_admin extends Base_Admin_Controller
 			$totalHeatingDistrictConsumption = 0;
 
 			$totalCoolingDistrictConsumption = 0;
+			$totalFleetPetrolConsumption = 0;
 
 
 
@@ -868,6 +870,9 @@ class Reportscron_admin extends Base_Admin_Controller
 					$value['water'] = !empty($value['water']) ? $value['water'] : 0;
 
 					$value['water_consumption'] = !empty($value['water_consumption']) ? $value['water_consumption'] : 0;
+					$value['fleet_petrol'] = !empty($value['fleet_petrol']) ? $value['fleet_petrol'] : 0;
+
+					$value['fleet_petrol_consumption'] = !empty($value['fleet_petrol_consumption']) ? $value['fleet_petrol_consumption'] : 0;
 
 					$value['onsite_generator'] = !empty($value['onsite_generator']) ? $value['onsite_generator'] : 0;
 					$value['onsite_generator_fuel_oil'] = !empty($value['onsite_generator_fuel_oil']) ? $value['onsite_generator_fuel_oil'] : 0;
@@ -928,7 +933,9 @@ class Reportscron_admin extends Base_Admin_Controller
 
 					$totalCoolingDistrictConsumption += $value['cooling_district'];
 
+					$totalFleetPetrol += $value['fleet_petrol'];
 
+					$totalFleetPetrolConsumption += $value['fleet_petrol_consumption'];
 
 					switch ($cview) {
 
@@ -1155,7 +1162,8 @@ class Reportscron_admin extends Base_Admin_Controller
 					$data['utility_cost_chart'][$value['month_id']][$value['year_id']]['total_room_night_budget'] = $value['total_room_night_budget'];
 					$data['utility_cost_chart'][$value['month_id']][$value['year_id']]['guest_night'] = $value['total_guests'];
 					$data['utility_cost_chart'][$value['month_id']][$value['year_id']]['total_guests_budget'] = $value['total_guests_budget'];
-
+					$data['utility_cost_chart'][$value['month_id']][$value['year_id']]['fleet_petrol'] = $value['fleet_petrol_consumption'];
+					$data['utility_cost_chart'][$value['month_id']][$value['year_id']]['total_fleet_petrol_cost'] = $value['fleet_petrol'];
 					$days_of_month = cal_days_in_month(CAL_GREGORIAN, $value['month_id'], $value['year_id']);
 
 					$data['utility_cost_chart'][$value['month_id']][$value['year_id']]['occupancy'] = (($value['total_room_night'] / ($value['rooms_keys'] * $days_of_month)) * 100);
@@ -1177,6 +1185,8 @@ class Reportscron_admin extends Base_Admin_Controller
 			$data['totalHeatingDistrict'] = $totalHeatingDistrict;
 
 			$data['totalCoolingDistrict'] = $totalCoolingDistrict;
+			$data['totalFleetPetrol'] = $totalFleetPetrol;
+			$data['totalFleetPetrolConsumption'] = $totalFleetPetrolConsumption;
 		} else {
 
 			$data['utility_cost_chart'] = array();
@@ -1303,10 +1313,12 @@ class Reportscron_admin extends Base_Admin_Controller
 			$totalHeatingDistrict_utility_cost_pre = 0;
 
 			$totalCoolingDistrict_utility_cost_pre = 0;
-
+			$totalFleetPetrol_utility_cost_pre = 0;
 
 
 			foreach ($utility_cost_chart_results_pre as $key => $value) {
+
+				$value['fleet_petrol'] = !empty($value['fleet_petrol']) ? $value['fleet_petrol'] : 0;
 
 				$value['cooling_district'] = !empty($value['cooling_district']) ? $value['cooling_district'] : 0;
 
@@ -1335,6 +1347,8 @@ class Reportscron_admin extends Base_Admin_Controller
 				$totalHeatingDistrict_utility_cost_pre += (!empty($value['heating_district'])) ? $value['heating_district'] : 0;
 
 				$totalCoolingDistrict_utility_cost_pre += (!empty($value['cooling_district'])) ? $value['cooling_district'] : 0;
+
+				$totalFleetPetrol_utility_cost_pre += (!empty($value['fleet_petrol'])) ? $value['fleet_petrol'] : 0;
 
 				$totalCoolingDistrict_utility_cost_pre += (!empty($value['cooling_district'])) ? $value['cooling_district'] : 0;
 
@@ -1380,6 +1394,8 @@ class Reportscron_admin extends Base_Admin_Controller
 				$data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['total_room_night_budget'] = $value['total_room_night_budget'];
 				$data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['guest_night'] = $value['total_guests'];
 				$data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['total_guests_budget'] = $value['total_guests_budget'];
+				$data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['fleet_petrol'] = $value['fleet_petrol_consumption'];
+				$data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['total_fleet_petrol_cost'] = $value['fleet_petrol'];
 				
 				$data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['total_electricity_kwh'] = (!empty($value['total_electricity_kwh'])) ? $value['total_electricity_kwh'] : 0;
 
@@ -1421,6 +1437,7 @@ class Reportscron_admin extends Base_Admin_Controller
 			$data['totalHeatingDistrict_utility_cost_pre'] = $totalHeatingDistrict_utility_cost_pre;
 
 			$data['totalCoolingDistrict_utility_cost_pre'] = $totalCoolingDistrict_utility_cost_pre;
+			$data['totalFleetPetrol_utility_cost_pre'] = $totalFleetPetrol_utility_cost_pre;
 		} else {
 
 			$data['utility_cost_chart_pre'] = array();
@@ -3338,6 +3355,40 @@ class Reportscron_admin extends Base_Admin_Controller
 					}
 				}
 
+				// Build the MYTD waste page from cumulative January-to-last-reported-month data.
+				$currYear = (int) $data['filters']['current_year'];
+				$currMonth = (int) $data['filters']['max_month_id'];
+				$previousYear = $currYear - 1;
+				$data['waste'] = array(
+					'total_room_night' => 0,
+					'previous_total_room_night' => 0,
+					'total_guests' => 0,
+					'previous_total_guests' => 0,
+				);
+				for ($month = 1; $month <= $currMonth; $month++) {
+					$currentUtility = $data['utility_cost_chart'][$month][$currYear] ?? array();
+					$previousUtility = $data['utility_cost_chart'][$month][$previousYear] ?? array();
+					$data['waste']['total_room_night'] += (float) ($currentUtility['room_night'] ?? 0);
+					$data['waste']['previous_total_room_night'] += (float) ($previousUtility['room_night'] ?? 0);
+					$data['waste']['total_guests'] += (float) ($currentUtility['guest_night'] ?? 0);
+					$data['waste']['previous_total_guests'] += (float) ($previousUtility['guest_night'] ?? 0);
+				}
+				$data['waste']['WasteReport'] = $this->site_waste_model->getWasteReportData(
+					$site_id,
+					$data['waste'],
+					$currYear,
+					$currMonth,
+					true
+				);
+				$content_reports_waste_report_ytd = '';
+				if (!empty($data['waste']['WasteReport'])) {
+					$content_reports_waste_report_ytd = $this->load->view(
+						'admin_landing_pdf_reports_waste',
+						$data['waste'],
+						true
+					);
+				}
+
 
 
 				$content_reports = $this->load->view('admin_landing_pdf_reports', $data, true);
@@ -3420,6 +3471,11 @@ class Reportscron_admin extends Base_Admin_Controller
 					$pdf->AddPage();
 
 					$pdf->writeHTML($content_reports_carbon_footprint, true, false, true, false, '');
+				}
+
+				if ($content_reports_waste_report_ytd != '') {
+					$pdf->AddPage();
+					$pdf->writeHTML($content_reports_waste_report_ytd, true, false, true, false, '');
 				}
 
 				$file_name = BASE_PATH_CUSTOM . "/assets/uploads/cron/" . $pdfName;
@@ -4065,6 +4121,7 @@ class Reportscron_admin extends Base_Admin_Controller
 			"heating_district",
 
 			"cooling_district",
+			"fleet_petrol",
 
 		);
 
@@ -4085,6 +4142,7 @@ class Reportscron_admin extends Base_Admin_Controller
 		$coolingTitle = lang("cooling-district");
 
 		$occupancyTitle = lang("occupancy");
+		$fleetPetrolTitle = lang("fleet_petrol");
 
 
 
@@ -4147,6 +4205,7 @@ class Reportscron_admin extends Base_Admin_Controller
 			$coolingTitle,
 
 			$occupancyTitle,
+			$fleetPetrolTitle,
 
 		);
 
@@ -4333,6 +4392,8 @@ class Reportscron_admin extends Base_Admin_Controller
 					$utility_cost_chart[$value['month_id']][$value['year_id']]['total_room_night_budget'] = $value['total_room_night_budget'];
 					$utility_cost_chart[$value['month_id']][$value['year_id']]['guest_night'] = $value['total_guests'];
 					$utility_cost_chart[$value['month_id']][$value['year_id']]['total_guests_budget'] = $value['total_guests_budget'];
+					$utility_cost_chart[$value['month_id']][$value['year_id']]['fleet_petrol'] = $value['fleet_petrol'];
+					$utility_cost_chart[$value['month_id']][$value['year_id']]['total_fleet_petrol_cost'] = $value['total_fleet_petrol_cost'];
 
 					$days_of_month = cal_days_in_month(CAL_GREGORIAN, $value['month_id'], $value['year_id']);
 
@@ -4397,7 +4458,7 @@ class Reportscron_admin extends Base_Admin_Controller
 					$pre_data_occupancy = (!empty($utility_cost_chart[$month][$prevYear]['occupancy'])) ? $utility_cost_chart[$month][$prevYear]['occupancy'] : 0;
 
 					$pre_data_budget = (!empty($utility_cost_chart[$month][$prevYear]['budget'])) ? $utility_cost_chart[$month][$prevYear]['budget'] : 0;
-
+					$pre_data_fleet_petrol = (!empty($utility_cost_chart[$month][$year - 1]['fleet_petrol'])) ? $utility_cost_chart[$month][$year - 1]['fleet_petrol'] : 0;
 
 
 					// Current year data
@@ -4443,7 +4504,7 @@ class Reportscron_admin extends Base_Admin_Controller
 					$data_occupancy = (!empty($utility_cost_chart[$month][$year]['occupancy'])) ? $utility_cost_chart[$month][$year]['occupancy'] : 0;
 
 					$data_budget = (!empty($utility_cost_chart[$month][$year]['budget'])) ? $utility_cost_chart[$month][$year]['budget'] : 0;
-
+					$data_fleet_petrol = (!empty($utility_cost_chart[$month][$year]['fleet_petrol'])) ? $utility_cost_chart[$month][$year]['fleet_petrol'] : 0;
 
 
 					// Round values
@@ -4615,6 +4676,16 @@ class Reportscron_admin extends Base_Admin_Controller
 
 
 						$chart_index[] = $chart_index_carbon[] = "cooling_district";
+					}
+					
+					if (!empty($site_details['show_utility_fleet']) && ($pre_data_fleet_petrol != 0 || $data_fleet_petrol != 0)) {
+						$chart_data[0][] = $fleetPetrolTitle;
+						$chart_data[1][] = $pre_data_fleet_petrol;
+						$chart_data[2][] = $data_fleet_petrol;
+						$carbon_footprint[0][] = $fleetPetrolTitle;
+						$carbon_footprint[1][] = round($pre_data_fleet_petrol * 2.3, $decimal_places);
+						$carbon_footprint[2][] = round($data_fleet_petrol * 2.3, $decimal_places);
+						$chart_index[] = $chart_index_carbon[] = "fleet_petrol";
 					}
 
 
@@ -6083,6 +6154,10 @@ class Reportscron_admin extends Base_Admin_Controller
 				array_push($monthlyTickedSites,  $cronSettings['site_cron_settings']['site_id']);
 			}
 		}
+		if (empty($monthlyTickedSites)) {
+			log_message('error', 'Combined EUI Chart skipped: no monthly ticked sites.');
+			return;
+		}
 
 		$this->load->model('reports/reports_model');
 		$allSiteRanking = [];
@@ -6169,7 +6244,7 @@ class Reportscron_admin extends Base_Admin_Controller
 		$data = ($isPerMeter) ? array_column($ranking, 'eui_per_meter') : array_column($ranking, 'eui');
 		$siteCount = count($categories);
     	$chartHeight = max(280, ($siteCount * 24) + 120);
-		$Unit = $isPerMeter ? 'kWh/m²' : 'kWh/RN';
+		$Unit = $isPerMeter ? "kWh/m\u{00B2}" : 'kWh/RN';
 		$chartData = [
 			"chart" => [
 				"type" => "bar",
@@ -6513,10 +6588,10 @@ class Reportscron_admin extends Base_Admin_Controller
 		$chartImagePath = BASE_PATH_CUSTOM . "/assets/uploads/highcharts/site_eui_combined.png";
 		$chartPerMeterImagePath = BASE_PATH_CUSTOM . "/assets/uploads/highcharts/site_eui_per_meter_combined.png";
 
-		if (!file_exists($chartImagePath)) {
+		if (!file_exists($chartImagePath) || filesize($chartImagePath) < 2048) {
 			return null;
 		}
-		if (!file_exists($chartPerMeterImagePath)) {
+		if (!file_exists($chartPerMeterImagePath) || filesize($chartPerMeterImagePath) < 2048) {
 			return null;
 		}
 		list($imgWidthPx, $imgHeightPx) = getimagesize($chartImagePath);
@@ -6592,6 +6667,10 @@ class Reportscron_admin extends Base_Admin_Controller
                 array_push($monthlyTickedSites,  $cronSettings['site_cron_settings']['site_id']);
             }
         }
+		if (empty($monthlyTickedSites)) {
+			log_message('error', 'generate_mpdf_new skipped: no monthly ticked sites.');
+			return;
+		}
 		foreach ($users as $key => $user) {
 			foreach ($user['user_regions'] as $key => $value) {
 				$region_specific_sites[$key] = $this->reportscron_model->getUserSitesWithRegionId($user['id'], $key);
@@ -6843,6 +6922,10 @@ class Reportscron_admin extends Base_Admin_Controller
 					$pdf->Output($file_name, 'F'); // D - downlaod, F- Save
 					$attachments[$regionName[$regionId - 1]] = $file_name;
 				}
+				if (empty($attachments)) {
+					log_message('error', 'generate_mpdf_new skipped email for user ' . $user['username'] . ': no monthly ticked sites in assigned regions.');
+					continue;
+				}
 					/* NEW : generate separate EUI chart pdf */
 					$euiChartPdf = $this->generateEUIChartPDF();
 					if ($euiChartPdf) {
@@ -6859,7 +6942,7 @@ class Reportscron_admin extends Base_Admin_Controller
 				        $lastYear    = (int) $lastYearDt->format('Y');
 
 					$filePath = $this->sites_model->generateGroupUtilityReport($currentYear,$currMonth,$prevYear,$prevMonth,$lastYear,1);
-					if (file_exists($filePath) && filesize($filePath) > 0) {
+					if (!empty($filePath) && file_exists($filePath) && filesize($filePath) > 0) {
 						$attachments['Group Utility Report'] = $filePath;
 					} else {
 						log_message('error', 'Excel not generated: ' . $filePath);
@@ -6879,7 +6962,7 @@ class Reportscron_admin extends Base_Admin_Controller
 					</li>
 					<li>
 						<strong>EUI Comparison Chart:</strong>
-						An End-Use Intensity (kWh/m²) comparative chart of all your properties on HEP.
+						An End-Use Intensity (kWh/m\u{00B2}) comparative chart of all your properties on HEP.
 					</li>
 					<li>
 						<strong>Detailed Data Spreadsheet:</strong>
@@ -7037,6 +7120,11 @@ class MYPDF extends TCPDF
 
 	public $site_name = '';
 	public $site_logo = '';
+
+	public function writeHTML($html, $ln = true, $fill = false, $reseth = false, $cell = false, $align = '')
+	{
+		return parent::writeHTML(sanitize_report_output_html($html), $ln, $fill, $reseth, $cell, $align);
+	}
 
 	public function Header()
 	{

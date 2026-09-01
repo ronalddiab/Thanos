@@ -34,7 +34,7 @@ $time_type_list_change = array(
 
 $sites_type1 = array(0=>'All sites');
 $sites_type2 = $this->_ci->config->config['sites_type'];
-$sites_type3 = array(3=>'Select Sites');
+$sites_type3 = array(5=>'Select Sites');
 $sites_type = array_merge($sites_type1,$sites_type2,$sites_type3);
 
 $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
@@ -445,7 +445,8 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
 			});
 			Highcharts.chart('sites_chart_cost', {
 				chart: {
-					type: 'column'
+					type: 'column',
+					alignTicks: false
 				},
 				title: {
 					text: '<?php echo lang($report_title); ?>',
@@ -485,7 +486,8 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
 					}
 				}, {
 					min: 0,
-					tickPositions: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+					max: 100,
+					tickInterval: 10,
 					title: {
 						rotation: 270,
 						margin: 30,
@@ -709,7 +711,8 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
 			});
 			Highcharts.chart('sites_chart', {
 				chart: {
-					type: 'column'
+					type: 'column',
+					alignTicks: false
 				},
 				title: {
 					text: '<?php echo lang($report_title); ?>',
@@ -749,7 +752,8 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
 					}
 				}, {
 					min: 0,
-					tickPositions: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+					max: 100,
+					tickInterval: 10,
 					title: {
 						rotation: 270,
 						margin: 30,
@@ -977,7 +981,8 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
 			});
 			Highcharts.chart('sites_chart_build_area', {
 				chart: {
-					type: 'column'
+					type: 'column',
+					alignTicks: false
 				},
 				title: {
 					text: '<?php echo lang($report_title); ?>',
@@ -1017,7 +1022,8 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
 					}
 				}, {
 					min: 0,
-					tickPositions: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+					max: 100,
+					tickInterval: 10,
 					title: {
 						rotation: 270,
 						margin: 30,
@@ -1050,7 +1056,7 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
     $(document).ready(function() {
         $("#site_type").change(function() {
             var site_type = $(this).val();
-            if(site_type == 3){
+            if(site_type == 5){
                 $.blockUI({
                     css: {cursor: 'default'},
                     blockMsgClass: 'formblockui site-filter-class',

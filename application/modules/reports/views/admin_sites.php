@@ -44,7 +44,7 @@ $time_type_list_change = array(
 
 $sites_type1 = array(0=>'All sites');
 $sites_type2 = $this->_ci->config->config['sites_type'];
-$sites_type3 = array(3=>'Select Sites');
+$sites_type3 = array(5=>'Select Sites');
 $sites_type = array_merge($sites_type1,$sites_type2,$sites_type3);
 
 ?>
@@ -298,6 +298,43 @@ $sites_type = array_merge($sites_type1,$sites_type2,$sites_type3);
 					</div>
 				</div>
 				<?php } ?>
+				<?php
+				$role_id = (isset($_SESSION['admin']['role_id']) ? $_SESSION['admin']['role_id'] : 0);
+				$export_group_utility_permission = check_user_permission_by_label('admin.sites.export_monthly_utility_report');
+				$export_group_waste_permission = check_user_permission_by_label('admin.sites.export_group_waste_corporate_report');
+				$show_corporate_reports = ($export_group_utility_permission || $export_group_waste_permission || in_array((int) $role_id, array(1, 6), true));
+				?>
+				<?php if ($show_corporate_reports) { ?>
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<h3>Corporate Reports</h3>
+						<p style="margin-bottom: 15px;">Reports that are emailed to corporate users — available here to view and download directly.</p>
+						<div class="row">
+							<?php if ($export_group_utility_permission) { ?>
+							<div class="col-lg-3">
+								<a href="<?php echo site_url() . BASE_ADMIN_URL_CUSTOM; ?>sites/group_utility_report" id="groupUtilityMonthPickerCorporate" class="btn btn-warning btn-submit group-utility-report" style="width:250px; padding-left: 5px;padding-right: 5px;">
+									<b><?php echo lang('export-monthly-utility-report'); ?></b>
+								</a>
+							</div>
+							<?php } ?>
+							<?php if ($export_group_waste_permission) { ?>
+							<div class="col-lg-3">
+								<a href="<?php echo site_url() . BASE_ADMIN_URL_CUSTOM; ?>sites/export_group_waste_corporate_report" id="groupWasteMonthPickerCorporate" class="btn btn-info btn-submit" style="width:250px; padding-left: 5px;padding-right: 5px;">
+									<b><?php echo lang('export-monthly-waste-report'); ?></b>
+								</a>
+							</div>
+							<?php } ?>
+							<?php if (in_array((int) $role_id, array(1, 6), true)) { ?>
+							<div class="col-lg-3">
+								<a href="<?php echo site_url() . BASE_ADMIN_URL_CUSTOM; ?>sites/download_corporate_utilities_dashboard" class="btn btn-primary btn-submit" style="width:250px; padding-left: 5px;padding-right: 5px;">
+									<b>Utilities Management Dashboard</b>
+								</a>
+							</div>
+							<?php } ?>
+						</div>
+					</div>
+				</div>
+				<?php } ?>
 				<div class="panel panel-default">
 					<div class="panel-body">
 						<h3>Data Export</h3>
@@ -369,12 +406,14 @@ $sites_type = array_merge($sites_type1,$sites_type2,$sites_type3);
 		}
 	});
 	$(function() {
-		$('#groupUtilityMonthPicker, #groupWasteMonthPicker, #groupDiscrepancyMonthPicker').on('click', function (e) {
+		$('#groupUtilityMonthPicker, #groupUtilityMonthPickerCorporate, #groupWasteMonthPicker, #groupWasteMonthPickerCorporate, #groupDiscrepancyMonthPicker').on('click', function (e) {
 			e.preventDefault();
 
 			const popupMap = {
 				groupUtilityMonthPicker: '#monthly_report_popup',
+				groupUtilityMonthPickerCorporate: '#monthly_report_popup',
 				groupWasteMonthPicker: '#monthly_waste_report_popup',
+				groupWasteMonthPickerCorporate: '#monthly_waste_report_popup',
 				groupDiscrepancyMonthPicker: '#monthly_discrepancy_report_popup'
 			};
 
@@ -482,9 +521,25 @@ $sites_type = array_merge($sites_type1,$sites_type2,$sites_type3);
 			var averagedataArray = '<?php echo json_encode($averagedataArray); ?>';
 			var averageData = JSON.parse(averagedataArray);
 			var averageresult = Object.keys(averageData).map((key) => averageData[key]);
+			var occupancyAxisMax = 100;
+			if (occupancyresult && occupancyresult.length) {
+				var occupancyDataMax = Math.max.apply(null, occupancyresult.map(function(v) { return Number(v) || 0; }));
+				if (occupancyDataMax > 100) {
+					occupancyAxisMax = Math.ceil(occupancyDataMax / 10) * 10;
+				}
+			}
+			var consumptionAxisMax = 0;
+			if (consumptionresult && consumptionresult.length) {
+				var consumptionSeries = consumptionresult.concat(averageresult);
+				var consumptionDataMax = Math.max.apply(null, consumptionSeries.map(function(v) { return Number(v) || 0; }));
+				if (consumptionDataMax > 0) {
+					consumptionAxisMax = consumptionDataMax * 1.1;
+				}
+			}
 			Highcharts.chart('sites_chart', {
 				chart: {
-					type: 'column'
+					type: 'column',
+					alignTicks: false
 				},
 				title: {
 					margin: 0,
@@ -506,6 +561,7 @@ $sites_type = array_merge($sites_type1,$sites_type2,$sites_type3);
 				},
 				yAxis: [{
 					min: 0,
+					max: consumptionAxisMax > 0 ? consumptionAxisMax : undefined,
 					title: {
 						text: '<?php echo $x_axis_title; ?>',
 						style: {
@@ -517,7 +573,8 @@ $sites_type = array_merge($sites_type1,$sites_type2,$sites_type3);
 					}
 				}, {
 					min: 0,
-					tickPositions: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+					max: occupancyAxisMax,
+					tickInterval: occupancyAxisMax <= 100 ? 10 : undefined,
 					title: {
 						rotation: 270,
 						margin: 20,
@@ -714,7 +771,8 @@ $sites_type = array_merge($sites_type1,$sites_type2,$sites_type3);
 			});
 			Highcharts.chart('sites_chart', {
 				chart: {
-					type: 'column'
+					type: 'column',
+					alignTicks: false
 				},
 				title: {
 					text: reportTitle,

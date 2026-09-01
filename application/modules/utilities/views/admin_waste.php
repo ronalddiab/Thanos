@@ -154,12 +154,12 @@ $typical_destinations = getWasteTypicalDestinationArray();
                                     <div class="form-control-block col-sm-2">
                                         <input type="text" id="<?php echo 'unit_measure_'.$name.'';?>" onchange="calculate_disposal_cost(`<?php echo $name;?>`)" name="<?php echo 'unit_measure_'.$name.''?>"  class="input-control hr_input" value="<?php echo $site_waste['unit_measure_'.$name.'']; ?>">
                                     </div>
-                                    <div class="form-control-block col-sm-2"><label style="overflow: hidden;max-height: 45px;overflow-y: auto;color:white;width:100%;text-align:right;"><?php echo "(". $site_detail['local_currency'].'/'.$unit_measures[$site_waste_display['unit_measure_dropdown_'.$name.'']].")"; ?></label>
+                                    <div class="form-control-block col-sm-2"><label style="overflow: hidden;max-height: 45px;overflow-y: auto;color:white;width:100%;text-align:right;"><?php echo "(". BASE_CURRENCY_SYMBOL.'/'.$unit_measures[$site_waste_display['unit_measure_dropdown_'.$name.'']].")"; ?></label>
                                     </div>
                                     <div class="form-control-block col-sm-2">
                                         <div data-tip="The tariff is automatically calculated, it is equal to Total Volume or Weight / Total Cost."><input type="text" id="<?php echo 'disposal_cost_'.$name.'';?>" name="<?php echo 'disposal_cost_'.$name.'';?>"  class="input-control hr_input tariffBGDark" value="<?php echo $site_waste['disposal_cost_'.$name.'']; ?>" readonly="readonly"></div>
                                     </div>
-                                    <div class="form-control-block col-sm-1"><label style="overflow: hidden;max-height: 45px;overflow-y: auto;color:white;width:100%;text-align:right;"><?php echo "(".$site_detail['local_currency'].")"; ?></label>
+                                    <div class="form-control-block col-sm-1"><label style="overflow: hidden;max-height: 45px;overflow-y: auto;color:white;width:100%;text-align:right;"><?php echo "(".BASE_CURRENCY_SYMBOL.")"; ?></label>
                                     </div>
                                     <div class="form-control-block col-sm-1">
                                         <input type="text" id="<?php echo 'total_'.$name.''?>" onchange="calculate_disposal_cost(`<?php echo $name;?>`)" name="<?php echo 'total_'.$name.'';?>"  class="input-control hr_input" value="<?php echo $site_waste['total_'.$name.'']; ?>">
@@ -180,7 +180,7 @@ $typical_destinations = getWasteTypicalDestinationArray();
                                         <div class="form-control-block col-sm-2">
                                         <?php if (strpos($keyPanel, ' #') !== false) { 
                                             $data = explode(' #',$keyPanel); ?>
-                                            <label><?php echo $data[0];?></label>
+                                            <label><?php echo $data[0] ;?></label>
                                         <?php } else { ?>
                                             <label><?php echo $keyPanel;?></label>
                                         <?php } ?>
@@ -190,12 +190,12 @@ $typical_destinations = getWasteTypicalDestinationArray();
                                         <div class="form-control-block col-sm-2">
                                             <input type="text" id="<?php echo 'unit_measure_'.$name.'';?>" onchange="calculate_disposal_cost(`<?php echo $name;?>`)" name="<?php echo 'unit_measure_'.$name.''?>"  class="input-control hr_input" value="<?php echo $site_waste['unit_measure_'.$name.'']; ?>">
                                         </div>
-                                        <div class="form-control-block col-sm-2"><label style="overflow: hidden;max-height: 45px;overflow-y: auto;width: 100%;text-align:right;"><?php echo "(". $site_detail['local_currency'].'/'.$unit_measures[$site_waste_display['unit_measure_dropdown_'.$name.'']].")"; ?></label>
+                                        <div class="form-control-block col-sm-2"><label style="overflow: hidden;max-height: 45px;overflow-y: auto;width: 100%;text-align:right;"><?php echo "(". BASE_CURRENCY_SYMBOL.'/'.$unit_measures[$site_waste_display['unit_measure_dropdown_'.$name.'']].")"; ?></label>
                                         </div>
                                         <div class="form-control-block col-sm-2">
                                             <div data-tip="The tariff is automatically calculated, it is equal to Total Volume or Weight / Total Cost."><input type="text" id="<?php echo 'disposal_cost_'.$name.'';?>" name="<?php echo 'disposal_cost_'.$name.'';?>"  class="input-control hr_input tariffBGLight" value="<?php echo $site_waste['disposal_cost_'.$name.'']; ?>" readonly="readonly"></div>
                                         </div>
-                                        <div class="form-control-block col-sm-1"><label style="overflow: hidden;max-height: 45px;overflow-y: auto;width: 100%;text-align:right;"><?php echo "(".$site_detail['local_currency'].")"; ?></label>
+                                        <div class="form-control-block col-sm-1"><label style="overflow: hidden;max-height: 45px;overflow-y: auto;width: 100%;text-align:right;"><?php echo "(".BASE_CURRENCY_SYMBOL.")"; ?></label>
                                         </div>
                                         <div class="form-control-block col-sm-1">
                                             <input type="text" id="<?php echo 'total_'.$name.''?>" onchange="calculate_disposal_cost(`<?php echo $name;?>`)" name="<?php echo 'total_'.$name.'';?>"  class="input-control hr_input" value="<?php echo $site_waste['total_'.$name.'']; ?>">
@@ -223,12 +223,12 @@ $typical_destinations = getWasteTypicalDestinationArray();
                                             <div class="form-control-block col-sm-2">
                                                 <input type="text" id="<?php echo 'unit_measure_'.$name.'';?>"  onchange="calculate_disposal_cost(`<?php echo $name;?>`)" name="<?php echo 'unit_measure_'.$name.''?>"  class="input-control hr_input" value="<?php echo $site_waste['unit_measure_'.$name.'']; ?>">
                                             </div>
-                                            <div class="form-control-block col-sm-2"><label style="overflow: hidden;max-height: 45px;overflow-y: auto;width:100%;text-align:right;"><?php echo "(". $site_detail['local_currency'].'/'.$unit_measures[$site_waste_display['unit_measure_dropdown_'.$name.'']].")"; ?></label>
+                                            <div class="form-control-block col-sm-2"><label style="overflow: hidden;max-height: 45px;overflow-y: auto;width:100%;text-align:right;"><?php echo "(". BASE_CURRENCY_SYMBOL.'/'.$unit_measures[$site_waste_display['unit_measure_dropdown_'.$name.'']].")"; ?></label>
                                             </div>
                                             <div class="form-control-block col-sm-2">
                                                 <div data-tip="The tariff is automatically calculated, it is equal to Total Volume or Weight / Total Cost."><input type="text" id="<?php echo 'disposal_cost_'.$name.'';?>" name="<?php echo 'disposal_cost_'.$name.'';?>"  class="input-control hr_input tariffBG" value="<?php echo $site_waste['disposal_cost_'.$name.'']; ?>" readonly="readonly"></div>
                                             </div>
-                                            <div class="form-control-block col-sm-1"><label style="overflow: hidden;max-height: 45px;overflow-y: auto;width:100%;text-align:right;"><?php echo "(".$site_detail['local_currency'].")"; ?></label>
+                                            <div class="form-control-block col-sm-1"><label style="overflow: hidden;max-height: 45px;overflow-y: auto;width:100%;text-align:right;"><?php echo "(".BASE_CURRENCY_SYMBOL.")"; ?></label>
                                             </div>
                                             <div class="form-control-block col-sm-1">
                                                 <input type="text" id="<?php echo 'total_'.$name.''?>" onchange="calculate_disposal_cost(`<?php echo $name;?>`)" name="<?php echo 'total_'.$name.'';?>"  class="input-control hr_input" value="<?php echo $site_waste['total_'.$name.'']; ?>">
@@ -246,6 +246,16 @@ $typical_destinations = getWasteTypicalDestinationArray();
                 <input type="hidden" id="month" name="month" value="<?php echo $utilities_month; ?>" />
                 <input type="hidden" id="year" name="year" value="<?php echo $utilities_year; ?>" />
                 <ul class="form-outer-block">
+                    <li style="padding-left: 0px; margin-bottom: 0px;">	    
+                        <div class="row">
+                            <div class="form-col-12 form-control-block">
+                                <label class="form-col-3"><b><?php echo 'Rebates ('.BASE_CURRENCY_SYMBOL.')'; ?></b></label>
+                                <div class="form-col-6">
+                                    <input type="text" id="rebates"  name="rebates"  class="input-control hr_input" value="<?php echo $site_waste['rebates']; ?>">
+                                </div>                                        
+                            </div>
+                        </div>
+                    </li>
                     <li style="padding-left: 0px; margin-bottom: 0px;">	    
                         <div class="row">
                             <div class="form-col-12 form-control-block">

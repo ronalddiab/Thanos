@@ -448,10 +448,36 @@ if ($filters["start_year"] == $filters["end_year"]) { // If start and end year i
 $current_year_text = lang("current-year");
 $previous_year_text = lang("previous-year");
 
-// Override if selected period is not for current year
-if($filters['start_year'] != date("Y")){
-    $current_year_text = 'Year - '.$filters['start_year'];
-    $previous_year_text = 'Year - '.($filters['start_year']-1);
+// Label the series by the actual selected range. A cross-year range
+// (e.g. 07/2025 - 06/2026) must not be labelled with only its start year.
+if ($filters['start_year'] != $filters['end_year']) {
+    $current_year_text = 'Year - ' . $filters['start_year'] . '/' . $filters['end_year'];
+    $previous_year_text = 'Year - ' . ($filters['start_year'] - 1) . '/' . ($filters['end_year'] - 1);
+} elseif ($filters['start_year'] != date("Y")) {
+    $current_year_text = 'Year - ' . $filters['start_year'];
+    $previous_year_text = 'Year - ' . ($filters['start_year'] - 1);
+}
+
+// In "Choose Year" mode the controller forces a full Jan-Dec range, which makes an
+// incomplete current year plot trailing zero months and divides its average by 12
+// instead of the real month count. Trim the range to the last month that actually
+// has data so it behaves like "Choose Date"/YTD, which already compute correctly.
+if (isset($data['time_type']) && $data['time_type'] == 'advance_select_choose_year') {
+    $lastDataMonth = 0;
+    foreach ($resultkeys as $ryear => $rmonths) {
+        foreach ($rmonths as $rmonth) {
+            if (!empty($reportdata[$rmonth][$ryear][$filters['utility_type']])) {
+                $lastDataMonth = max($lastDataMonth, (int) $rmonth);
+            }
+        }
+    }
+    if ($lastDataMonth > 0) {
+        foreach ($resultkeys as $ryear => $rmonths) {
+            $resultkeys[$ryear] = array_values(array_filter($rmonths, function ($m) use ($lastDataMonth) {
+                return (int) $m <= $lastDataMonth;
+            }));
+        }
+    }
 }
 ?>
 
@@ -663,12 +689,18 @@ if($filters['start_year'] != date("Y")){
             $('#report_form_utility').validate({// initialize the plugin
                 rules: {
                     startdate: {
+                        required: true,
                         dateBefore: '#enddate_utility'
                     },
                     enddate: {
+                        required: true,
                         dateAfter: '#startdate_utility',
                         monthdefer: '#startdate_utility'
                     }
+                },
+                messages: {
+                    startdate: { required: '<?php echo lang("start-date"); ?> is required' },
+                    enddate: { required: '<?php echo lang("end-date"); ?> is required' }
                 }
             });
 

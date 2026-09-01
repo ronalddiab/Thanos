@@ -161,6 +161,71 @@
                                             </table>
                                         </td>
                                     </tr>
+                                    <?php if ($site_detail['show_utility_fleet']) { ?>
+                                    <tr style="background-color:#d8e1f2;">
+                                        <td width="20%" colspan="4"><strong>FLEET FUEL</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td width="20%">
+                                            <table width="100%" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Consumption (Litres)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Total Cost (<?php echo currency_symbol($isLocal) ?>)</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                        <td width="30%">
+                                            <table width="100%" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td width="35%"><?php echo number_format($total_sum_data_fleet_petrol); ?></td>
+                                                        <td width="35%"><?php echo number_format($total_sum_pre_data_fleet_petrol); ?></td>
+                                                        <td width="30%"><?php echo ''; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><?php echo num_format_without_currency($total_sum_data_total_fleet_petrol_cost, 0, $isLocal); ?></td>
+                                                        <td><?php echo num_format_without_currency($total_sum_pre_data_total_fleet_petrol_cost, 0, $isLocal); ?></td>
+                                                        <td><?php echo ''; ?></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                        <td width="30%">
+                                            <table width="100%" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr style="<?php echo $fleet_consumption_difference > 0 ? $positive_number_style : ''; ?>">
+                                                        <td width="35%" align="center"><?php echo number_format($fleet_consumption_difference); ?></td>
+                                                        <td width="35%" align="center"><?php echo number_format($fleet_consumption_variation, $percentage_decimal); ?>%</td>
+                                                        <td width="30%" align="center"><?php echo ''; ?></td>
+                                                    </tr>
+                                                    <tr style="<?php echo $fleet_cost_difference > 0 ? $positive_number_style : ''; ?>">
+                                                        <td align="center"><?php echo num_format_without_currency($fleet_cost_difference, 0, $isLocal); ?></td>
+                                                        <td align="center"><?php echo number_format($fleet_cost_variation, $percentage_decimal); ?>%</td>
+                                                        <td align="center"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                        <td width="20%">
+                                            <table width="100%" cellpadding="0" cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                <?php } ?>
                                     <?php if ($site_detail['show_utility_electricity']) { ?>
                                         <tr style="background-color:#d8e1f2;">
                                             <td width="20%" colspan="4"><strong>ELECTRICITY</strong></td>
@@ -232,7 +297,7 @@
                                                         <?php $electricity_actual_budget_diff = $currentBudgetActualData["total_electricity_kwh_actual"] - $currentBudgetActualData["total_electricity_kwh_budget"]; ?>
                                                         <tr style="<?php echo $electricity_actual_budget_diff > 0 ? $positive_number_style : ''; ?>">
                                                             <td width="50%" style="text-align: center;"><?php echo number_format($electricity_actual_budget_diff); ?></td>
-                                                            <td width="50%" style="text-align: center;"><?php echo number_format($electricity_actual_budget_diff * 100 / $currentBudgetActualData["total_electricity_kwh_actual"], $percentage_decimal) . "%"; ?></td>
+                                                            <td width="50%" style="text-align: center;"><?php echo number_format(($currentBudgetActualData["total_electricity_kwh_budget"] != 0) ? $electricity_actual_budget_diff * 100 / $currentBudgetActualData["total_electricity_kwh_budget"] : 0, $percentage_decimal) . "%"; ?></td>
                                                         </tr>
                                                         <?php $electricity_actual_budget_tariff_diff = $electricity_tariff_actual - $electricity_tariff_budget; ?>
                                                         <tr style="<?php echo $electricity_actual_budget_tariff_diff > 0 ? $positive_number_style : ''; ?>">
@@ -323,7 +388,7 @@
                                                         <?php $fuel_act_bud_diff = $currentBudgetActualData["total_fuel_oil_actual"] - $currentBudgetActualData["total_fuel_oil_budget"]; ?>
                                                         <tr style="<?php echo $fuel_act_bud_diff > 0 ? $positive_number_style : ''; ?>">
                                                             <td width="50%" style="text-align: center;"><?php echo number_format($fuel_act_bud_diff); ?></td>
-                                                            <td width="50%" style="text-align: center;"><?php echo number_format($fuel_act_bud_diff * 100 / $currentBudgetActualData["total_fuel_oil_actual"], $percentage_decimal) . "%"; ?></td>
+                                                            <td width="50%" style="text-align: center;"><?php echo number_format(($currentBudgetActualData["total_fuel_oil_budget"] != 0) ? $fuel_act_bud_diff * 100 / $currentBudgetActualData["total_fuel_oil_budget"] : 0, $percentage_decimal) . "%"; ?></td>
                                                         </tr>
                                                         <?php $fuel_act_bud_tariff_diff = $fuel_oil_tariff_actual - $fuel_oil_tariff_budget; ?>
                                                         <tr style="<?php echo $fuel_act_bud_tariff_diff > 0 ? $positive_number_style : ''; ?>">
@@ -414,7 +479,7 @@
                                                         <?php $lpg_act_bud_diff = $currentBudgetActualData["total_lpg_actual"] - $currentBudgetActualData["total_lpg_budget"]; ?>
                                                         <tr style="<?php echo $lpg_act_bud_diff > 0 ? $positive_number_style : ''; ?>">
                                                             <td width="50%" style="text-align: center;"><?php echo number_format($lpg_act_bud_diff); ?></td>
-                                                            <td width="50%" style="text-align: center;"><?php echo $currentBudgetActualData["total_lpg_actual"] != 0 ? number_format($lpg_act_bud_diff * 100 / $currentBudgetActualData["total_lpg_actual"], $percentage_decimal) . "%" : 0 ; ?></td>
+                                                            <td width="50%" style="text-align: center;"><?php echo $currentBudgetActualData["total_lpg_budget"] != 0 ? number_format($lpg_act_bud_diff * 100 / $currentBudgetActualData["total_lpg_budget"], $percentage_decimal) . "%" : 0 ; ?></td>
                                                         </tr>
                                                         <?php $lpg_act_bud_tarrif_diff = $lpg_tariff_actual - $lpg_tariff_budget; ?>
                                                         <tr style="<?php echo $lpg_act_bud_tarrif_diff > 0 ? $positive_number_style : ''; ?>">
@@ -505,7 +570,7 @@
                                                         <?php $natural_gas_act_bud_diff = $currentBudgetActualData["total_natural_gas_actual"] - $currentBudgetActualData["total_natural_gas_budget"]; ?>
                                                         <tr style="<?php echo $natural_gas_act_bud_diff > 0 ? $positive_number_style : ''; ?>">
                                                             <td width="50%" style="text-align: center;"><?php echo number_format($natural_gas_act_bud_diff); ?></td>
-                                                            <td width="50%" style="text-align: center;"><?php echo $currentBudgetActualData["total_natural_gas_actual"] != 0 ? number_format($natural_gas_act_bud_diff * 100 / $currentBudgetActualData["total_natural_gas_actual"], $percentage_decimal) . "%" : 0; ?></td>
+                                                            <td width="50%" style="text-align: center;"><?php echo $currentBudgetActualData["total_natural_gas_budget"] != 0 ? number_format($natural_gas_act_bud_diff * 100 / $currentBudgetActualData["total_natural_gas_budget"], $percentage_decimal) . "%" : 0; ?></td>
                                                         </tr>
                                                         <?php $natural_gas_act_bud_tariff_diff = $natural_gas_tariff_actual - $natural_gas_tariff_budget; ?>
                                                         <tr style="<?php echo $natural_gas_act_bud_tariff_diff > 0 ? $positive_number_style : ''; ?>">
@@ -595,7 +660,7 @@
                                                         <?php $water_act_bud_diff = $currentBudgetActualData["water_total_consumption_actual"] - $currentBudgetActualData["water_total_consumption_budget"]; ?>
                                                         <tr style="<?php echo $water_act_bud_diff > 0 ? $positive_number_style : ''; ?>">
                                                             <td width="50%" style="text-align: center;"><?php echo number_format($water_act_bud_diff); ?></td>
-                                                            <td width="50%" style="text-align: center;"><?php echo number_format(($currentBudgetActualData["water_total_consumption_actual"] - $currentBudgetActualData["water_total_consumption_budget"]) * 100 / $currentBudgetActualData["water_total_consumption_actual"], $percentage_decimal) . "%"; ?></td>
+                                                            <td width="50%" style="text-align: center;"><?php echo number_format(($currentBudgetActualData["water_total_consumption_budget"] != 0) ? ($currentBudgetActualData["water_total_consumption_actual"] - $currentBudgetActualData["water_total_consumption_budget"]) * 100 / $currentBudgetActualData["water_total_consumption_budget"] : 0, $percentage_decimal) . "%"; ?></td>
                                                         </tr>
                                                         <?php $water_act_bud_tariff_diff = $water_tariff_actual - $water_tariff_budget; ?>
                                                         <tr style="<?php echo $water_act_bud_tariff_diff > 0 ? $positive_number_style : ''; ?>">
@@ -688,7 +753,7 @@
                                                         ?>
                                                         <tr style="<?php echo $district_cooling_act_bud_diff > 0 ? $positive_number_style : ''; ?>">
                                                             <td width="50%" style="text-align: center;"><?php echo number_format($district_cooling_act_bud_diff); ?></td>
-                                                            <td width="50%" style="text-align: center;"><?php echo number_format(($district_cooling_act_bud_diff) * 100 / $total_sum_data_cooling_district_consumption, $percentage_decimal) . "%"; ?></td>
+                                                            <td width="50%" style="text-align: center;"><?php echo number_format(($currentBudgetActualData["district_cooling_budget"] != 0) ? ($district_cooling_act_bud_diff) * 100 / $currentBudgetActualData["district_cooling_budget"] : 0, $percentage_decimal) . "%"; ?></td>
                                                         </tr>
                                                         <?php $district_cooling_act_bud_tariff_diff = $district_cooling_tariff_actual - $district_cooling_tariff_budget; ?>
                                                         <tr style="<?php echo $district_cooling_act_bud_tariff_diff > 0 ? $positive_number_style : ''; ?>">
@@ -781,7 +846,7 @@
                                                         <?php $district_heating_act_bud_diff = $currentBudgetActualData["district_heating_actual"] - $currentBudgetActualData["district_heating_budget"]; ?>
                                                         <tr style="<?php echo $district_heating_act_bud_diff > 0 ? $positive_number_style : ''; ?>">
                                                             <td width="50%" style="text-align: center;"><?php echo numb_format_without_currency($district_heating_act_bud_diff, 0, $isLocal); ?></td>
-                                                            <td width="50%" style="text-align: center;"><?php echo number_format(($currentBudgetActualData["district_heating_actual"] - $currentBudgetActualData["district_heating_budget"]) * 100 / $currentBudgetActualData["district_heating_actual"], $percentage_decimal) . "%"; ?></td>
+                                                            <td width="50%" style="text-align: center;"><?php echo number_format(($currentBudgetActualData["district_heating_budget"] != 0) ? ($currentBudgetActualData["district_heating_actual"] - $currentBudgetActualData["district_heating_budget"]) * 100 / $currentBudgetActualData["district_heating_budget"] : 0, $percentage_decimal) . "%"; ?></td>
                                                         </tr>
                                                         <?php $district_heating_act_bud_tariff_diff = $district_heating_tariff_actual - $district_heating_tariff_budget; ?>
                                                         <tr style="<?php echo $district_heating_act_bud_tariff_diff > 0 ? $positive_number_style : ''; ?>">

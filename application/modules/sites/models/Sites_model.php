@@ -98,7 +98,6 @@ class Sites_model extends Base_Model
 				}
 			}
 		}
-
 		if ($role_id == 6) {
 			$site_id = $this->get_regional_sites_for_corporate_user();
 		}
@@ -366,6 +365,7 @@ class Sites_model extends Base_Model
 				$this->db->where("deleted_by is NULL");
 				$tablesites = $this->db->get('site_emission');
 				$siteEmissionArray  = $tablesites->row_array();
+
 				if (!empty($siteEmissionArray)) {
 					$siteArray['electricity_emission_factor'] = isset($siteEmissionArray['electricity_emission_factor']) && isset($siteEmissionArray['electricity_emission_factor_percentage']) ? ((1 - ($siteEmissionArray['electricity_emission_factor_percentage'] / 100)) * $siteEmissionArray['electricity_emission_factor']) : $siteEmissionArray['electricity_emission_factor'];
 					$siteArray['electricity_emission_factor_percentage'] = isset($siteEmissionArray['electricity_emission_factor_percentage']) ? $siteEmissionArray['electricity_emission_factor_percentage'] : 0;
@@ -421,6 +421,9 @@ class Sites_model extends Base_Model
 			$site_data['residence_types'] = $data['residence_types'];
 		} else {
 			$site_data['residence_types'] = NULL;
+		}
+		if (isset($data['city'])) {
+			$site_data['city'] = $data['city'];
 		}
 		if (isset($data['site_location_latitude'])) {
 			$site_data['site_location_latitude'] = $data['site_location_latitude'];
@@ -685,6 +688,9 @@ class Sites_model extends Base_Model
 		}
 		if (isset($data['show_waste_management'])) {
 			$site_data['show_waste_management'] = $data['show_waste_management'];
+		}
+		if (isset($data['show_utility_fleet'])) {
+			$site_data['show_utility_fleet'] = $data['show_utility_fleet'];
 		}
 
 		if (isset($data['show_total_utility_notification'])) {
@@ -1319,7 +1325,6 @@ class Sites_model extends Base_Model
 				$siteArray[$key] = $this->getEmissionFactorYearly($site);
 			}
 			return $siteArray;
-
 		} else {
 			return array();
 		}
@@ -2060,7 +2065,9 @@ class Sites_model extends Base_Model
 	public function get_regional_sites_for_corporate_user()
 	{
 		$user_id = $this->session->userdata[$this->section_name]['user_id'];
-		$site_id = array();
+		$role_id = isset($this->session->userdata[$this->section_name]['role_id'])
+			? $this->session->userdata[$this->section_name]['role_id']
+			: 6;
 		$region_id = array();
 		$this->db->select('*');
 		$this->db->from('user_regions');
@@ -2074,10 +2081,83 @@ class Sites_model extends Base_Model
 				$region_id[] = $result['region_id'];
 			}
 		}
-		$regionalSitesData = $this->get_site_detail_with_region_filter(0, 0, $role_id, $data['region_id']);
+		$regionalSitesData = $this->get_site_detail_with_region_filter(0, $user_id, $role_id, $region_id);
 		$regionalSites = isset($regionalSitesData) ? array_column($regionalSitesData, 'id') : [];
-		$site_id = array_unique($regionalSites);
+		$site_id = array_values(array_unique($regionalSites));
 		return $site_id;
+	}
+
+	/**
+	 * Assign a newly created site to all Super Admins (role 1)
+	 * and Corporate users (role 6) whose regions include the site's region.
+	 */
+	public function assign_site_to_corporate_and_super_admins($site_id, $region_id)
+	{
+		$site_id = (int) $site_id;
+		$region_id = (int) $region_id;
+		if ($site_id <= 0) {
+			return false;
+		}
+
+		$userIds = array();
+
+		$this->db->select('id');
+		$this->db->from('users');
+		$this->db->where('role_id', 1);
+		$this->db->where('status', 1);
+		$superAdmins = $this->db->get()->result_array();
+		if (!empty($superAdmins)) {
+			$userIds = array_merge($userIds, array_column($superAdmins, 'id'));
+		}
+
+		if ($region_id > 0) {
+			$this->db->select('u.id');
+			$this->db->from('users u');
+			$this->db->join('user_regions ur', 'ur.user_id = u.id', 'inner');
+			$this->db->where('u.role_id', 6);
+			$this->db->where('u.status', 1);
+			$this->db->where('ur.region_id', $region_id);
+			$corporateUsers = $this->db->get()->result_array();
+			if (!empty($corporateUsers)) {
+				$userIds = array_merge($userIds, array_column($corporateUsers, 'id'));
+			}
+		}
+
+		$userIds = array_unique(array_map('intval', $userIds));
+		foreach ($userIds as $userId) {
+			if ($userId <= 0) {
+				continue;
+			}
+			$this->db->where('user_id', $userId);
+			$this->db->where('site_id', $site_id);
+			$exists = $this->db->get('user_sites')->row_array();
+			if (empty($exists)) {
+				$this->db->insert('user_sites', array(
+					'user_id' => $userId,
+					'site_id' => $site_id,
+				));
+			}
+		}
+
+		// Drop this site from Corporate users who do not belong to the site's region.
+		$this->db->select('u.id');
+		$this->db->from('users u');
+		$this->db->where('u.role_id', 6);
+		$corporateAll = $this->db->get()->result_array();
+		$keepIds = array_flip($userIds);
+		if (!empty($corporateAll)) {
+			foreach ($corporateAll as $corporate) {
+				$corporateId = (int) $corporate['id'];
+				if ($corporateId <= 0 || isset($keepIds[$corporateId])) {
+					continue;
+				}
+				$this->db->where('user_id', $corporateId);
+				$this->db->where('site_id', $site_id);
+				$this->db->delete('user_sites');
+			}
+		}
+
+		return true;
 	}
 	public function getCarbonRecords($site_id, $site_detials)
 	{
@@ -2099,10 +2179,12 @@ class Sites_model extends Base_Model
 		$getUtilities['total_natural_gas_cost'] = ($getUtilities['total_natural_gas_cost'] != '') ? $getUtilities['total_natural_gas_cost'] : 0;
 		$getUtilities['district_heating_cost'] = ($getUtilities['district_heating_cost'] != '') ? $getUtilities['district_heating_cost'] : 0;
 		$getUtilities['district_cooling_cost'] = ($getUtilities['district_cooling_cost'] != '') ? $getUtilities['district_cooling_cost'] : 0;
-		$totalelectricitykwh = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'];
+		$getUtilities['total_fleet_petrol_cost'] = ($getUtilities['total_fleet_petrol_cost'] != '') ? $getUtilities['total_fleet_petrol_cost'] : 0;
+
+		$totalelectricitykwh = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production'];
 		$totalfueloil = $getUtilities['total_fuel_oil_cost']; // - $getUtilities['onsite_generators_fuel_oil_quantity'];
 		$totalnaturalgas = $getUtilities['total_natural_gas_cost']; // - $getUtilities['onsite_generators_natural_gas_quantity'];
-		$currentMonth_footPrint = ($dataFactor['electricity'] * $totalelectricitykwh * $site_detials['electricity_emission_factor']) + ($dataFactor['lpg'] * $getUtilities['total_lpg_cost'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloil * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgas * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating_cost'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling_cost'] * $site_detials['district_cooling_emission_factor']);
+		$currentMonth_footPrint = ($dataFactor['electricity'] * $totalelectricitykwh * $site_detials['electricity_emission_factor']) + ($dataFactor['lpg'] * $getUtilities['total_lpg_cost'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloil * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgas * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating_cost'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling_cost'] * $site_detials['district_cooling_emission_factor']) + ($getUtilities['fleet_petrol'] * 2.3);
 
 		$dataCarbon['carbon_footprint_currentMonth'] = $currentMonth_footPrint;
 		$dataCarbon['total_utility_cost_currentMonth'] = $getUtilities['total_electricity_cost'] + $getUtilities['total_fuel_oil_cost'] + $getUtilities['total_lpg_cost'] + $getUtilities['total_natural_gas_cost'] + $getUtilities['district_heating_cost'] + $getUtilities['district_cooling_cost'] + $getUtilities['water_total_consumption_cost'] + $getUtilities['district_cooling_fixed_cost'] + $getUtilities['district_heating_fixed_cost'] + $getUtilities['lpg_fixed_cost'] + $getUtilities['natural_gas_fixed_cost'] + $getUtilities['water_fixed_cost'];
@@ -2131,11 +2213,13 @@ class Sites_model extends Base_Model
 		$utilitiesSameMonthPreviousYear['total_natural_gas'] = ($utilitiesSameMonthPreviousYear['total_natural_gas'] != '') ? $utilitiesSameMonthPreviousYear['total_natural_gas'] : 0;
 		$utilitiesSameMonthPreviousYear['district_heating'] = ($utilitiesSameMonthPreviousYear['district_heating'] != '') ? $utilitiesSameMonthPreviousYear['district_heating'] : 0;
 		$utilitiesSameMonthPreviousYear['district_cooling'] = ($utilitiesSameMonthPreviousYear['district_cooling'] != '') ? $utilitiesSameMonthPreviousYear['district_cooling'] : 0;
+		$utilitiesSameMonthPreviousYear['fleet_petrol'] = ($utilitiesSameMonthPreviousYear['fleet_petrol'] != '') ? $utilitiesSameMonthPreviousYear['fleet_petrol'] : 0;
 
-		$totalelectricitykwhprev = $utilitiesSameMonthPreviousYear['total_electricity_kwh'] - $utilitiesSameMonthPreviousYear['onsite_generators_quantity'];
+		$totalelectricitykwhprev = $utilitiesSameMonthPreviousYear['total_electricity_kwh'] - $utilitiesSameMonthPreviousYear['onsite_generators_quantity'] - $utilitiesSameMonthPreviousYear['total_renewable_energy_production'];
 		$totalfueloilprev = $utilitiesSameMonthPreviousYear['total_fuel_oil']; // - $utilitiesSameMonthPreviousYear['onsite_generators_fuel_oil_quantity'];
 		$totalnaturalgasprev = $utilitiesSameMonthPreviousYear['total_natural_gas']; // - $utilitiesSameMonthPreviousYear['onsite_generators_natural_gas_quantity'];
-		$SameMonthPreviousYear_footPrint = ($dataFactor['electricity'] * $totalelectricitykwhprev * $site_detials['electricity_emission_factor']) + ($dataFactor['lpg'] * $utilitiesSameMonthPreviousYear['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilprev * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgasprev * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $utilitiesSameMonthPreviousYear['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $utilitiesSameMonthPreviousYear['district_cooling'] * $site_detials['district_cooling_emission_factor']);
+		$SameMonthPreviousYear_footPrint = ($dataFactor['electricity'] * $totalelectricitykwhprev * $site_detials['electricity_emission_factor']) + ($dataFactor['lpg'] * $utilitiesSameMonthPreviousYear['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilprev * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgasprev * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $utilitiesSameMonthPreviousYear['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $utilitiesSameMonthPreviousYear['district_cooling'] * $site_detials['district_cooling_emission_factor']) + ($utilitiesSameMonthPreviousYear['fleet_petrol'] * 2.3);
+
 		$dataCarbon['carbon_footprint_SameMonthPreviousYear'] = $SameMonthPreviousYear_footPrint;
 
 		// YTD
@@ -2165,12 +2249,13 @@ class Sites_model extends Base_Model
 				$getUtilities['total_natural_gas'] = ($getUtilities['total_natural_gas'] != '') ? $getUtilities['total_natural_gas'] : 0;
 				$getUtilities['district_heating'] = ($getUtilities['district_heating'] != '') ? $getUtilities['district_heating'] : 0;
 				$getUtilities['district_cooling'] = ($getUtilities['district_cooling'] != '') ? $getUtilities['district_cooling'] : 0;
+				$getUtilities['fleet_petrol'] = ($getUtilities['fleet_petrol'] != '') ? $getUtilities['fleet_petrol'] : 0;
 
 				$totalelectricitykwhcurrentyear = $getUtilities['total_electricity_kwh'];
 				if (isset($electricity_emission_factor_percentage) && !empty($electricity_emission_factor_percentage)) {
-					$currentMonth_footPrint_new += ((((1 - ($electricity_emission_factor_percentage / 100)) * $totalelectricitykwhcurrentyear) - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production']) * $electricity_emission_factor * $dataFactor['electricity']) + ($getUtilities['total_lpg'] * $site_detials['lpg_emission_factor'] * $dataFactor['lpg']) + ($dataFactor['fuel_oil'] * $getUtilities['total_fuel_oil'] * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $getUtilities['total_natural_gas'] * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling'] * $site_detials['district_cooling_emission_factor']);
+					$currentMonth_footPrint_new += ((((1 - ($electricity_emission_factor_percentage / 100)) * $totalelectricitykwhcurrentyear) - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production']) * $electricity_emission_factor * $dataFactor['electricity']) + ($getUtilities['total_lpg'] * $site_detials['lpg_emission_factor'] * $dataFactor['lpg']) + ($dataFactor['fuel_oil'] * $getUtilities['total_fuel_oil'] * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $getUtilities['total_natural_gas'] * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling'] * $site_detials['district_cooling_emission_factor']) + ($getUtilities['fleet_petrol'] * 2.3);
 				} else {
-					$currentMonth_footPrint_new += ((((1) * $totalelectricitykwhcurrentyear) - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production']) * $electricity_emission_factor * $dataFactor['electricity']) + ($getUtilities['total_lpg'] * $site_detials['lpg_emission_factor'] * $dataFactor['lpg']) + ($dataFactor['fuel_oil'] * $getUtilities['total_fuel_oil'] * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $getUtilities['total_natural_gas'] * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling'] * $site_detials['district_cooling_emission_factor']);
+					$currentMonth_footPrint_new += ((((1) * $totalelectricitykwhcurrentyear) - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production']) * $electricity_emission_factor * $dataFactor['electricity']) + ($getUtilities['total_lpg'] * $site_detials['lpg_emission_factor'] * $dataFactor['lpg']) + ($dataFactor['fuel_oil'] * $getUtilities['total_fuel_oil'] * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $getUtilities['total_natural_gas'] * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling'] * $site_detials['district_cooling_emission_factor']) + ($getUtilities['fleet_petrol'] * 2.3);
 				}
 			}
 		} else {
@@ -2194,14 +2279,15 @@ class Sites_model extends Base_Model
 				$getUtilities['total_natural_gas'] = ($getUtilities['total_natural_gas'] != '') ? $getUtilities['total_natural_gas'] : 0;
 				$getUtilities['district_heating'] = ($getUtilities['district_heating'] != '') ? $getUtilities['district_heating'] : 0;
 				$getUtilities['district_cooling'] = ($getUtilities['district_cooling'] != '') ? $getUtilities['district_cooling'] : 0;
+				$getUtilities['fleet_petrol'] = ($getUtilities['fleet_petrol'] != '') ? $getUtilities['fleet_petrol'] : 0;
 
 				$totalelectricitykwhcurrentyear = $getUtilities['total_electricity_kwh'];
 				$totalfueloilcurrentyear = $getUtilities['total_fuel_oil']; // - $getUtilities['onsite_generators_fuel_oil_quantity'];
 				$totalnaturalgascurrentyear = $getUtilities['total_natural_gas']; // - $getUtilities['onsite_generators_natural_gas_quantity'];
 				if (isset($electricity_emission_factor_percentage) && !empty($electricity_emission_factor_percentage)) {
-					$currentMonth_footPrint_new += (((((1 - ($electricity_emission_factor_percentage / 100)) * $totalelectricitykwhcurrentyear) - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production']) * $dataFactor['electricity']) * $electricity_emission_factor) + ($dataFactor['lpg'] * $getUtilities['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilcurrentyear * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgascurrentyear * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling'] * $site_detials['district_cooling_emission_factor']);
+					$currentMonth_footPrint_new += (((((1 - ($electricity_emission_factor_percentage / 100)) * $totalelectricitykwhcurrentyear) - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production']) * $dataFactor['electricity']) * $electricity_emission_factor) + ($dataFactor['lpg'] * $getUtilities['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilcurrentyear * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgascurrentyear * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling'] * $site_detials['district_cooling_emission_factor']) + ($getUtilities['fleet_petrol'] * 2.3);
 				} else {
-					$currentMonth_footPrint_new += (((((1) * $totalelectricitykwhcurrentyear) - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production']) * $dataFactor['electricity']) * $electricity_emission_factor) + ($dataFactor['lpg'] * $getUtilities['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilcurrentyear * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgascurrentyear * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling'] * $site_detials['district_cooling_emission_factor']);
+					$currentMonth_footPrint_new += (((((1) * $totalelectricitykwhcurrentyear) - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production']) * $dataFactor['electricity']) * $electricity_emission_factor) + ($dataFactor['lpg'] * $getUtilities['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilcurrentyear * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgascurrentyear * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling'] * $site_detials['district_cooling_emission_factor']) + ($getUtilities['fleet_petrol'] * 2.3);
 				}
 			}
 		}
@@ -2229,6 +2315,7 @@ class Sites_model extends Base_Model
 			$getUtilities['total_natural_gas'] = ($getUtilities['total_natural_gas'] != '') ? $getUtilities['total_natural_gas'] : 0;
 			$getUtilities['district_heating'] = ($getUtilities['district_heating'] != '') ? $getUtilities['district_heating'] : 0;
 			$getUtilities['district_cooling'] = ($getUtilities['district_cooling'] != '') ? $getUtilities['district_cooling'] : 0;
+			$getUtilities['fleet_petrol'] = ($getUtilities['fleet_petrol'] != '') ? $getUtilities['fleet_petrol'] : 0;
 
 			$totalelectricitykwhbaselineyear = $getUtilities['total_electricity_kwh'];
 			$totalfueloilbaselineyear = $getUtilities['total_fuel_oil']; // - $getUtilities['onsite_generators_fuel_oil_quantity'];
@@ -2239,9 +2326,9 @@ class Sites_model extends Base_Model
 			// echo '((((((1 - ('.$electricity_emission_factor_percentage.'/100)) *'. $totalelectricitykwhbaselineyear.')  - '.$getUtilities['onsite_generators_quantity'].' - '.$getUtilities['total_renewable_energy_production'].') * '.$dataFactor['electricity'].') * '.$electricity_emission_factor.') )<br/>';
 			// echo ($dataFactor['natural_gas'].' * '.$totalnaturalgasbaselineyear.' * '.$site_detials['natural_gas_emission_factor']);
 			if (isset($electricity_emission_factor_percentage) && !empty($electricity_emission_factor_percentage)) {
-				$baselineMonth_footPrint_new += (((((1 - ($electricity_emission_factor_percentage / 100)) * $totalelectricitykwhbaselineyear)  - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production']) * $dataFactor['electricity']) * $electricity_emission_factor) + ($dataFactor['lpg'] * $getUtilities['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilbaselineyear * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgasbaselineyear * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling'] * $site_detials['district_cooling_emission_factor']);
+				$baselineMonth_footPrint_new += (((((1 - ($electricity_emission_factor_percentage / 100)) * $totalelectricitykwhbaselineyear)  - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production']) * $dataFactor['electricity']) * $electricity_emission_factor) + ($dataFactor['lpg'] * $getUtilities['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilbaselineyear * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgasbaselineyear * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling'] * $site_detials['district_cooling_emission_factor']) + ($getUtilities['fleet_petrol'] * 2.3);
 			} else {
-				$baselineMonth_footPrint_new += (((((1) * $totalelectricitykwhbaselineyear)  - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production']) * $dataFactor['electricity']) * $electricity_emission_factor) + ($dataFactor['lpg'] * $getUtilities['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilbaselineyear * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgasbaselineyear * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling'] * $site_detials['district_cooling_emission_factor']);
+				$baselineMonth_footPrint_new += (((((1) * $totalelectricitykwhbaselineyear)  - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production']) * $dataFactor['electricity']) * $electricity_emission_factor) + ($dataFactor['lpg'] * $getUtilities['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilbaselineyear * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgasbaselineyear * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $getUtilities['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $getUtilities['district_cooling'] * $site_detials['district_cooling_emission_factor']) + ($getUtilities['fleet_petrol'] * 2.3);
 			}
 		}
 		for ($i = 1; $i < $compareMonth; $i++) {
@@ -2265,14 +2352,15 @@ class Sites_model extends Base_Model
 			$YtdUtilitiesPreviousYear['district_heating'] = ($YtdUtilitiesPreviousYear['district_heating'] != '') ? $YtdUtilitiesPreviousYear['district_heating'] : 0;
 			$YtdUtilitiesPreviousYear['district_cooling'] = ($YtdUtilitiesPreviousYear['district_cooling'] != '') ? $YtdUtilitiesPreviousYear['district_cooling'] : 0;
 			$YtdUtilitiesPreviousYear['water_total_consumption'] = ($YtdUtilitiesPreviousYear['water_total_consumption'] != '') ? $YtdUtilitiesPreviousYear['water_total_consumption'] : 0;
+			$YtdUtilitiesPreviousYear['fleet_petrol'] = ($YtdUtilitiesPreviousYear['fleet_petrol'] != '') ? $YtdUtilitiesPreviousYear['fleet_petrol'] : 0;
 
 			$totalelectricitykwhpreviousyear = $YtdUtilitiesPreviousYear['total_electricity_kwh'];
 			$totalfueloilpreviousyear = $YtdUtilitiesPreviousYear['total_fuel_oil'];
 			$totalnaturalgaspreviousyear = $YtdUtilitiesPreviousYear['total_natural_gas'];
 			if (isset($electricity_emission_factor_percentage) && !empty($electricity_emission_factor_percentage)) {
-				$ytd_carbon_footprintPreviousYear += (((((1 - ($electricity_emission_factor_percentage / 100)) * $totalelectricitykwhpreviousyear)  - $YtdUtilitiesPreviousYear['onsite_generators_quantity'] - $YtdUtilitiesPreviousYear['total_renewable_energy_production']) * $dataFactor['electricity']) * $electricity_emission_factor) + ($dataFactor['lpg'] * $YtdUtilitiesPreviousYear['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilpreviousyear * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgaspreviousyear * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $YtdUtilitiesPreviousYear['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $YtdUtilitiesPreviousYear['district_cooling'] * $site_detials['district_cooling_emission_factor']);
+				$ytd_carbon_footprintPreviousYear += (((((1 - ($electricity_emission_factor_percentage / 100)) * $totalelectricitykwhpreviousyear)  - $YtdUtilitiesPreviousYear['onsite_generators_quantity'] - $YtdUtilitiesPreviousYear['total_renewable_energy_production']) * $dataFactor['electricity']) * $electricity_emission_factor) + ($dataFactor['lpg'] * $YtdUtilitiesPreviousYear['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilpreviousyear * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgaspreviousyear * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $YtdUtilitiesPreviousYear['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $YtdUtilitiesPreviousYear['district_cooling'] * $site_detials['district_cooling_emission_factor']) + ($YtdUtilitiesPreviousYear['fleet_petrol'] * 2.3);
 			} else {
-				$ytd_carbon_footprintPreviousYear += (((((1) * $totalelectricitykwhpreviousyear)  - $YtdUtilitiesPreviousYear['onsite_generators_quantity'] - $YtdUtilitiesPreviousYear['total_renewable_energy_production']) * $dataFactor['electricity']) * $electricity_emission_factor) + ($dataFactor['lpg'] * $YtdUtilitiesPreviousYear['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilpreviousyear * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgaspreviousyear * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $YtdUtilitiesPreviousYear['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $YtdUtilitiesPreviousYear['district_cooling'] * $site_detials['district_cooling_emission_factor']);
+				$ytd_carbon_footprintPreviousYear += (((((1) * $totalelectricitykwhpreviousyear)  - $YtdUtilitiesPreviousYear['onsite_generators_quantity'] - $YtdUtilitiesPreviousYear['total_renewable_energy_production']) * $dataFactor['electricity']) * $electricity_emission_factor) + ($dataFactor['lpg'] * $YtdUtilitiesPreviousYear['total_lpg'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $totalfueloilpreviousyear * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $totalnaturalgaspreviousyear * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $YtdUtilitiesPreviousYear['district_heating'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $YtdUtilitiesPreviousYear['district_cooling'] * $site_detials['district_cooling_emission_factor']) + ($YtdUtilitiesPreviousYear['fleet_petrol'] * 2.3);
 			}
 		}
 
@@ -2297,10 +2385,11 @@ class Sites_model extends Base_Model
 			$YtdUtilities['district_cooling_cost'] = ($YtdUtilities['district_cooling_cost'] != '') ? $YtdUtilities['district_cooling_cost'] : 0;
 			$YtdUtilities['water_total_consumption_cost'] = ($YtdUtilities['water_total_consumption_cost'] != '') ? $YtdUtilities['water_total_consumption_cost'] : 0;
 			$YtdUtilities['total_natural_gas_cost'] = ($YtdUtilities['total_natural_gas_cost'] != '') ? $YtdUtilities['total_natural_gas_cost'] : 0;
+			$YtdUtilities['total_fleet_petrol_cost'] = ($YtdUtilities['total_fleet_petrol_cost'] != '') ? $YtdUtilities['total_fleet_petrol_cost'] : 0;
 			if (isset($electricity_emission_factor_percentage) && !empty($electricity_emission_factor_percentage)) {
-				$ytd_carbon_footprint += (((((1 - ($electricity_emission_factor_percentage / 100)) * $YtdUtilities['total_electricity_kwh'])  - $YtdUtilities['onsite_generators_quantity'] - $YtdUtilities['total_renewable_energy_production']) * $dataFactor['electricity']) * $site_detials['electricity_emission_factor']) + ($dataFactor['lpg'] * $YtdUtilities['total_lpg_cost'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $YtdUtilities['total_fuel_oil_cost'] * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $YtdUtilities['total_natural_gas_cost'] * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $YtdUtilities['district_heating_cost'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $YtdUtilities['district_cooling_cost'] * $site_detials['district_cooling_emission_factor']);
+				$ytd_carbon_footprint += (((((1 - ($electricity_emission_factor_percentage / 100)) * $YtdUtilities['total_electricity_kwh'])  - $YtdUtilities['onsite_generators_quantity'] - $YtdUtilities['total_renewable_energy_production']) * $dataFactor['electricity']) * $site_detials['electricity_emission_factor']) + ($dataFactor['lpg'] * $YtdUtilities['total_lpg_cost'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $YtdUtilities['total_fuel_oil_cost'] * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $YtdUtilities['total_natural_gas_cost'] * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $YtdUtilities['district_heating_cost'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $YtdUtilities['district_cooling_cost'] * $site_detials['district_cooling_emission_factor']) + ($YtdUtilities['fleet_petrol'] * 2.3);
 			} else {
-				$ytd_carbon_footprint += (((((1) * $YtdUtilities['total_electricity_kwh'])  - $YtdUtilities['onsite_generators_quantity'] - $YtdUtilities['total_renewable_energy_production']) * $dataFactor['electricity']) * $site_detials['electricity_emission_factor']) + ($dataFactor['lpg'] * $YtdUtilities['total_lpg_cost'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $YtdUtilities['total_fuel_oil_cost'] * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $YtdUtilities['total_natural_gas_cost'] * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $YtdUtilities['district_heating_cost'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $YtdUtilities['district_cooling_cost'] * $site_detials['district_cooling_emission_factor']);
+				$ytd_carbon_footprint += (((((1) * $YtdUtilities['total_electricity_kwh'])  - $YtdUtilities['onsite_generators_quantity'] - $YtdUtilities['total_renewable_energy_production']) * $dataFactor['electricity']) * $site_detials['electricity_emission_factor']) + ($dataFactor['lpg'] * $YtdUtilities['total_lpg_cost'] * $site_detials['lpg_emission_factor']) + ($dataFactor['fuel_oil'] * $YtdUtilities['total_fuel_oil_cost'] * $site_detials['fuel_emission_factor']) + ($dataFactor['natural_gas'] * $YtdUtilities['total_natural_gas_cost'] * $site_detials['natural_gas_emission_factor']) + ($dataFactor['district_heating'] * $YtdUtilities['district_heating_cost'] * $site_detials['district_heating_emission_factor']) + ($dataFactor['district_cooling'] * $YtdUtilities['district_cooling_cost'] * $site_detials['district_cooling_emission_factor']) + ($YtdUtilities['fleet_petrol'] * 2.3);
 			}
 			//For variation
 			$total_utility_costs += $YtdUtilities['total_electricity_cost'] + $YtdUtilities['total_fuel_oil_cost'] + $YtdUtilities['total_lpg_cost'] + $YtdUtilities['total_natural_gas_cost'] + $YtdUtilities['district_heating_cost'] + $YtdUtilities['district_cooling_cost'] + $YtdUtilities['water_total_consumption_cost'];
@@ -2312,8 +2401,9 @@ class Sites_model extends Base_Model
 			$YtdUtilities['district_heating_total_budget_cost'] = ($YtdUtilities['district_heating_total_budget_cost'] != '') ? $YtdUtilities['district_heating_total_budget_cost'] : 0;
 			$YtdUtilities['district_cooling_total_budget_cost'] = ($YtdUtilities['district_cooling_total_budget_cost'] != '') ? $YtdUtilities['district_cooling_total_budget_cost'] : 0;
 			$YtdUtilities['water_total_consumption_budget_cost'] = ($YtdUtilities['water_total_consumption_budget_cost'] != '') ? $YtdUtilities['water_total_consumption_budget_cost'] : 0;
+			$YtdUtilities['total_fleet_petrol_cost'] = ($YtdUtilities['total_fleet_petrol_cost'] != '') ? $YtdUtilities['total_fleet_petrol_cost'] : 0;
 
-			$total_budgeted_costs += $YtdUtilities['electricity_total_budget_cost'] + $YtdUtilities['fuel_total_budget_cost'] + $YtdUtilities['lpg_total_budget_cost'] + $YtdUtilities['natural_gas_total_budget_cost'] + $YtdUtilities['district_heating_total_budget_cost'] + $YtdUtilities['district_cooling_total_budget_cost'] + $YtdUtilities['water_total_consumption_budget_cost'];
+			$total_budgeted_costs += $YtdUtilities['electricity_total_budget_cost'] + $YtdUtilities['fuel_total_budget_cost'] + $YtdUtilities['lpg_total_budget_cost'] + $YtdUtilities['natural_gas_total_budget_cost'] + $YtdUtilities['district_heating_total_budget_cost'] + $YtdUtilities['district_cooling_total_budget_cost'] + $YtdUtilities['water_total_consumption_budget_cost'] + $YtdUtilities['total_fleet_petrol_cost'];
 		}
 
 		//ytd variation
@@ -2334,6 +2424,8 @@ class Sites_model extends Base_Model
 				$YtdUtilities['total_natural_gas_cost'] = ($YtdUtilities['total_natural_gas_cost'] != '') ? $YtdUtilities['total_natural_gas_cost'] : 0;
 				$YtdUtilities['district_cooling_cost'] = ($YtdUtilities['district_cooling_cost'] != '') ? $YtdUtilities['district_cooling_cost'] : 0;
 				$YtdUtilities['water_total_consumption_cost'] = ($YtdUtilities['water_total_consumption_cost'] != '') ? $YtdUtilities['water_total_consumption_cost'] : 0;
+				$YtdUtilities['total_fleet_petrol_cost'] = ($YtdUtilities['total_fleet_petrol_cost'] != '') ? $YtdUtilities['total_fleet_petrol_cost'] : 0;
+
 				$YtdUtilities['district_cooling_fixed_cost'] = ($YtdUtilities['district_cooling_fixed_cost'] != '') ? $YtdUtilities['district_cooling_fixed_cost'] : 0;
 				$YtdUtilities['district_heating_fixed_cost'] = ($YtdUtilities['district_heating_fixed_cost'] != '') ? $YtdUtilities['district_heating_fixed_cost'] : 0;
 				$YtdUtilities['lpg_fixed_cost'] = ($YtdUtilities['lpg_fixed_cost'] != '') ? $YtdUtilities['lpg_fixed_cost'] : 0;
@@ -2349,7 +2441,7 @@ class Sites_model extends Base_Model
 				$YtdUtilities['water_total_consumption_budget_cost'] = ($YtdUtilities['water_total_consumption_budget_cost'] != '') ? $YtdUtilities['water_total_consumption_budget_cost'] : 0;
 
 				//For variation
-				$total_utility_costs_variation += $YtdUtilities['total_electricity_cost'] + $YtdUtilities['total_fuel_oil_cost'] + $YtdUtilities['total_lpg_cost'] + $YtdUtilities['total_natural_gas_cost'] + $YtdUtilities['district_heating_cost'] + $YtdUtilities['district_cooling_cost'] + $YtdUtilities['water_total_consumption_cost'] + $YtdUtilities['district_cooling_fixed_cost'] + $YtdUtilities['district_heating_fixed_cost'] + $YtdUtilities['lpg_fixed_cost'] + $YtdUtilities['natural_gas_fixed_cost'] + $YtdUtilities['water_fixed_cost'];
+				$total_utility_costs_variation += $YtdUtilities['total_electricity_cost'] + $YtdUtilities['total_fuel_oil_cost'] + $YtdUtilities['total_lpg_cost'] + $YtdUtilities['total_natural_gas_cost'] + $YtdUtilities['district_heating_cost'] + $YtdUtilities['district_cooling_cost'] + $YtdUtilities['water_total_consumption_cost'] + $YtdUtilities['district_cooling_fixed_cost'] + $YtdUtilities['district_heating_fixed_cost'] + $YtdUtilities['lpg_fixed_cost'] + $YtdUtilities['natural_gas_fixed_cost'] + $YtdUtilities['water_fixed_cost'] + $YtdUtilities['total_fleet_petrol_cost'];
 
 				$total_budgeted_costs_variation += $YtdUtilities['electricity_total_budget_cost'] + $YtdUtilities['fuel_total_budget_cost'] + $YtdUtilities['lpg_total_budget_cost'] + $YtdUtilities['natural_gas_total_budget_cost'] + $YtdUtilities['district_heating_total_budget_cost'] + $YtdUtilities['district_cooling_total_budget_cost'] + $YtdUtilities['water_total_consumption_budget_cost'];
 			}
@@ -2363,7 +2455,7 @@ class Sites_model extends Base_Model
 				$YtdUtilities = $this->utilities_model->getUtility();
 
 				//For variation
-				$total_utility_costs_variation += $YtdUtilities['total_electricity_cost'] + $YtdUtilities['total_fuel_oil_cost'] + $YtdUtilities['total_lpg_cost'] + $YtdUtilities['total_natural_gas_cost'] + $YtdUtilities['district_heating_cost'] + $YtdUtilities['district_cooling_cost'] + $YtdUtilities['water_total_consumption_cost'] + $YtdUtilities['district_cooling_fixed_cost'] + $YtdUtilities['district_heating_fixed_cost'] + $YtdUtilities['lpg_fixed_cost'] + $YtdUtilities['natural_gas_fixed_cost'] + $YtdUtilities['water_fixed_cost'];
+				$total_utility_costs_variation += $YtdUtilities['total_electricity_cost'] + $YtdUtilities['total_fuel_oil_cost'] + $YtdUtilities['total_lpg_cost'] + $YtdUtilities['total_natural_gas_cost'] + $YtdUtilities['district_heating_cost'] + $YtdUtilities['district_cooling_cost'] + $YtdUtilities['water_total_consumption_cost'] + $YtdUtilities['district_cooling_fixed_cost'] + $YtdUtilities['district_heating_fixed_cost'] + $YtdUtilities['lpg_fixed_cost'] + $YtdUtilities['natural_gas_fixed_cost'] + $YtdUtilities['water_fixed_cost'] + $YtdUtilities['total_fleet_petrol_cost'];
 
 				$total_budgeted_costs_variation += $YtdUtilities['electricity_total_budget_cost'] + $YtdUtilities['fuel_total_budget_cost'] + $YtdUtilities['lpg_total_budget_cost'] + $YtdUtilities['natural_gas_total_budget_cost'] + $YtdUtilities['district_heating_total_budget_cost'] + $YtdUtilities['district_cooling_total_budget_cost'] + $YtdUtilities['water_total_consumption_budget_cost'];
 			}
@@ -2400,7 +2492,8 @@ class Sites_model extends Base_Model
 		$getUtilities_lastMonth['lpg_fixed_cost'] = ($getUtilities_lastMonth['lpg_fixed_cost'] != '') ? $getUtilities_lastMonth['lpg_fixed_cost'] : 0;
 		$getUtilities_lastMonth['natural_gas_fixed_cost'] = ($getUtilities_lastMonth['natural_gas_fixed_cost'] != '') ? $getUtilities_lastMonth['natural_gas_fixed_cost'] : 0;
 		$getUtilities_lastMonth['water_fixed_cost'] = ($getUtilities_lastMonth['water_fixed_cost'] != '') ? $getUtilities_lastMonth['water_fixed_cost'] : 0;
-		$dataCarbon['total_utility_cost_lastMonth'] = $getUtilities_lastMonth['total_electricity_cost'] + $getUtilities_lastMonth['total_fuel_oil_cost'] + $getUtilities_lastMonth['total_lpg_cost'] + $getUtilities_lastMonth['total_natural_gas_cost'] + $getUtilities_lastMonth['district_heating_cost'] + $getUtilities_lastMonth['district_cooling_cost'] + $getUtilities_lastMonth['water_total_consumption_cost'] + $getUtilities_lastMonth['district_heating_fixed_cost'] + $getUtilities_lastMonth['district_cooling_fixed_cost'] + $getUtilities_lastMonth['lpg_fixed_cost'] + $getUtilities_lastMonth['natural_gas_fixed_cost'] + $getUtilities_lastMonth['water_fixed_cost'];
+		$getUtilities_lastMonth['total_fleet_petrol_cost'] = ($getUtilities_lastMonth['total_fleet_petrol_cost'] != '') ? $getUtilities_lastMonth['total_fleet_petrol_cost'] : 0;
+		$dataCarbon['total_utility_cost_lastMonth'] = $getUtilities_lastMonth['total_electricity_cost'] + $getUtilities_lastMonth['total_fuel_oil_cost'] + $getUtilities_lastMonth['total_lpg_cost'] + $getUtilities_lastMonth['total_natural_gas_cost'] + $getUtilities_lastMonth['district_heating_cost'] + $getUtilities_lastMonth['district_cooling_cost'] + $getUtilities_lastMonth['water_total_consumption_cost'] + $getUtilities_lastMonth['district_heating_fixed_cost'] + $getUtilities_lastMonth['district_cooling_fixed_cost'] + $getUtilities_lastMonth['lpg_fixed_cost'] + $getUtilities_lastMonth['natural_gas_fixed_cost'] + $getUtilities_lastMonth['water_fixed_cost'] + $getUtilities_lastMonth['total_fleet_petrol_cost'];
 		$lastMonth_cost_roomNight = ($dataCarbon['total_utility_cost_lastMonth'] != '' && $getUtilities_lastMonth['total_room_night']) ? $dataCarbon['total_utility_cost_lastMonth'] / $getUtilities_lastMonth['total_room_night'] : 0;
 		//last month - utilities cost/room night
 		$this->utilities_model->utilities_month = date('n') - 1;
@@ -2442,7 +2535,8 @@ class Sites_model extends Base_Model
 		$getUtilities_sameMonth_lastYear['lpg_fixed_cost'] = ($getUtilities_sameMonth_lastYear['lpg_fixed_cost'] != '') ? $getUtilities_sameMonth_lastYear['lpg_fixed_cost'] : 0;
 		$getUtilities_sameMonth_lastYear['natural_gas_fixed_cost'] = ($getUtilities_sameMonth_lastYear['natural_gas_fixed_cost'] != '') ? $getUtilities_sameMonth_lastYear['natural_gas_fixed_cost'] : 0;
 		$getUtilities_sameMonth_lastYear['water_fixed_cost'] = ($getUtilities_sameMonth_lastYear['water_fixed_cost'] != '') ? $getUtilities_sameMonth_lastYear['water_fixed_cost'] : 0;
-		$dataCarbon['total_utility_cost_sameMonth_lastYear'] = $getUtilities_sameMonth_lastYear['total_electricity_cost'] + $getUtilities_sameMonth_lastYear['total_fuel_oil_cost'] + $getUtilities_sameMonth_lastYear['total_lpg_cost'] + $getUtilities_sameMonth_lastYear['total_natural_gas_cost'] + $getUtilities_sameMonth_lastYear['district_heating_cost'] + $getUtilities_sameMonth_lastYear['district_cooling_cost'] + $getUtilities_sameMonth_lastYear['water_total_consumption_cost'] + $getUtilities_sameMonth_lastYear['district_heating_fixed_cost'] + $getUtilities_sameMonth_lastYear['district_cooling_fixed_cost'] + $getUtilities_sameMonth_lastYear['lpg_fixed_cost'] + $getUtilities_sameMonth_lastYear['natural_gas_fixed_cost'] + $getUtilities_sameMonth_lastYear['water_fixed_cost'];
+		$getUtilities_sameMonth_lastYear['total_fleet_petrol_cost'] = ($getUtilities_sameMonth_lastYear['total_fleet_petrol_cost'] != '') ? $getUtilities_sameMonth_lastYear['total_fleet_petrol_cost'] : 0;
+		$dataCarbon['total_utility_cost_sameMonth_lastYear'] = $getUtilities_sameMonth_lastYear['total_electricity_cost'] + $getUtilities_sameMonth_lastYear['total_fuel_oil_cost'] + $getUtilities_sameMonth_lastYear['total_lpg_cost'] + $getUtilities_sameMonth_lastYear['total_natural_gas_cost'] + $getUtilities_sameMonth_lastYear['district_heating_cost'] + $getUtilities_sameMonth_lastYear['district_cooling_cost'] + $getUtilities_sameMonth_lastYear['water_total_consumption_cost'] + $getUtilities_sameMonth_lastYear['district_heating_fixed_cost'] + $getUtilities_sameMonth_lastYear['district_cooling_fixed_cost'] + $getUtilities_sameMonth_lastYear['lpg_fixed_cost'] + $getUtilities_sameMonth_lastYear['natural_gas_fixed_cost'] + $getUtilities_sameMonth_lastYear['water_fixed_cost'] + $getUtilities_sameMonth_lastYear['total_fleet_petrol_cost'];
 		$dataCarbon['variation_ytd'] = $variation_ytd;
 		$dataCarbon['variationPercentage_ytd'] = $total_utility_costs_variation != '' ? ($variation_ytd * 100) / $total_utility_costs_variation : 0;
 		$sameMonth_lastYear_cost_roomNight = ($dataCarbon['total_utility_cost_sameMonth_lastYear'] != '' && $getUtilities_sameMonth_lastYear['total_room_night']) ? $dataCarbon['total_utility_cost_sameMonth_lastYear'] / $getUtilities_sameMonth_lastYear['total_room_night'] : 0;
@@ -2476,7 +2570,6 @@ class Sites_model extends Base_Model
 		$utility_cost_calculation_chr['room_nights']['consumption_image'] = $getUtilities_sameMonth_lastYear['total_room_night'] < $getUtilities_lastMonth['total_room_night'] ? 'upArrowGreen.png' : 'downArrowRed.png';
 
 		$dataCarbon['cdd_hdd'] = $utility_cost_calculation_chr;
-
 		return $dataCarbon;
 	}
 	public function getYtdCarbonFootprints($site_id, $site_details, $dataFactor, $emissionFactor, $current_year, $previous_year, $current_month)
@@ -2518,6 +2611,7 @@ class Sites_model extends Base_Model
 			$YtdUtilities['district_cooling'] = floatval($YtdUtilities['district_cooling'] ?? 0);
 			$YtdUtilities['onsite_generators_quantity'] = floatval($YtdUtilities['onsite_generators_quantity'] ?? 0);
 			$YtdUtilities['total_renewable_energy_production'] = floatval($YtdUtilities['total_renewable_energy_production'] ?? 0);
+			$YtdUtilities['fleet_petrol'] = floatval($YtdUtilities['fleet_petrol'] ?? 0);
 
 			$electricity_consumption = (1 - ($currentYearEmissions['electricity_emission_factor_percentage'] / 100)) * ($YtdUtilities['total_electricity_kwh'] - $YtdUtilities['onsite_generators_quantity'] - $YtdUtilities['total_renewable_energy_production']);
 			$net_electricity = $electricity_consumption;
@@ -2527,7 +2621,8 @@ class Sites_model extends Base_Model
 				+ ($dataFactor['fuel_oil'] * $YtdUtilities['total_fuel_oil'] * $currentYearEmissions['fuel_emission_factor']) 
 				+ ($dataFactor['natural_gas'] * $YtdUtilities['total_natural_gas'] * $currentYearEmissions['natural_gas_emission_factor'])
 				+ ($dataFactor['district_heating'] * $YtdUtilities['district_heating'] * $currentYearEmissions['district_heating_emission_factor']) 
-				+ ($dataFactor['district_cooling'] * $YtdUtilities['district_cooling'] * $currentYearEmissions['district_cooling_emission_factor']);
+				+ ($dataFactor['district_cooling'] * $YtdUtilities['district_cooling'] * $currentYearEmissions['district_cooling_emission_factor'])
+				+ ($YtdUtilities['fleet_petrol'] * 2.3);
 		}
 
 		// --- YTD Carbon Footprint for Current Year ---
@@ -2544,6 +2639,7 @@ class Sites_model extends Base_Model
 			$YtdUtilities['district_cooling_cost'] = floatval($YtdUtilities['district_cooling_cost'] ?? 0);
 			$YtdUtilities['onsite_generators_quantity'] = floatval($YtdUtilities['onsite_generators_quantity'] ?? 0);
 			$YtdUtilities['total_renewable_energy_production'] = floatval($YtdUtilities['total_renewable_energy_production'] ?? 0);
+			$YtdUtilities['fleet_petrol'] = floatval($YtdUtilities['fleet_petrol'] ?? 0);
 
 			$electricity_consumption = (1 - ($currentYearEmissions['electricity_emission_factor_percentage'] / 100)) * ($YtdUtilities['total_electricity_kwh'] - $YtdUtilities['onsite_generators_quantity'] - $YtdUtilities['total_renewable_energy_production']);
 			$net_electricity = $electricity_consumption;
@@ -2553,7 +2649,8 @@ class Sites_model extends Base_Model
 				+ ($dataFactor['fuel_oil'] * $YtdUtilities['total_fuel_oil_cost'] * $currentYearEmissions['fuel_emission_factor']) 
 				+ ($dataFactor['natural_gas'] * $YtdUtilities['total_natural_gas_cost'] * $currentYearEmissions['natural_gas_emission_factor'])
 				+ ($dataFactor['district_heating'] * $YtdUtilities['district_heating_cost'] * $currentYearEmissions['district_heating_emission_factor']) 
-				+ ($dataFactor['district_cooling'] * $YtdUtilities['district_cooling_cost'] * $currentYearEmissions['district_cooling_emission_factor']);
+				+ ($dataFactor['district_cooling'] * $YtdUtilities['district_cooling_cost'] * $currentYearEmissions['district_cooling_emission_factor'])
+				+ ($YtdUtilities['fleet_petrol'] * 2.3);
 		}
 
 		// --- YTD Carbon Footprint for Previous Year ---
@@ -2571,7 +2668,7 @@ class Sites_model extends Base_Model
 			$YtdUtilitiesPreviousYear['onsite_generators_quantity'] = floatval($YtdUtilitiesPreviousYear['onsite_generators_quantity'] ?? 0);
 			$YtdUtilitiesPreviousYear['total_renewable_energy_production'] = floatval($YtdUtilitiesPreviousYear['total_renewable_energy_production'] ?? 0);
 			$YtdUtilitiesPreviousYear['total_fuel_oil_cost'] = floatval($YtdUtilitiesPreviousYear['total_fuel_oil_cost'] ?? 0);
-			$YtdUtilitiesPreviousYear['total_natural_gas_cost'] = floatval($YtdUtilitiesPreviousYear['total_natural_gas_cost'] ?? 0);
+			$YtdUtilitiesPreviousYear['fleet_petrol'] = floatval($YtdUtilitiesPreviousYear['fleet_petrol'] ?? 0);
 
 			$electricity_consumption_prev = (1 - ($previousYearEmissions['electricity_emission_factor_percentage'] / 100)) * ($YtdUtilitiesPreviousYear['total_electricity_kwh'] - $YtdUtilitiesPreviousYear['onsite_generators_quantity'] - $YtdUtilitiesPreviousYear['total_renewable_energy_production']);
 			$net_electricity_prev = $electricity_consumption_prev;
@@ -2583,7 +2680,8 @@ class Sites_model extends Base_Model
 				+ ($dataFactor['fuel_oil'] * $YtdUtilitiesPreviousYear['total_fuel_oil'] * $previousYearEmissions['fuel_emission_factor']) 
 				+ ($dataFactor['natural_gas'] * $YtdUtilitiesPreviousYear['total_natural_gas'] * $previousYearEmissions['natural_gas_emission_factor']) 
 				+ ($dataFactor['district_heating'] * $YtdUtilitiesPreviousYear['district_heating'] * $previousYearEmissions['district_heating_emission_factor']) 
-				+ ($dataFactor['district_cooling'] * $YtdUtilitiesPreviousYear['district_cooling'] * $previousYearEmissions['district_cooling_emission_factor']);
+				+ ($dataFactor['district_cooling'] * $YtdUtilitiesPreviousYear['district_cooling'] * $previousYearEmissions['district_cooling_emission_factor'])
+				+ ($YtdUtilitiesPreviousYear['fleet_petrol'] * 2.3);
 		}
 
 		// --- YTD Carbon Footprint for Baseline Year ---
@@ -2591,7 +2689,6 @@ class Sites_model extends Base_Model
             $this->utilities_model->utilities_month = $i;
             $this->utilities_model->utilities_year = $site_details['baseline_regression_year'];
             $YtdUtilitiesBaseline = $this->utilities_model->getUtility();
-
 			$YtdUtilitiesBaseline['total_electricity_kwh'] = floatval($YtdUtilitiesBaseline['total_electricity_kwh'] ?? 0);
             $YtdUtilitiesBaseline['total_lpg'] = floatval($YtdUtilitiesBaseline['total_lpg'] ?? 0);
             $YtdUtilitiesBaseline['total_fuel_oil'] = floatval($YtdUtilitiesBaseline['total_fuel_oil'] ?? 0);
@@ -2600,6 +2697,7 @@ class Sites_model extends Base_Model
             $YtdUtilitiesBaseline['district_cooling'] = floatval($YtdUtilitiesBaseline['district_cooling'] ?? 0);
             $YtdUtilitiesBaseline['onsite_generators_quantity'] = floatval($YtdUtilitiesBaseline['onsite_generators_quantity'] ?? 0);
             $YtdUtilitiesBaseline['total_renewable_energy_production'] = floatval($YtdUtilitiesBaseline['total_renewable_energy_production'] ?? 0);
+            $YtdUtilitiesBaseline['fleet_petrol'] = floatval($YtdUtilitiesBaseline['fleet_petrol'] ?? 0);
 
             $electricity_consumption_baseline = (1 - ($baselineYearEmissions['electricity_emission_factor_percentage'] / 100)) * ($YtdUtilitiesBaseline['total_electricity_kwh'] - $YtdUtilitiesBaseline['onsite_generators_quantity'] - $YtdUtilitiesBaseline['total_renewable_energy_production']);
             $net_electricity_baseline = $electricity_consumption_baseline;
@@ -2609,7 +2707,8 @@ class Sites_model extends Base_Model
                 + ($dataFactor['fuel_oil'] * $YtdUtilitiesBaseline['total_fuel_oil'] * $baselineYearEmissions['fuel_emission_factor'])
                 + ($dataFactor['natural_gas'] * $YtdUtilitiesBaseline['total_natural_gas'] * $baselineYearEmissions['natural_gas_emission_factor'])
                 + ($dataFactor['district_heating'] * $YtdUtilitiesBaseline['district_heating'] * $baselineYearEmissions['district_heating_emission_factor'])
-                + ($dataFactor['district_cooling'] * $YtdUtilitiesBaseline['district_cooling'] * $baselineYearEmissions['district_cooling_emission_factor']);
+                + ($dataFactor['district_cooling'] * $YtdUtilitiesBaseline['district_cooling'] * $baselineYearEmissions['district_cooling_emission_factor'])
+                + ($YtdUtilitiesBaseline['fleet_petrol'] * 2.3);
         }
 
 
@@ -2663,7 +2762,8 @@ class Sites_model extends Base_Model
 				COALESCE(total_electricity_cost, 0) + COALESCE(total_fuel_oil_cost, 0) + COALESCE(total_lpg_cost, 0) +
 				COALESCE(total_natural_gas_cost, 0) + COALESCE(district_heating_cost, 0) + COALESCE(district_cooling_cost, 0) +
 				COALESCE(water_total_consumption_cost, 0) + COALESCE(district_cooling_fixed_cost, 0) + COALESCE(district_heating_fixed_cost, 0) +
-				COALESCE(lpg_fixed_cost, 0) + COALESCE(natural_gas_fixed_cost, 0) + COALESCE(water_fixed_cost, 0)
+				COALESCE(lpg_fixed_cost, 0) + COALESCE(natural_gas_fixed_cost, 0) + COALESCE(water_fixed_cost, 0) +
+				COALESCE(total_fleet_petrol_cost, 0)
 			) AS total_utility_cost,
 
 			-- Total Utility Cost YTD
@@ -2672,7 +2772,8 @@ class Sites_model extends Base_Model
 					COALESCE(uc2.total_electricity_cost, 0) + COALESCE(uc2.total_fuel_oil_cost, 0) + COALESCE(uc2.total_lpg_cost, 0) +
 					COALESCE(uc2.total_natural_gas_cost, 0) + COALESCE(uc2.district_heating_cost, 0) + COALESCE(uc2.district_cooling_cost, 0) +
 					COALESCE(uc2.water_total_consumption_cost, 0) + COALESCE(uc2.district_cooling_fixed_cost, 0) + COALESCE(uc2.district_heating_fixed_cost, 0) +
-					COALESCE(uc2.lpg_fixed_cost, 0) + COALESCE(uc2.natural_gas_fixed_cost, 0) + COALESCE(uc2.water_fixed_cost, 0)
+					COALESCE(uc2.lpg_fixed_cost, 0) + COALESCE(uc2.natural_gas_fixed_cost, 0) + COALESCE(uc2.water_fixed_cost, 0) +
+					COALESCE(uc2.total_fleet_petrol_cost, 0)
 				)
 				FROM utilities_cost AS uc2
 				WHERE uc2.site_id = utilities_cost.site_id
@@ -2716,24 +2817,26 @@ class Sites_model extends Base_Model
 							COALESCE(total_electricity_cost, 0) + COALESCE(total_fuel_oil_cost, 0) + COALESCE(total_lpg_cost, 0) +
 							COALESCE(total_natural_gas_cost, 0) + COALESCE(district_heating_cost, 0) + COALESCE(district_cooling_cost, 0) +
 							COALESCE(water_total_consumption_cost, 0) + COALESCE(district_cooling_fixed_cost, 0) + COALESCE(district_heating_fixed_cost, 0) +
-							COALESCE(lpg_fixed_cost, 0) + COALESCE(natural_gas_fixed_cost, 0) + COALESCE(water_fixed_cost, 0)
-						) / COALESCE(total_room_night, 0)
+							COALESCE(lpg_fixed_cost, 0) + COALESCE(natural_gas_fixed_cost, 0) + COALESCE(water_fixed_cost, 0) + COALESCE(total_fleet_petrol_cost, 0)
+						) / total_room_night
 					ELSE 0
 				END
 			) AS cost_roomNight,
 
 			-- Total Electricity kWh (minus onsite generators)
-			(COALESCE(total_electricity_kwh, 0) - COALESCE(onsite_generators_quantity, 0)) AS totalelectricitykwh,
+			(COALESCE(total_electricity_kwh, 0) - COALESCE(onsite_generators_quantity, 0) - COALESCE(total_renewable_energy_production, 0)) AS totalelectricitykwh,
 
 			-- Carbon Footprint
 			(
-				(".($dataFactor['electricity'] ?? 0)." * (COALESCE(total_electricity_kwh, 0) - COALESCE(onsite_generators_quantity, 0)) * ".(float) ($site_details['electricity_emission_factor'] ?? 0).") +
+				(".($dataFactor['electricity'] ?? 0)." * (COALESCE(total_electricity_kwh, 0) - COALESCE(onsite_generators_quantity, 0) - COALESCE(total_renewable_energy_production, 0)) * ".(float) ($site_details['electricity_emission_factor'] ?? 0).") +
 				(".($dataFactor['lpg'] ?? 0)." * COALESCE(total_lpg, 0) * ".(float) ($site_details['lpg_emission_factor'] ?? 0).") +
 				(".($dataFactor['fuel_oil'] ?? 0)." * COALESCE(total_fuel_oil, 0) * ".(float) ($site_details['fuel_emission_factor'] ?? 0).") +
 				(".($dataFactor['natural_gas'] ?? 0)." * COALESCE(total_natural_gas, 0) * ".(float) ($site_details['natural_gas_emission_factor'] ?? 0).") +
 				(".($dataFactor['district_heating'] ?? 0)." * COALESCE(district_heating, 0) * ".(float) ($site_details['district_heating_emission_factor'] ?? 0).") +
-				(".($dataFactor['district_cooling'] ?? 0)." * COALESCE(district_cooling, 0) * ".(float) ($site_details['district_cooling_emission_factor'] ?? 0).") 
-			) AS carbon_footprint,
+				(".($dataFactor['district_cooling'] ?? 0)." * COALESCE(district_cooling, 0) * ".(float) ($site_details['district_cooling_emission_factor'] ?? 0).") +
+				(COALESCE(fleet_petrol, 0) * 2.3)
+			) AS carbon_footprint, 
+
 			-- CDD and HDD
 			COALESCE(cdd, 0) AS cdd,
 			COALESCE(hdd, 0) AS hdd,
@@ -2779,6 +2882,7 @@ class Sites_model extends Base_Model
 			COALESCE(lpg_fixed_cost, 0) as lpg_fixed_cost_raw,
 			COALESCE(natural_gas_fixed_cost, 0) as natural_gas_fixed_cost_raw,
 			COALESCE(water_fixed_cost, 0) as water_fixed_cost_raw
+
 		", FALSE);
 		$this->db->from('utilities_cost');
 		$this->db->where('site_id', $site_details['id']);
@@ -2883,7 +2987,18 @@ class Sites_model extends Base_Model
 			'reports/reports_model',
 			'sites/site_waste_model'
 		]);
-		
+
+		$siteCronSettings = $this->sites_model->getSiteCronSettings();
+		$monthlyTickedSites = array();
+		foreach ($siteCronSettings as $cronSettings) {
+			if ($cronSettings['site_cron_settings']['cron_type'] == 'MONTHLY') {
+				array_push($monthlyTickedSites, $cronSettings['site_cron_settings']['site_id']);
+			}
+		}
+		if (empty($monthlyTickedSites)) {
+			return false;
+		}
+
         $parentHeading = [
 			'Room Nights',
 			'Guest Nights',
@@ -3009,13 +3124,6 @@ class Sites_model extends Base_Model
 
 		// LOGIC TO FETCH DATA AND POPULATE THE EXCEL SHEET
 		$data = $rowsYtd = $rowsCurrentMonth = [];
-		$siteCronSettings = $this->sites_model->getSiteCronSettings();
-        $monthlyTickedSites = array();
-        foreach ($siteCronSettings as $cronSettings) {
-            if ($cronSettings['site_cron_settings']['cron_type'] == 'MONTHLY') {
-                array_push($monthlyTickedSites,  $cronSettings['site_cron_settings']['site_id']);
-            }
-        }
 		$sites = $this->sites_model->get_site_detail_multiple();
 		usort($sites, function ($a, $b) {
 			return strcasecmp($a['site_location_name'], $b['site_location_name']);
@@ -3050,7 +3158,7 @@ class Sites_model extends Base_Model
 				$data['sites'][$site_id]['dataUtilityCurrent']['total_natural_gas'] = (float) ($getUtilities['total_natural_gas'] * $dataFactor['natural_gas'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityCurrent']['district_heating'] = (float) ($getUtilities['district_heating'] * $dataFactor['district_heating'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityCurrent']['district_cooling'] = (float) ($getUtilities['district_cooling'] * $dataFactor['district_cooling'] ?? 0);
-				$data['sites'][$site_id]['dataUtilityCurrent']['water_total_consumption'] = (float) ($getUtilities['water_total_consumption'] ?? 0);
+				$data['sites'][$site_id]['dataUtilityCurrent']['water_total_consumption'] = (float) ($getUtilities['water_total_consumption'] * $dataFactor['water'] ?? 0);
 
 				$data['sites'][$site_id]['dataUtilityCurrentYTD']['total_electricity_kwh'] = (float) ($getUtilitiesYTD['total_electricity_kwh'] * $dataFactor['electricity'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityCurrentYTD']['total_lpg'] = (float) ($getUtilitiesYTD['total_lpg'] * $dataFactor['lpg'] ?? 0);

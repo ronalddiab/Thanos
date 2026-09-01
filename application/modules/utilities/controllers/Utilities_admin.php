@@ -1647,6 +1647,8 @@ class Utilities_admin extends Base_Admin_Controller
                 $this->site_waste_model->disposal_cost_tin = isset($postData['disposal_cost_tin']) ? $postData['disposal_cost_tin'] : NULL;
                 $this->site_waste_model->total_tin = isset($postData['total_tin']) ? $postData['total_tin'] : NULL;
                 $this->site_waste_model->is_check_tin = NULL;
+
+                $this->site_waste_model->rebates = isset($postData['rebates']) ? $postData['rebates'] : NULL;
                 $this->site_waste_model->insert_site_waste();
 
                 if (isset($site_waste) && !empty($site_waste)) {
@@ -1743,6 +1745,8 @@ class Utilities_admin extends Base_Admin_Controller
                 $wasteArray[$i]['Total Cost '.$label] = $value['s']['total_'.$name];
                 $columns['Total Cost '.$label] = 'Total Cost '.$label;
             }
+            $wasteArray[$i]['Rebates'] = $value['s']['rebates'];
+            $columns['Rebates'] = 'Rebates';
             $i++;
         }
         $cells = array();

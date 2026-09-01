@@ -2,6 +2,12 @@
 $wastePerGuest = $WasteReport['wastePerGuest'];
 $wasteReportArray = $WasteReport['wasteReport'];
 $fullmontharray = array(1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April', 5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August', 9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December');
+$currentPeriod = !empty($WasteReport['isYtd'])
+    ? 'YTD - ' . $WasteReport['currentYear']
+    : $fullmontharray[$WasteReport['currentMonth']] . ' - ' . $WasteReport['currentYear'];
+$previousPeriod = !empty($WasteReport['isYtd'])
+    ? 'YTD - ' . ($WasteReport['currentYear'] - 1)
+    : $fullmontharray[$WasteReport['currentMonth']] . ' - ' . ($WasteReport['currentYear'] - 1);
 ?>
 
 <!-- ============ WASTE REPORT TABLE ============ -->
@@ -13,8 +19,8 @@ $fullmontharray = array(1 => 'January', 2 => 'February', 3 => 'March', 4 => 'Apr
     </tr>
     <tr style="color:black; background-color:#d8e1f2;" align="center">
         <th><strong>Metric</strong></th>
-        <th><strong><?php echo $fullmontharray[$WasteReport['currentMonth']] . " - " . ($WasteReport['currentYear']); ?></strong></th>
-        <th><strong><?php echo $fullmontharray[$WasteReport['currentMonth']] . " - " . ($WasteReport['currentYear'] - 1); ?></strong></th>
+        <th><strong><?php echo $currentPeriod; ?></strong></th>
+        <th><strong><?php echo $previousPeriod; ?></strong></th>
         <th><strong>Variation (%)</strong></th>
     </tr>
 
@@ -38,8 +44,8 @@ $fullmontharray = array(1 => 'January', 2 => 'February', 3 => 'March', 4 => 'Apr
 <table border="1" cellpadding="8" cellspacing="0" width="100%">
     <tr style="color:black; background-color:#d8e1f2;" align="center">
         <th><strong>Metric</strong></th>
-        <th><strong><?php echo $fullmontharray[$WasteReport['currentMonth']] . " - " . ($WasteReport['currentYear']); ?></strong></th>
-        <th><strong><?php echo $fullmontharray[$WasteReport['currentMonth']] . " - " . ($WasteReport['currentYear'] - 1); ?></strong></th>
+        <th><strong><?php echo $currentPeriod; ?></strong></th>
+        <th><strong><?php echo $previousPeriod; ?></strong></th>
         <th><strong>Variation (%)</strong></th>
     </tr>
 

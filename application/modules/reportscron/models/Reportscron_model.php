@@ -611,7 +611,7 @@ class Reportscron_model extends Base_Model {
 
 		    FROM {$this->_tbl_utilities}
 
-		WHERE site_id={$this->site_id} AND (year_id='$year' AND month_id='$month')";
+		    WHERE site_id={$this->site_id} AND (year_id='$year' AND month_id='$month')";
 
 
 
@@ -705,6 +705,9 @@ class Reportscron_model extends Base_Model {
 
 			COALESCE(u.water_total_consumption_cost, 0) AS water,
 			COALESCE(u.water_total_consumption, 0) AS water_consumption,
+
+			COALESCE(u.total_fleet_petrol_cost, 0) AS fleet_petrol,
+			COALESCE(u.fleet_petrol, 0) AS fleet_petrol_consumption,
 
 			COALESCE(u.onsite_generators_quantity, 0) AS onsite_generator,
 			COALESCE(u.onsite_generators_fuel_oil_quantity, 0) AS onsite_generator_fuel_oil,
@@ -1981,19 +1984,30 @@ class Reportscron_model extends Base_Model {
     }
 
     public function fetchUpdatedRoomKeys($result) {
+	if (empty($result) || !is_array($result)) {
+	    return $result;
+	}
+	$this->load->model('sites/sites_model');
 	foreach ($result as $key => $value) {
-	    foreach ($value as $subkey => $subvalue) {
-		if($subkey == 'rooms_keys') {
-		    $this->load->model('sites/sites_model');
-		    $dataFetch['site_id'] = $this->site_id;
-		    $dataFetch['area_update_field'] = $subkey;
-		    $latestAreaEntry = $this->sites_model->getlatestSiteArea($dataFetch);
-		    if(isset($latestAreaEntry) && !empty($latestAreaEntry)) {
-			$latestAreaEntry = (array) $latestAreaEntry;
-			$result[$key][$subkey] = $latestAreaEntry['area_update_value'];
-		    }
-		} else {
-		    continue;
+	    if (!is_array($value)) {
+		continue;
+	    }
+	    $row_site_id = !empty($value['site_id']) ? $value['site_id'] : $this->site_id;
+	    if (empty($row_site_id)) {
+		continue;
+	    }
+	    if (!array_key_exists('rooms_keys', $value)) {
+		continue;
+	    }
+	    $dataFetch = array(
+		'site_id' => $row_site_id,
+		'area_update_field' => 'rooms_keys',
+	    );
+	    $latestAreaEntry = $this->sites_model->getlatestSiteArea($dataFetch);
+	    if (!empty($latestAreaEntry)) {
+		$latestAreaEntry = (array) $latestAreaEntry;
+		if (isset($latestAreaEntry['area_update_value'])) {
+		    $result[$key]['rooms_keys'] = $latestAreaEntry['area_update_value'];
 		}
 	    }
 	}

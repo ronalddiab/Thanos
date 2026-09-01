@@ -167,7 +167,7 @@ $utilities_value_check = array(
                                         ?>
                                     </tr>
                                     <tr>
-                                        <td style="border-left-color:#000000;border-left-width:1px;border-left-style:solid;border-right-color:#000000;border-right-width:1px;border-right-style:solid;border-bottom-color:#000000;border-bottom-width:1px;border-bottom-style:solid; ">Utilities Cost ($) / <?php echo GetSiteUtilityUnitName($site_id,'water'); ?></td>
+                                        <td style="border-left-color:#000000;border-left-width:1px;border-left-style:solid;border-right-color:#000000;border-right-width:1px;border-right-style:solid;border-bottom-color:#000000;border-bottom-width:1px;border-bottom-style:solid; ">Utilities Cost ($)  / m<sup>2</sup>; ?></td>
                                         <?php 
                                         foreach ($utility_cost_chart_5years as $year => $year_value) {
                                             $total = 0;

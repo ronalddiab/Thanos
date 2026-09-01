@@ -322,18 +322,25 @@ class Dashboard_admin extends Base_Admin_Controller {
 			if ($progress_chart_unit == 'per_rn') {
 			    $result['energy_budget'] = (isset($budgetIndex['energy']) && $budgetIndex['energy'] != 0) ? round(($budgetIndex['energy'] / $result['room_night']), 2) : 0;
 			    $result['water_budget'] = (isset($budgetIndex['water']) && $budgetIndex['water'] != 0) ? round(($budgetIndex['water'] / $result['room_night']), 2) : 0;
-			    $result['energy'] = (isset($result['room_night']) && $result['room_night'] != 0) ? round(($result['energy'] / $result['room_night']), 2) : 0;
-			    $result['water'] = (isset($result['room_night']) && $result['room_night'] != 0) ? round(($result['water'] / $result['room_night']), 2) : 0;
+			    // Keep full precision for saving % calc; round only the plotted series
+			    $result['energy_precise'] = (isset($result['room_night']) && $result['room_night'] != 0) ? ($result['energy'] / $result['room_night']) : 0;
+			    $result['water_precise'] = (isset($result['room_night']) && $result['room_night'] != 0) ? ($result['water'] / $result['room_night']) : 0;
+			    $result['energy'] = round($result['energy_precise'], 2);
+			    $result['water'] = round($result['water_precise'], 2);
 			} else if ($progress_chart_unit == 'per_meter') {
 			    $result['energy_budget'] = (isset($budgetIndex['energy']) && $budgetIndex['energy'] != 0) ? round(($budgetIndex['energy'] / $result['cooled_builtup_area']), 2) : 0;
 			    $result['water_budget'] = (isset($budgetIndex['water']) && $budgetIndex['water'] != 0) ? round(($budgetIndex['water'] / $result['cooled_builtup_area']), 2) : 0;
-			    $result['energy'] = (isset($result['cooled_builtup_area']) && $result['cooled_builtup_area'] != 0) ? round(($result['energy'] / $result['cooled_builtup_area']), 2) : 0;
-			    $result['water'] = (isset($result['cooled_builtup_area']) && $result['cooled_builtup_area'] != 0) ? round(($result['water'] / $result['cooled_builtup_area']), 2) : 0;
+			    $result['energy_precise'] = (isset($result['cooled_builtup_area']) && $result['cooled_builtup_area'] != 0) ? ($result['energy'] / $result['cooled_builtup_area']) : 0;
+			    $result['water_precise'] = (isset($result['cooled_builtup_area']) && $result['cooled_builtup_area'] != 0) ? ($result['water'] / $result['cooled_builtup_area']) : 0;
+			    $result['energy'] = round($result['energy_precise'], 2);
+			    $result['water'] = round($result['water_precise'], 2);
 			} else if ($progress_chart_unit == 'per_gn') {
 			    $result['energy_budget'] = (isset($budgetIndex['energy']) && $budgetIndex['energy'] != 0) ? round(($budgetIndex['energy'] / $result['guest_night']), 2) : 0;
 			    $result['water_budget'] = (isset($budgetIndex['water']) && $budgetIndex['water'] != 0) ? round(($budgetIndex['water'] / $result['guest_night']), 2) : 0;
-			    $result['energy'] = (isset($result['guest_night']) && $result['guest_night'] != 0) ? round(($result['energy'] / $result['guest_night']), 2) : 0;
-			    $result['water'] = (isset($result['guest_night']) && $result['guest_night'] != 0) ? round(($result['water'] / $result['guest_night']), 2) : 0;
+			    $result['energy_precise'] = (isset($result['guest_night']) && $result['guest_night'] != 0) ? ($result['energy'] / $result['guest_night']) : 0;
+			    $result['water_precise'] = (isset($result['guest_night']) && $result['guest_night'] != 0) ? ($result['water'] / $result['guest_night']) : 0;
+			    $result['energy'] = round($result['energy_precise'], 2);
+			    $result['water'] = round($result['water_precise'], 2);
 			}
 		    }
 
@@ -347,6 +354,8 @@ class Dashboard_admin extends Base_Admin_Controller {
 			$result['room_night'] = 0;
 			$result['energy'] = 0;
 			$result['water'] = 0;
+			$result['energy_precise'] = 0;
+			$result['water_precise'] = 0;
 			$result['onsite_energy_generator_quantity'] = 0;
 			$progressReportData[$result['month_id']][$result['year_id']] = $result;
 		    }

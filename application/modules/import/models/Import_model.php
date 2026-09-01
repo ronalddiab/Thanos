@@ -1557,9 +1557,127 @@ class Import_model extends Base_Model {
 
     }
 
+    /**
+     * Daily/monthly rows that contain a negative consumption or cost value (any year).
+     */
+    public function getNegativeUtilityRows($isDaily = false)
+    {
+	$table = $isDaily ? $this->_table_daily : $this->_table;
+	$skip = array('id', 'site_id', 'month_id', 'year_id', 'date_id', 'hour', 'cdd', 'hdd', 'created', 'modified', 'user_id');
+	$fields = $this->db->list_fields($table);
+	$or = array();
+	foreach ($fields as $field) {
+	    if (in_array($field, $skip, true)) {
+		continue;
+	    }
+	    $or[] = "`{$field}` < 0";
+	}
+	if (empty($or)) {
+	    return array();
+	}
+	$sql = "SELECT t.*, s.site_location_name
+	    FROM {$table} t
+	    LEFT JOIN " . TBL_SITES . " s ON s.id = t.site_id
+	    WHERE t.site_id != 0 AND t.year_id != 0 AND t.month_id != 0
+	    " . ($isDaily ? " AND t.date_id != 0" : "") . "
+	    AND (" . implode(' OR ', $or) . ")
+	    ORDER BY s.site_location_name, t.year_id, t.month_id";
+	return $this->db->query($sql)->result_array();
+    }
 
+    /**
+     * Months where summed daily readings diverge from the monthly utilities_cost row.
+     * Skips months with no daily data. Tolerance is 1 consumption unit.
+     */
+    public function getDailyMonthlyDivergences($tolerance = 1, $site_id = 0)
+    {
+	$map = array(
+	    'electricity' => array('monthly' => 'total_electricity_kwh', 'daily' => 'electricity', 'flag' => 'show_utility_electricity'),
+	    'fuel_oil' => array('monthly' => 'total_fuel_oil', 'daily' => 'fuel_oil', 'flag' => 'show_utility_fuel_oil'),
+	    'lpg' => array('monthly' => 'total_lpg', 'daily' => 'lpg', 'flag' => 'show_utility_lpg'),
+	    'natural_gas' => array('monthly' => 'total_natural_gas', 'daily' => 'natural_gas', 'flag' => 'show_utility_natural_gas'),
+	    'district_heating' => array('monthly' => 'district_heating', 'daily' => 'district_heating', 'flag' => 'show_utility_district_heating'),
+	    'district_cooling' => array('monthly' => 'district_cooling', 'daily' => 'district_cooling', 'flag' => 'show_utility_district_cooling'),
+	    'water' => array('monthly' => 'water_total_consumption', 'daily' => 'water', 'flag' => 'show_utility_water'),
+	);
+	$dailyWhere = "site_id != 0 AND year_id != 0 AND month_id != 0 AND date_id != 0";
+	$binds = array();
+	if (!empty($site_id)) {
+	    $dailyWhere .= " AND site_id = ?";
+	    $binds[] = (int) $site_id;
+	}
+	$dailySql = "SELECT site_id, year_id, month_id,
+		SUM(COALESCE(total_electricity_kwh, 0)) AS electricity,
+		SUM(COALESCE(total_diesel_fuel, 0)) AS fuel_oil,
+		SUM(COALESCE(total_lpg_consumption, 0)) AS lpg,
+		SUM(COALESCE(total_natural_gas_consumption, 0)) AS natural_gas,
+		SUM(COALESCE(total_district_heating_consumption, 0)) AS district_heating,
+		SUM(COALESCE(total_district_cooling_consumption, 0)) AS district_cooling,
+		SUM(COALESCE(total_water_consumption, 0)) AS water
+	    FROM {$this->_table_daily}
+	    WHERE {$dailyWhere}
+	    GROUP BY site_id, year_id, month_id";
+	$dailyRows = empty($binds) ? $this->db->query($dailySql)->result_array() : $this->db->query($dailySql, $binds)->result_array();
+	$dailyMap = array();
+	foreach ($dailyRows as $daily) {
+	    $dailyMap[$daily['site_id'] . '_' . $daily['year_id'] . '_' . $daily['month_id']] = $daily;
+	}
 
-    public function deleteHourlyFixedSubmissionUtilityIfexists($data = array()){
+	$this->db->select('u.site_id, u.year_id, u.month_id, s.site_location_name,
+		s.show_utility_electricity, s.show_utility_fuel_oil, s.show_utility_lpg,
+		s.show_utility_natural_gas, s.show_utility_district_heating,
+		s.show_utility_district_cooling, s.show_utility_water,
+		u.total_electricity_kwh, u.total_fuel_oil, u.total_lpg, u.total_natural_gas,
+		u.district_heating, u.district_cooling, u.water_total_consumption');
+	$this->db->from($this->_table . ' AS u');
+	$this->db->join(TBL_SITES . ' AS s', 's.id = u.site_id', 'left');
+	$this->db->where('u.site_id !=', 0);
+	$this->db->where('u.year_id !=', 0);
+	$this->db->where('u.month_id !=', 0);
+	if (!empty($site_id)) {
+	    $this->db->where('u.site_id', (int) $site_id);
+	}
+	$monthlyRows = $this->db->get()->result_array();
+
+	$divergences = array();
+	$tolerance = abs((float) $tolerance);
+	foreach ($monthlyRows as $row) {
+	    $key = $row['site_id'] . '_' . $row['year_id'] . '_' . $row['month_id'];
+	    if (!isset($dailyMap[$key])) {
+		continue;
+	    }
+	    foreach ($map as $utility => $cfg) {
+		if (empty($row[$cfg['flag']])) {
+		    continue;
+		}
+		$dailySum = (float) $dailyMap[$key][$cfg['daily']];
+		$monthlyVal = (float) $row[$cfg['monthly']];
+		if ($dailySum == 0 && $monthlyVal == 0) {
+		    continue;
+		}
+		if ($dailySum == 0) {
+		    continue;
+		}
+		$diff = $dailySum - $monthlyVal;
+		if (abs($diff) > $tolerance) {
+		    $divergences[] = array(
+			'Site Name' => $row['site_location_name'],
+			'Year' => $row['year_id'],
+			'Month' => $row['month_id'],
+			'Utility Name' => ucwords(str_replace('_', ' ', $utility)),
+			'Value Daily' => $dailySum,
+			'Value Monthly' => $monthlyVal,
+			'Difference' => $diff,
+			'Flag' => 'Diverged',
+		    );
+		}
+	    }
+	}
+	return $divergences;
+    }
+
+    public function deleteHourlyFixedSubmissionUtilityIfexists($data = array())
+	{
 
         $this->db->where_in('id',$data);
 

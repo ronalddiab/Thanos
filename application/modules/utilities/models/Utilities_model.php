@@ -477,7 +477,6 @@ class Utilities_model extends Base_Model
 	$data['revenue']                                    = isset($postdata['revenue']) ? $postdata['revenue'] : '';
 	$data['forex']                                      = isset($postdata['forex']) ? $postdata['forex'] : 1;
 		$data['vehicle_petrol']                             = isset($postdata['vehicle_petrol']) ? $postdata['vehicle_petrol'] : 1;
-		$data['fleet_petrol']                             = isset($postdata['fleet_petrol']) ? $postdata['fleet_petrol'] : 1;
 	$data['total_f_b_sales']                            = isset($postdata['total_f_b_sales']) ? $postdata['total_f_b_sales'] : '';
 
 	// New Fields

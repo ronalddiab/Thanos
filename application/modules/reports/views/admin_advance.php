@@ -451,10 +451,14 @@ if ($filters["start_year"] == $filters["end_year"]) { // If start and end year i
 $current_year_text = lang("current-year");
 $previous_year_text = lang("previous-year");
 
-// Override if selected period is not for current year
-if($filters['start_year'] != date("Y")){
-    $current_year_text = 'Year - '.$filters['start_year'];
-    $previous_year_text = 'Year - '.($filters['start_year']-1);
+// Label the series by the actual selected range. A cross-year range
+// (e.g. 07/2025 - 06/2026) must not be labelled with only its start year.
+if ($filters['start_year'] != $filters['end_year']) {
+    $current_year_text = 'Year - ' . $filters['start_year'] . '/' . $filters['end_year'];
+    $previous_year_text = 'Year - ' . ($filters['start_year'] - 1) . '/' . ($filters['end_year'] - 1);
+} elseif ($filters['start_year'] != date("Y")) {
+    $current_year_text = 'Year - ' . $filters['start_year'];
+    $previous_year_text = 'Year - ' . ($filters['start_year'] - 1);
 }
 ?>
 <script type="text/javascript">
@@ -665,12 +669,18 @@ if($filters['start_year'] != date("Y")){
             $('#report_form_utility').validate({// initialize the plugin
                 rules: {
                     startdate: {
+                        required: true,
                         dateBefore: '#enddate_utility'
                     },
                     enddate: {
+                        required: true,
                         dateAfter: '#startdate_utility',
                         monthdefer: '#startdate_utility'
                     }
+                },
+                messages: {
+                    startdate: { required: '<?php echo lang("start-date"); ?> is required' },
+                    enddate: { required: '<?php echo lang("end-date"); ?> is required' }
                 }
             });
 
@@ -910,7 +920,7 @@ if($filters['start_year'] != date("Y")){
 
 			?>
 			utilityChartReportArray.push(["<?php echo lang('average'); ?>", <?php echo $currentAvgData; ?>, <?php echo $cddAvgData; ?>, <?php echo $hddAvgData; ?>, <?php if ($is_occupancy) {
-																																										echo (isset($occupancyAvgData) && is_finite($occupancyAvgData) && is_nan($occupancyAvgData)) ? $occupancyAvgData : 0;
+																																										echo (isset($occupancyAvgData) && is_finite($occupancyAvgData) && !is_nan($occupancyAvgData)) ? $occupancyAvgData : 0;
 																																									} ?>]);
 			var utilityChartData = [];
 			var xAxisutilityChart = [];
