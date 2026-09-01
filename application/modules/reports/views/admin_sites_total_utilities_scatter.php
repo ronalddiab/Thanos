@@ -40,7 +40,7 @@ if ($filters['base_type'] == 'cost') {
 
 $sites_type1 = array(0=>'All sites');
 $sites_type2 = $this->_ci->config->config['sites_type'];
-$sites_type3 = array(3=>'Select Sites');
+$sites_type3 = array(5=>'Select Sites');
 $sites_type = array_merge($sites_type1,$sites_type2,$sites_type3);
 ?>
 <style>
@@ -431,7 +431,7 @@ $sites_type = array_merge($sites_type1,$sites_type2,$sites_type3);
     $(document).ready(function() {
 	$("#site_type").change(function() {
 	    var site_type = $(this).val();
-	    if (site_type == 3) {
+	    if (site_type == 5) {
 		$.blockUI({
 		    css: {
 			cursor: 'default'

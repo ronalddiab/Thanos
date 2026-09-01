@@ -6,8 +6,16 @@ $montharray = array(1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'May', 
 $fullmontharray = array(1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April', 5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August', 9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December');
 
 //Bar chart show last year data
-$current_year = date('Y');
-$last_year = $current_year-1;
+// Keep the legend years aligned with the months plotted on the x-axis
+if (!empty($filters['filters_comparision_chart']["end_year"])) {
+    $current_year = (int) $filters['filters_comparision_chart']["end_year"];
+} elseif (!empty($utility_year_selected)) {
+    $current_year = (int) $utility_year_selected;
+} else {
+    $current_year = (int) date('Y');
+}
+$last_year = $current_year - 1;
+$isLocal = true;
 
 if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_comparision_chart']["end_year"]) { // If start and end year is same
     for ($i = $filters['filters_comparision_chart']['start_month']; $i <= $filters['filters_comparision_chart']["end_month"]; $i++) {
@@ -274,7 +282,11 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
             $AVG_pre_data_budget = ($total_sum_pre_data_budget/$total_months);
             
             // Average Current year data
-            $YTD_total_months = $this->_ci->config->config['YTD_month_count'];            
+            $YTD_total_months = $this->_ci->config->config['YTD_month_count'];
+            // A completed past year must average over the months plotted, not the running YTD count
+            if (isset($utility_year_selected) && $utility_year_selected != date('Y')) {
+                $YTD_total_months = $total_months;
+            }
             $AVG_data_electricity = ($total_sum_data_electricity/$YTD_total_months);
             $AVG_data_fuel = ($total_sum_data_fuel/$YTD_total_months);
             $AVG_data_lpg = ($total_sum_data_lpg/$YTD_total_months);
@@ -371,7 +383,7 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
 			arrAvgPre.push(<?php echo isset($AVG_pre_data_occupancy) && is_finite($AVG_pre_data_occupancy) ? $AVG_pre_data_occupancy : 0; ?>);
 			arrAvgPre.push(null);
 			
-			var arrAvg = ['<?php echo ($year-1)." ".lang("average"); ?>'];
+			var arrAvg = ['<?php echo $year." ".lang("average"); ?>'];
 			<?php if($totalElectricity != 0){ ?>
 					arrAvg.push(<?php echo $AVG_data_electricity; ?>);
 			<?php	} ?>
@@ -412,7 +424,7 @@ $chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
                 },
                 hAxis: {title: '<?php echo lang("month"); ?>', titleTextStyle: {fontName: 'Arial'}, slantedText:true, slantedTextAngle:45},
                 vAxes: {
-                    0: { title:'<?php echo lang("utility-cost-chart-yaxis-0-title"); ?>',titleTextStyle: {fontName: 'Arial',}},
+                    0: { title:'<?php echo lang("utility-cost-chart-yaxis-0-title") . ' (' . ($isLocal ? currency_symbol($isLocal) : BASE_CURRENCY) . ')'; ?>',titleTextStyle: {fontName: 'Arial',}},
                     1: { title:'<?php echo lang("occupancy"); ?>',titleTextStyle: {fontName: 'Arial',fontSize: 18},'minValue': 100 ,ticks: [0,10,20,30,40,50,60,70,80,90,100] }
                 },
                 interpolateNulls: true,

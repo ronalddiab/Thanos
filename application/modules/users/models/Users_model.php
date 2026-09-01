@@ -248,7 +248,13 @@ class Users_model extends Base_Model
 
             $data['user_id'] = $user_id;
 
+            $sites = array_unique(array_filter(array_map('intval', $sites)));
+
             foreach ($sites as $key => $value) {
+
+                if (empty($value)) {
+                    continue;
+                }
 
                 $data['site_id'] = $value;
 

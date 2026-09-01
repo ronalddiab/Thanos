@@ -723,11 +723,26 @@ class Users_admin extends Base_Admin_Controller {
 	    $data['user_report'] = $user_report;
 
 	    $data['sites'] = array();
+	    $data['hidden_sites'] = array();
 	    $site_results = $this->users_model->get_site_to_user($id);
 	    if(!empty($site_results)){
+		$assigned_sites = array();
 		foreach ($site_results as $result) {
-		    $data['sites'][] = $result['site_id'];
+		    $assigned_sites[] = (int) $result['site_id'];
 		}
+		$assigned_sites = array_values(array_unique(array_filter($assigned_sites)));
+
+		// The site dropdown only lists active, named sites. An assignment that is
+		// missing from that list renders with no option selected and the browser
+		// falls back to the first option, which looks like a duplicated site.
+		// Keep those assignments as hidden inputs so saving does not drop them.
+		$selectable_sites = is_array($data['hotel_sites']) ? array_map('intval', array_keys($data['hotel_sites'])) : array();
+		$data['sites'] = array_values(array_intersect($assigned_sites, $selectable_sites));
+		$data['hidden_sites'] = array_values(array_diff($assigned_sites, $selectable_sites));
+	    }
+	    // Align first dropdown with the unique sites list to avoid duplicate rows in for_site_div
+	    if (!empty($data['sites'])) {
+		$data['site_id'] = $data['sites'][0];
 	    }
 
 	    $data['regions'] = array();
@@ -737,6 +752,7 @@ class Users_admin extends Base_Admin_Controller {
 		foreach ($region_results as $result) {
 		    $data['regions'][] = $result['region_id'];
 		}
+		$data['regions'] = array_values(array_unique(array_map('intval', $data['regions'])));
 	    }
 	    //create breadcrumbs & page-title
 	    if ($action == 'add') {
@@ -800,18 +816,15 @@ class Users_admin extends Base_Admin_Controller {
 	    ## in case when create user for hotel user and super admin
 	    if (in_array($role_id, $role_array)) {
 		$data['site_id'] = array();
-	    }else{
-		if(!empty($data['site_id']) && empty($data['region_id']) && !isset($data['region_id'])) {
-			$data['site_id'] = array_unique($data['site_id']);
-		} else if (!empty($data['region_id']) && isset($data['region_id']) && $role_id == 6) {
-		    ## Assign all sites with selected region on create mode
-		    $this->load->model('sites/sites_model');
-		    $region_id = intval($data['region_id'][0]);
-		    $data['site_id'] = [];
-		    $regionalSitesData = $this->sites_model->get_site_detail_with_region_filter(0, 0, $role_id, $data['region_id']);
-		    $regionalSites = isset($regionalSitesData ) ? array_column($regionalSitesData, 'id') : [];
-		    $data['site_id'] = array_unique($regionalSites);
+	    } else if ($role_id == 6) {
+		// Corporate users: keep the sites chosen on the form (including removals).
+		if (!empty($data['site_id']) && is_array($data['site_id'])) {
+		    $data['site_id'] = array_values(array_unique(array_filter(array_map('intval', $data['site_id']))));
+		} else {
+		    $data['site_id'] = array();
 		}
+	    } else if (!empty($data['site_id'])) {
+		$data['site_id'] = array_values(array_unique($data['site_id']));
 	    }
 
 	    if (isset($data['site_id']) && !empty($data['site_id'])) {
@@ -861,7 +874,13 @@ class Users_admin extends Base_Admin_Controller {
 
 		// Set sites for users (No reports for admin user)
 		if($id != 1){
-		    if(isset($data['site_id']) && !empty($data['site_id'])){
+		    if ($role_id == 6) {
+			// Keep the sites selected on the form so removals persist.
+			$this->users_model->delete_site_to_user($inserted_id);
+			if (!empty($data['site_id'])) {
+			    $this->users_model->assign_site_to_user($data['site_id'], $inserted_id);
+			}
+		    } elseif(isset($data['site_id']) && !empty($data['site_id'])){
 			$this->users_model->delete_site_to_user($inserted_id);
 			$this->users_model->assign_site_to_user($data['site_id'], $inserted_id);
 		    }

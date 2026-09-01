@@ -860,7 +860,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
                                                     <?php } ?>
 
-                                                    <?php if($totalFuel_utility_cost_pre && $site_detail['show_utility_fuel']){ ?>
+                                                    <?php if($totalFuel_utility_cost_pre && $site_detail['show_utility_fuel_oil']){ ?>
 
                                                     <tr>
 
@@ -890,7 +890,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
                                                     <?php } ?>
 
-                                                    <?php if($totalHeatingDistrict_utility_cost_pre && $site_detail['show_utility_heating_district']){ ?>
+                                                    <?php if($totalHeatingDistrict_utility_cost_pre && $site_detail['show_utility_district_heating']){ ?>
 
                                                     <tr>
 
@@ -900,7 +900,7 @@ $dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
                                                     <?php } ?>
 
-                                                    <?php if($totalCoolingDistrict_utility_cost_pre && $site_detail['show_utility_cooling_district']){ ?>
+                                                    <?php if($totalCoolingDistrict_utility_cost_pre && $site_detail['show_utility_district_cooling']){ ?>
 
                                                     <tr>
 

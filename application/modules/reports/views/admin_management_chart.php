@@ -338,6 +338,7 @@ if ($utility_select && $utility_select == 'mtd') {
             var utilityMonthDailyArrayData = JSON.parse(utilityDailyMonth);
             var chartUtilityTitle = utilityMonthDailyArrayData[0];
             chartUtilityTitle = chartUtilityTitle.filter(value => value !== "Date");
+            chartUtilitySubtitle = chartUtilityTitle.filter(value => value !== "Date").join(", ");
             var chartDailyMonthData = [];
             var dateArray = [];
             var yearSelected = '<?php echo $year; ?>';
@@ -455,7 +456,7 @@ if ($utility_select && $utility_select == 'mtd') {
 					enabled: false
 				},
                 subtitle: {
-                    text: chartUtilityTitle
+                    text: chartUtilitySubtitle
                 },
                 xAxis: {
                     title: {

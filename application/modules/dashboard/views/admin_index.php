@@ -164,6 +164,18 @@ if ($filters["start_year"] == $filters["end_year"]) {
 ?>
 <!-- Monthly Utility Chart START -->
 <?php
+$utility_budget_keys = array(
+    'electricity'      => 'electricity_budget',
+    'fuel_oil'         => 'fuel_budget',
+    'lpg'              => 'lpg_budget',
+    'water'            => 'water_budget',
+    'natural_gas'      => 'natural_gas_budget',
+    'district_cooling' => 'district_cooling_budget',
+    'district_heating' => 'district_heating_budget',
+);
+$utility_budget_key = isset($utility_budget_keys[$filters['utility_type']])
+    ? $utility_budget_keys[$filters['utility_type']]
+    : $filters['utility_type'] . '_budget';
 $total_sum_budget = 0;
 if (!empty($reportdata)) {
     $total_sum_current = 0;
@@ -173,9 +185,12 @@ if (!empty($reportdata)) {
     $total_months_pre  = 0;
 
     if ($utility_chart_year == $current_year) {
-	$YTD_total_months = $this->_ci->config->config['YTD_month_count'];
+	$avg_month_count = (int) $filters['CURRENT_YEAR_MAX_MONTH_ID'];
     } else {
-	$YTD_total_months = 12;
+	$avg_month_count = 12;
+    }
+    if ($avg_month_count < 1) {
+	$avg_month_count = 1;
     }
     $monthdata = array();
     $budgetdata = array();
@@ -191,7 +206,7 @@ if (!empty($reportdata)) {
 	    $currentdata  = (!empty($reportdata[$month][$year][$filters['utility_type']])) ? $reportdata[$month][$year][$filters['utility_type']] : 0;
 	    $previousoccupancydata  = (!empty($reportdata[$month][$year - 1]['occupancy'])) ? $reportdata[$month][$year - 1]['occupancy'] : 0;
 	    $occupancydata  = (!empty($reportdata[$month][$year]['occupancy'])) ? $reportdata[$month][$year]['occupancy'] : 0;
-	    $budgetdata  = (!empty($reportdata[$month][$year][$filters['utility_type'] . '_budget'])) ? $reportdata[$month][$year][$filters['utility_type'] . '_budget'] : 0;
+	    $budgetdata  = (!empty($reportdata[$month][$year][$utility_budget_key])) ? $reportdata[$month][$year][$utility_budget_key] : 0;
 
 	    $previousdata = round($previousdata, 2);
 	    $currentdata  = round($currentdata, 2);
@@ -285,30 +300,28 @@ if (!empty($reportdata)) {
 	    $previousoccupancydata_tooltip_array[] = $occupancydata_tooltip;
 	    $budgetdata_tooltip_array[] = $budgetdata_tooltip;
 
-	    if ($month <= $YTD_total_months) {
+	    if ($month <= $avg_month_count) {
 		$total_sum_pre += $previousdata;
-	    }
-
-	    $total_months_pre++;
-	    if ($filters['CURRENT_YEAR_MAX_MONTH_ID'] >= $month) {
 		$total_sum_current += $currentdata;
 		$total_sum_budget += $budgetdata;
 		$total_months++;
 	    }
+
+	    $total_months_pre++;
 	    $filter_utility_type_array = array();
 	    $filter_utility_type = $filters['utility_type'];
 	    $filter_utility_type_array = $filter_utility_type;
 	}
     }
 
-    // Total months for average is current month
-    $currentAvgData  = isset($YTD_total_months) && !empty($YTD_total_months) && $YTD_total_months != 0 ? ($total_sum_current / $YTD_total_months) : 0;
-    $previousAvgData = isset($YTD_total_months) && !empty($YTD_total_months) && $YTD_total_months != 0 ? ($total_sum_pre / $YTD_total_months) : 0;
-    $budgetAvgData   = isset($total_months) && !empty($total_months) && $total_months != 0 ? ($total_sum_budget / $total_months) : 0;
+    // Average through last completed month (e.g. July when current month is August)
+    $currentAvgData  = ($total_months > 0) ? ($total_sum_current / $total_months) : 0;
+    $previousAvgData = ($total_months > 0) ? ($total_sum_pre / $total_months) : 0;
+    $budgetAvgData   = ($total_months > 0) ? ($total_sum_budget / $total_months) : 0;
 
-    $currentAvgData  = round($currentAvgData, 2);
-    $previousAvgData = round($previousAvgData, 2);
-    $budgetAvgData   = round($budgetAvgData, 2);
+    $currentAvgData  = is_finite($currentAvgData) ? round($currentAvgData, 2) : 0;
+    $previousAvgData = is_finite($previousAvgData) ? round($previousAvgData, 2) : 0;
+    $budgetAvgData   = is_finite($budgetAvgData) ? round($budgetAvgData, 2) : 0;
 
     // Last year average Variant
     $deference_value = $previousAvgData - $currentAvgData;
@@ -360,12 +373,8 @@ if (!empty($reportdata)) {
 
     $monthdata[] = "Average";
 
-    $previousdata_array[] = '{y: ' . $previousAvgData . ', color: "grey"}';
-    $currentdata_array[] = '{y: ' . $currentAvgData . ', color: "black"}';
-
-    if ((string)$budgetAvgData == "NAN") {
-	$budgetAvgData = 0;
-    }
+    $previousdata_array[] = array('y' => $previousAvgData, 'color' => 'grey');
+    $currentdata_array[] = array('y' => $currentAvgData, 'color' => 'black');
     $budgetdata_array[] = $budgetAvgData;
     $previousdata_tooltip_array[0][] = $previousAvgData_tooltip;
     $currentdata_tooltip_array[0][] = $currentAvgData_tooltip;
@@ -402,6 +411,20 @@ if (!empty($reportdata)) {
 	$filter_utility_type = 'electricity';
     }
 }
+
+$utility_lang_keys = array(
+    'electricity'      => 'electricity',
+    'fuel_oil'         => 'oil',
+    'lpg'              => 'lpg',
+    'water'            => 'water',
+    'natural_gas'      => 'natural_gas',
+    'district_cooling' => 'district_cooling',
+    'district_heating' => 'district_heating',
+);
+if (!isset($filter_utility_type) && isset($filters['utility_type'])) {
+    $filter_utility_type = $filters['utility_type'];
+}
+$filter_utility_lang_key = isset($utility_lang_keys[$filter_utility_type]) ? $utility_lang_keys[$filter_utility_type] : $filter_utility_type;
 ?>
 
 <!-- Monthly Utility Chart END -->
@@ -410,21 +433,25 @@ if (!empty($reportdata)) {
 // Progress on Target - variables pre-calculated in controller
 // Progress Chart Data array
 if (!empty($progressReportData)) {
-    $dataPrev = $dataCurrent = $dataChart = $dataBudget = $dataSavingPercentage = $dataTargetPrev = $dataTargetCurr = $dataBudgetPrev = $dataBudgetCurr = [];
+    $dataPrev = $dataCurrent = $dataChart = $dataBudget = $dataSavingPercentage = $dataTargetPrev = $dataTargetCurr = $dataBudgetPrev = $dataBudgetCurr = $dataPrevPrecise = $dataCurrentPrecise = [];
     foreach ($progressReportData as $key => $value) {
 	$jsonKey = $fullmontharray[$key];
 	foreach ($value as $keyData => $valueData) {
 	    $jsonValue = $valueData[$progress_chart_utility];
+	    // Full-precision intensity for the saving % calc (falls back to plotted value when absent)
+	    $jsonPreciseValue = isset($valueData[$progress_chart_utility . '_precise']) ? $valueData[$progress_chart_utility . '_precise'] : $jsonValue;
 	    $jsonTargetValue = $valueData[$progress_chart_utility . '_target'];
 	    $jsonBudgetValue = $valueData[$progress_chart_utility . '_budget'];
 	    if ($keyData < $current_year && $progress_chart_year != 'industry_benchmark') {
 		$dataTargetPrev[] = $jsonTargetValue;
 		$dataBudgetPrev[] = $jsonBudgetValue;
 		$dataPrev[] =  $jsonValue;
+		$dataPrevPrecise[] = $jsonPreciseValue;
 	    } else {
 		$dataTargetCurr[] = $jsonTargetValue;
 		$dataBudgetCurr[] = $jsonBudgetValue;
 		$dataCurrent[] = $jsonValue;
+		$dataCurrentPrecise[] = $jsonPreciseValue;
 	    }
 	}
     }
@@ -437,11 +464,12 @@ if (!empty($progressReportData)) {
 	    $dataBudgetValue = (($bugetPrevValue * $site_detials[$reductionUtilityValue]) / 100);
 	    $dataBudget[] = $bugetPrevValue - $dataBudgetValue;
 	    if ($is_percent_check == 1) {
-		$dataPrevValue = $dataTargetPrev[$key];
-		$dataCurrValue = $dataTargetCurr[$key];
+		// Saving must reflect the intensity series on the left axis, not absolute volume.
+		// Use the full-precision intensities so small m3/GN figures aren't distorted by 2dp rounding.
+		$dataPrevValue = isset($dataPrevPrecise[$key]) ? $dataPrevPrecise[$key] : $value;
+		$dataCurrValue = isset($dataCurrentPrecise[$key]) ? $dataCurrentPrecise[$key] : 0;
 		$differenceFromPrev = $dataPrevValue - $dataCurrValue;
-		$dataSavingTargetValue = (($dataPrevValue * $site_detials[$reductionUtilityValue]) / 100);
-		$dataSavingPercentage[] = calculateDashboardPercentage($differenceFromPrev, $dataPrevValue);
+		$dataSavingPercentage[] = round((float) calculateDashboardPercentage($differenceFromPrev, $dataPrevValue), 2);
 	    }
 	}
     }
@@ -822,11 +850,11 @@ if (!empty($groupUtilityChartDataArray)) {
 							if ($progress_chart_utility == 'energy') {
 								$unitDrodownConstant = [
 									'per_rn' => 'EUI (kWh/RN)',
-									'per_meter' => 'EUI (kWh/m\u{00B2})',
+									'per_meter' => 'EUI (kWh/m²)',
 								];
 							} else {
 								$unitDrodownConstant = [
-									'per_gn' => 'WUI (m3/GN)',
+									'per_gn' => 'WUI (' . GetSiteUtilityUnitName($site_id, 'water') . '/GN)',
 								];
 							}
 							?>
@@ -958,6 +986,7 @@ if (!empty($groupUtilityChartDataArray)) {
 			    // 'food_and_beverage_waste' => 'Food and Beverage Waste',
 			    // 'food_and_beverage_waste_total_food_handled' => 'Food and Beverage Waste/Total Food Handled (Food Cover)',
 			    // 'food_and_beverage_waste_room_night' => 'Food and Beverage Waste/Room-Night',
+			    // 'tonnes_of_carbon_offsets_purchased' => 'Tonnes of carbon offsets purchased',
 			    $performanceChartConstant = [
 				'utility_consumption'  => 'Total Energy Consumption',
 				'carbon_footprint' => 'Carbon Emissions',
@@ -971,7 +1000,6 @@ if (!empty($groupUtilityChartDataArray)) {
 				'budget_vs_total_utility_cost' => 'Budget vs total utility cost',
 				'renewable_energy_generated' => 'Renewable Energy Generated',
 				'renewable_energy_generated_intensity' => 'Renewable Energy Generated Intensity',
-				'tonnes_of_carbon_offsets_purchased' => 'Tonnes of carbon offsets purchased',
 			    ];
 			    ?>
 			    <select onchange="dashboardAjaxSubmit(this.form);" name="performance_chart_type" data-type="custom-dropdown" id="progress_select" class="chart_dropdown">
@@ -1150,7 +1178,20 @@ if (!empty($groupUtilityChartDataArray)) {
     var occupancytooltipArray = <?php echo json_encode($occupancydata_tooltip_array[0]); ?>;
     var previousoccupancytooltipArray = <?php echo json_encode($previousoccupancydata_tooltip_array[0]); ?>;
     var currentmonthArray = <?php echo json_encode($currentArray); ?>;
-    $(function() {
+    (function renderUtilityChart() {
+	var chartEl = document.getElementById('utility_chart');
+	if (!chartEl || typeof Highcharts === 'undefined') {
+	    return;
+	}
+	if (Highcharts.charts) {
+	    for (var ci = 0; ci < Highcharts.charts.length; ci++) {
+		var existingChart = Highcharts.charts[ci];
+		if (existingChart && existingChart.renderTo === chartEl) {
+		    existingChart.destroy();
+		    break;
+		}
+	    }
+	}
 	var onclickUtility = "<?php echo $onclickUtility; ?>";
 	Highcharts.setOptions({
 	    lang: {
@@ -1175,7 +1216,7 @@ if (!empty($groupUtilityChartDataArray)) {
 		numericSymbols: null //otherwise by default ['k', 'M', 'G', 'T', 'P', 'E']
 	    },
 	    title: {
-		text: '<?php echo lang("report-title-" . $filter_utility_type); ?>',
+		text: <?php echo json_encode(lang('report-title-' . $filter_utility_lang_key)); ?>,
 		style: {
 		    color: Highcharts.getOptions().colors[1],
 		    fontFamily: 'Arial',
@@ -1183,7 +1224,7 @@ if (!empty($groupUtilityChartDataArray)) {
 		}
 	    },
 	    xAxis: {
-		categories: [<?php echo '"' . implode('","', $monthdata) . '"'; ?>],
+		categories: <?php echo json_encode($monthdata); ?>,
 		title: {
 		    text: '<?php echo lang("haxis-title"); ?>',
 		    style: {
@@ -1197,7 +1238,7 @@ if (!empty($groupUtilityChartDataArray)) {
 
 	    yAxis: [{
 		    title: {
-						text: '<?php echo GetSiteUtilityUnitName($site_id, $filter_utility_type); ?>', //echo lang("kWh-label-" . $filter_utility_type);
+						text: <?php echo json_encode(GetSiteUtilityUnitName($site_id, $filter_utility_type)); ?>,
 			style: {
 			    color: Highcharts.getOptions().colors[1],
 			    fontFamily: 'Arial',
@@ -1277,7 +1318,7 @@ if (!empty($groupUtilityChartDataArray)) {
 		    type: 'column',
 		    color: '<?php echo $this->_ci->config->config['chart_legend_colors'][($utility_chart_year - 1)]; ?>',
 		    yAxis: 0,
-		    data: [<?php echo implode(',', $previousdata_array); ?>],
+		    data: <?php echo json_encode($previousdata_array); ?>,
 
 		    backgroundColor: Highcharts.defaultOptions.legend.backgroundColor || '#dc3912'
 		},
@@ -1291,13 +1332,7 @@ if (!empty($groupUtilityChartDataArray)) {
 		    color: '<?php echo $this->_ci->config->config['chart_legend_colors'][$utility_chart_year]; ?>',
 		    type: 'column',
 		    yAxis: 0,
-		    data: [<?php echo implode(',', $currentdata_array); ?>],
-		    tooltip: {
-			useHTML: true,
-			formatter: function() {
-			    return <?php echo $currentdata_tooltip ?>;
-			}
-		    },
+		    data: <?php echo json_encode($currentdata_array); ?>,
 		},
 		<?php if (isset($is_occupancy_check_utility) && !empty(($is_occupancy_check_utility))) { ?> {
 			events: {
@@ -1309,7 +1344,7 @@ if (!empty($groupUtilityChartDataArray)) {
 			color: '<?php echo $this->_ci->config->config['chart_legend_colors'][($utility_chart_year - 1)]; ?>',
 			type: 'spline',
 			yAxis: 1,
-			data: [<?php echo implode(',', $previousoccupancydata_array); ?>]
+			data: <?php echo json_encode($previousoccupancydata_array); ?>
 
 		    }, {
 			events: {
@@ -1321,7 +1356,7 @@ if (!empty($groupUtilityChartDataArray)) {
 			color: '<?php echo $this->_ci->config->config['chart_legend_colors'][$utility_chart_year]; ?>',
 			type: 'spline',
 			yAxis: 1,
-			data: [<?php echo implode(',', $occupancydata_array); ?>]
+			data: <?php echo json_encode($occupancydata_array); ?>
 
 		    },
 		<?php } ?>
@@ -1335,7 +1370,7 @@ if (!empty($groupUtilityChartDataArray)) {
 			type: 'spline',
 			color: '#ff9900',
 			xAxis: 0,
-			data: [<?php echo implode(',', $budgetdata_array); ?>],
+			data: <?php echo json_encode($budgetdata_array); ?>,
 			tooltip: {
 			    useHTML: true
 			},
@@ -1346,7 +1381,7 @@ if (!empty($groupUtilityChartDataArray)) {
 		<?php } ?>
 	    ]
 	});
-    });
+    })();
 <?php } ?>
 <?php endif; ?>
 
@@ -1420,7 +1455,7 @@ if (!empty($groupUtilityChartDataArray)) {
 		previousPercentYear = (typeof(performanceReportPreviousYear[i]) != "undefined") ? performanceReportPreviousYear[i]['y'] : 0;
 		difference_value = currentPercentYear - previousPercentYear;
 		if (currentPercentYear > 0) {
-		    performancePercentage = ((difference_value * 100) / currentPercentYear);
+		    performancePercentage = ((difference_value * 100) / previousPercentYear);
 		} else {
 		    performancePercentage = 100;
 		}

@@ -379,7 +379,7 @@ $optionintvalue = array();
 
                                     $last_year_deference = $current_year['total_' . $utility['db_key']] - $previous_year['total_' . $utility['db_key']];
 
-                                    $last_year_percantage = ($current_year['total_' . $utility['db_key']] != 0) ? (floatval((($last_year_deference * 100) / $current_year['total_' . $utility['db_key']]))) : 0;
+                                    $last_year_percantage = ($previous_year['total_' . $utility['db_key']] != 0) ? (floatval((($last_year_deference * 100) / $previous_year['total_' . $utility['db_key']]))) : 0;
 
                                     ?>
 
@@ -411,7 +411,7 @@ $optionintvalue = array();
 
                                         $budget_deference = $current_year['total_' . $utility['db_key']] - $current_year[$utility['budget_key']];
 
-                                        $budget_percantage = ($current_year['total_' . $utility['db_key']] != 0) ? floatval((($budget_deference * 100) / $current_year['total_' . $utility['db_key']])) : 0;
+                                        $budget_percantage = ($previous_year[$utility['budget_key']] != 0) ? floatval((($budget_deference * 100) / $previous_year[$utility['budget_key']])) : 0;
 
                                         ?>
 
@@ -447,7 +447,7 @@ $optionintvalue = array();
 
                                             $last_year_deference = $current_year['total_' . 'landscape_water_consumption'] - $previous_year['total_' . 'landscape_water_consumption'];
 
-                                            $last_year_percantage = ($current_year['total_' . 'landscape_water_consumption'] != 0) ? floatval((($last_year_deference * 100) / $current_year['total_' . 'landscape_water_consumption'])) : 0;
+                                            $last_year_percantage = ($previous_year['total_' . 'landscape_water_consumption'] != 0) ? floatval((($last_year_deference * 100) / $previous_year['total_' . 'landscape_water_consumption'])) : 0;
 
                                             ?>
 
@@ -489,7 +489,7 @@ $optionintvalue = array();
 
                                             $last_year_deference = $current_year['total_' . 'waste_water_consumption'] - $previous_year['total_' . 'waste_water_consumption'];
 
-                                            $last_year_percantage = ($current_year['total_' . 'waste_water_consumption'] != '') ? floatval((($last_year_deference * 100) / $current_year['total_' . 'waste_water_consumption'])) : 0;
+                                            $last_year_percantage = ($previous_year['total_' . 'waste_water_consumption'] != '') ? floatval((($last_year_deference * 100) / $previous_year['total_' . 'waste_water_consumption'])) : 0;
 
                                             ?>
 
@@ -533,7 +533,7 @@ $optionintvalue = array();
 
                                     $last_year_deference = $current_year['total_' . $utility['db_key'] . '_cost'] - $previous_year['total_' . $utility['db_key'] . '_cost'];
 
-                                    $last_year_percantage = ($current_year['total_' . $utility['db_key'] . '_cost'] != 0) ? floatval((($last_year_deference * 100) / $current_year['total_' . $utility['db_key'] . '_cost'])) : 0;
+                                    $last_year_percantage = ($previous_year['total_' . $utility['db_key'] . '_cost'] != 0) ? floatval((($last_year_deference * 100) / $previous_year['total_' . $utility['db_key'] . '_cost'])) : 0;
 
                                     ?>
 
@@ -561,7 +561,7 @@ $optionintvalue = array();
 
                                         $budget_deference = $current_year['total_' . $utility['db_key'] . '_cost'] - $current_year[$utility['budget_key'] . '_cost'];
 
-                                        $budget_percantage = ($current_year['total_' . $utility['db_key'] . '_cost'] != 0) ? floatval((($budget_deference * 100) / $current_year['total_' . $utility['db_key'] . '_cost'])) : 0;
+                                        $budget_percantage = ($current_year[$utility['budget_key'] . '_cost'] != 0) ? floatval((($budget_deference * 100) / $current_year[$utility['budget_key'] . '_cost'])) : 0;
 
                                         ?>
 
@@ -597,7 +597,7 @@ $optionintvalue = array();
 
                                     $last_year_deference = $current_per_room_night - $previous_per_room_night;
 
-                                    $last_year_percantage = ($current_per_room_night != 0) ? floatval((($last_year_deference * 100) / $current_per_room_night)) : 0;
+                                    $last_year_percantage = ($previous_per_room_night != 0) ? floatval((($last_year_deference * 100) / $previous_per_room_night)) : 0;
 
                                     ?>
 
@@ -645,7 +645,7 @@ $optionintvalue = array();
 
                                     $last_year_deference = $current_per_room_night - $previous_per_room_night;
 
-                                    $last_year_percantage = ($current_per_room_night != 0) ? floatval((($last_year_deference * 100) / $current_per_room_night)) : 0;
+                                    $last_year_percantage = ($previous_per_room_night != 0) ? floatval(((number_format($last_year_deference) * 100) / number_format($previous_per_room_night))) : 0;
 
                                     ?>
 
@@ -677,7 +677,7 @@ $optionintvalue = array();
 
                                 $last_year_deference = $current_year['total_utility_cost'] - $previous_year['total_utility_cost'];
 
-                                $last_year_percantage = ($current_year['total_utility_cost'] != 0) ? (($last_year_deference * 100) / $current_year['total_utility_cost']) : 0 ;
+                                $last_year_percantage = ($previous_year['total_utility_cost'] != 0) ? (($last_year_deference * 100) / $previous_year['total_utility_cost']) : 0 ;
 
 
 
@@ -689,7 +689,7 @@ $optionintvalue = array();
 
                                 $budget_deference = $current_year['total_utility_cost'] - $current_year['total_budget_cost'];
 
-                                $budget_percantage = ( $current_year['total_utility_cost'] !=0 ) ? floatval((($budget_deference * 100) / $current_year['total_utility_cost'])) : 0;
+                                $budget_percantage = ( $current_year['total_budget_cost'] !=0 ) ? floatval((($budget_deference * 100) / $current_year['total_budget_cost'])) : 0;
 
                                 ?>
 
@@ -723,7 +723,7 @@ $optionintvalue = array();
 
                                 $last_year_deference = $current_year['total_utility_cost_per_roomnight'] - $previous_year['total_utility_cost_per_roomnight'];
 
-                                $last_year_percantage = ($current_year['total_utility_cost_per_roomnight'] != 0) ? (($last_year_deference * 100) / $current_year['total_utility_cost_per_roomnight']) : 0;
+                                $last_year_percantage = ($previous_year['total_utility_cost_per_roomnight'] != 0) ? (($last_year_deference * 100) / $previous_year['total_utility_cost_per_roomnight']) : 0;
 
                                 ?>
 
