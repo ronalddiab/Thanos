@@ -754,7 +754,7 @@ if (!empty($groupUtilityChartDataArray)) {
 			<div class="article-content notification_div">
 				<ul class="default-listing">
 					<?php
-					if ($notifications or !empty($utilityForLastMonthCompare)) {
+					if ($notifications or !empty($utilityForLastMonthCompare) or !empty($utilityDivergenceCount)) {
 
 			if ($site_detials['show_total_utility_notification']) {
 
@@ -777,6 +777,9 @@ if (!empty($groupUtilityChartDataArray)) {
 				<li class="clearfix notification-status-none"><span>Your <strong>Total Utilities</strong> for <?php echo $filters_notification['currentmonth']; ?> represent <?php echo $total_current_utility_revenue; ?>% of the total <strong>revenue</strong> . <?php echo $filters_notification['previousmonth']; ?> represented <?php echo $total_previous_utility_revenue; ?>%</span></li><?php
 																																																		}
 																																																	    }
+
+																																																	    if (!empty($utilityDivergenceCount)) { ?>
+			    <?php }
 
 																																																	    $current_utility_by_room_night  = 0;
 																																																	    // Total utilities with room nights
@@ -811,6 +814,13 @@ if (!empty($groupUtilityChartDataArray)) {
 																																																		    echo '<li class="clearfix"><span>' . $notifications[$i]['field_label'] . ' is missing</span><a>' . date("F", mktime(0, 0, 0, $notifications[$i]['month'], 10)) . ' - ' . $notifications[$i]['year'] . '</a></li>';
 																																																		}
 																																																	    }
+			?>
+			<?php if(!empty($actionNotifications)){
+				foreach ($actionNotifications as $key => $value) {
+			    ?>
+				<li class="clearfix actionNotifications"><span><?php echo $value['message'].' ('.$value['period'].')'; ?></span></li>
+			<?php } 
+			}
 			?>
 		</ul><?php
 		    } ?>
@@ -850,7 +860,7 @@ if (!empty($groupUtilityChartDataArray)) {
 							if ($progress_chart_utility == 'energy') {
 								$unitDrodownConstant = [
 									'per_rn' => 'EUI (kWh/RN)',
-									'per_meter' => 'EUI (kWh/m²)',
+									'per_meter' => 'EUI (kWh/m²)', 
 								];
 							} else {
 								$unitDrodownConstant = [

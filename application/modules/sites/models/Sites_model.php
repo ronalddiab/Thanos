@@ -2536,7 +2536,20 @@ class Sites_model extends Base_Model
 		$getUtilities_sameMonth_lastYear['natural_gas_fixed_cost'] = ($getUtilities_sameMonth_lastYear['natural_gas_fixed_cost'] != '') ? $getUtilities_sameMonth_lastYear['natural_gas_fixed_cost'] : 0;
 		$getUtilities_sameMonth_lastYear['water_fixed_cost'] = ($getUtilities_sameMonth_lastYear['water_fixed_cost'] != '') ? $getUtilities_sameMonth_lastYear['water_fixed_cost'] : 0;
 		$getUtilities_sameMonth_lastYear['total_fleet_petrol_cost'] = ($getUtilities_sameMonth_lastYear['total_fleet_petrol_cost'] != '') ? $getUtilities_sameMonth_lastYear['total_fleet_petrol_cost'] : 0;
-		$dataCarbon['total_utility_cost_sameMonth_lastYear'] = $getUtilities_sameMonth_lastYear['total_electricity_cost'] + $getUtilities_sameMonth_lastYear['total_fuel_oil_cost'] + $getUtilities_sameMonth_lastYear['total_lpg_cost'] + $getUtilities_sameMonth_lastYear['total_natural_gas_cost'] + $getUtilities_sameMonth_lastYear['district_heating_cost'] + $getUtilities_sameMonth_lastYear['district_cooling_cost'] + $getUtilities_sameMonth_lastYear['water_total_consumption_cost'] + $getUtilities_sameMonth_lastYear['district_heating_fixed_cost'] + $getUtilities_sameMonth_lastYear['district_cooling_fixed_cost'] + $getUtilities_sameMonth_lastYear['lpg_fixed_cost'] + $getUtilities_sameMonth_lastYear['natural_gas_fixed_cost'] + $getUtilities_sameMonth_lastYear['water_fixed_cost'] + $getUtilities_sameMonth_lastYear['total_fleet_petrol_cost'];
+		$dataCarbon['total_utility_cost_sameMonth_lastYear'] =
+			(float)$getUtilities_sameMonth_lastYear['total_electricity_cost']
+			+ (float)$getUtilities_sameMonth_lastYear['total_fuel_oil_cost']
+			+ (float)$getUtilities_sameMonth_lastYear['total_lpg_cost']
+			+ (float)$getUtilities_sameMonth_lastYear['total_natural_gas_cost']
+			+ (float)$getUtilities_sameMonth_lastYear['district_heating_cost']
+			+ (float)$getUtilities_sameMonth_lastYear['district_cooling_cost']
+			+ (float)$getUtilities_sameMonth_lastYear['water_total_consumption_cost']
+			+ (float)$getUtilities_sameMonth_lastYear['district_heating_fixed_cost']
+			+ (float)$getUtilities_sameMonth_lastYear['district_cooling_fixed_cost']
+			+ (float)$getUtilities_sameMonth_lastYear['lpg_fixed_cost']
+			+ (float)$getUtilities_sameMonth_lastYear['natural_gas_fixed_cost']
+			+ (float)$getUtilities_sameMonth_lastYear['water_fixed_cost']
+			+ (float)$getUtilities_sameMonth_lastYear['total_fleet_petrol_cost'];
 		$dataCarbon['variation_ytd'] = $variation_ytd;
 		$dataCarbon['variationPercentage_ytd'] = $total_utility_costs_variation != '' ? ($variation_ytd * 100) / $total_utility_costs_variation : 0;
 		$sameMonth_lastYear_cost_roomNight = ($dataCarbon['total_utility_cost_sameMonth_lastYear'] != '' && $getUtilities_sameMonth_lastYear['total_room_night']) ? $dataCarbon['total_utility_cost_sameMonth_lastYear'] / $getUtilities_sameMonth_lastYear['total_room_night'] : 0;
@@ -2987,16 +3000,18 @@ class Sites_model extends Base_Model
 			'reports/reports_model',
 			'sites/site_waste_model'
 		]);
-
-		$siteCronSettings = $this->sites_model->getSiteCronSettings();
-		$monthlyTickedSites = array();
-		foreach ($siteCronSettings as $cronSettings) {
-			if ($cronSettings['site_cron_settings']['cron_type'] == 'MONTHLY') {
-				array_push($monthlyTickedSites, $cronSettings['site_cron_settings']['site_id']);
+		if($isAttachment == 1){
+			
+			$siteCronSettings = $this->sites_model->getSiteCronSettings();
+			$monthlyTickedSites = array();
+			foreach ($siteCronSettings as $cronSettings) {
+				if ($cronSettings['site_cron_settings']['cron_type'] == 'MONTHLY') {
+					array_push($monthlyTickedSites, $cronSettings['site_cron_settings']['site_id']);
+				}
 			}
-		}
-		if (empty($monthlyTickedSites)) {
-			return false;
+			if (empty($monthlyTickedSites)) {
+				return false;
+			}
 		}
 
         $parentHeading = [
@@ -3132,8 +3147,10 @@ class Sites_model extends Base_Model
 	    if (!empty($sites)) {
 			foreach ($sites as $key => $site_detail) {
 				$site_id = $site_detail['id'];
-				if(!in_array($site_id, $monthlyTickedSites)) {
-					continue;
+				if($isAttachment == 1){
+					if(!in_array($site_id, $monthlyTickedSites)) {
+						continue;
+					}
 				}
 				$progressOnTarget = [];
 				$progressOnTargetWasteYtd = [];
@@ -3194,11 +3211,14 @@ class Sites_model extends Base_Model
 				$progressOnTarget = $this->reports_model->getProgressOnTargetWithBaseline($baselineYear);
 				$landfillData = $this->site_waste_model->getWasteYTDByDestinationAndCurrMonth($site_detail, 'landfill', $currentYear, $currMonth);
 				$totalWasteData = $this->site_waste_model->getWasteYTDByDestinationAndCurrMonth($site_detail, '', $currentYear, $currMonth);
+				$wasteDiversionNumeratorData = $this->site_waste_model->getWasteYTDByDestinationAndCurrMonth($site_detail, 'recycling_wte', $currentYear, $currMonth);
 
 				$progressOnTarget[$baselineYear]['landfill_waste_target'] = isset($landfillData['YTDTotal'][$baselineYear]) ? $landfillData['YTDTotal'][$baselineYear] : 0;
 				$progressOnTarget[$baselineYear]['total_waste_target'] = isset($totalWasteData['YTDTotal'][$baselineYear]) ? $totalWasteData['YTDTotal'][$baselineYear] : 0;
+				$progressOnTarget[$baselineYear]['waste_diversion_numerator'] = isset($wasteDiversionNumeratorData['YTDTotal'][$baselineYear]) ? $wasteDiversionNumeratorData['YTDTotal'][$baselineYear] : 0;
 				$progressOnTarget[$running_year]['landfill_waste_target'] = isset($landfillData['YTDTotal'][$running_year]) ? $landfillData['YTDTotal'][$running_year] : 0;
 				$progressOnTarget[$running_year]['total_waste_target'] = isset($totalWasteData['YTDTotal'][$running_year]) ? $totalWasteData['YTDTotal'][$running_year] : 0;
+				$progressOnTarget[$running_year]['waste_diversion_numerator'] = isset($wasteDiversionNumeratorData['YTDTotal'][$running_year]) ? $wasteDiversionNumeratorData['YTDTotal'][$running_year] : 0;
 
 				$progressValueWasteYTD = [
 					'total_waste_baseline_target' => isset($totalWasteData['YTDTotal'][$baselineYear]) ? $totalWasteData['YTDTotal'][$baselineYear] : 0,
