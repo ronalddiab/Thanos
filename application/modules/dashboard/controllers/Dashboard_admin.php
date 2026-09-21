@@ -477,6 +477,10 @@ class Dashboard_admin extends Base_Admin_Controller {
 	    'end_month' => intval(date('m'))
 	);
 	$sitescustomnotification = $this->dashboard_model->getSiteCustomNotifications($site_cuatom_notification_filter);
+	$actionNotifications = $this->dashboard_model->get_action_notifications($site_id, $current_month,$current_year);
+	$this->load->model('import/import_model');
+	// $utilityDivergences = $this->import_model->getDailyMonthlyDivergences(1, $site_id);
+	// $utilityDivergenceCount = !empty($utilityDivergences) ? count($utilityDivergences) : 0;
 
 	// ========================================
 	// Assign all data to view array
@@ -534,6 +538,8 @@ class Dashboard_admin extends Base_Admin_Controller {
 	// Notifications
 	$data['notifications'] = $notifications;
 	$data['sitescustomnotification'] = $sitescustomnotification;
+	$data['actionNotifications'] = $actionNotifications;
+	// $data['utilityDivergenceCount'] = $utilityDivergenceCount;
 
 	// Utility cost data
 	$data['total_utility_cost_currentMonth'] = $currentMonthData['total_utility_cost'] ?? 0;

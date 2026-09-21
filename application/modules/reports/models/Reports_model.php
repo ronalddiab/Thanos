@@ -3172,21 +3172,21 @@ class Reports_model extends Base_Model
 	switch ($filters['performance_chart_type']) {
 	    case 'utility_consumption':
 		$data['performanceReportArray'] = $performanceReportData['UtilityConsumption'];
-		$data['y_axis'] = 'Kwh';
+		$data['y_axis'] = 'kWh';
 		$data['report_title'] = 'Total Energy Consumption';
-		$data['unit'] = 'Kwh';
+		$data['unit'] = 'kWh';
 		break;
 
 	    case 'utility_consumption_intesity_per_square_footage':
 		$data['performanceReportArray'] = $performanceReportData['UtilityConsumptionIntensity'];
-		$data['y_axis'] = 'Kwh'. '/' .  getLocalUnitText($site_detail['id']);
+		$data['y_axis'] = 'kWh'. '/' .  getLocalUnitText($site_detail['id']);
 		$data['report_title'] = 'Total Energy Consumption Intensity (per square '. getLocalUnitFullText($site_detail['id']).')';
 		$data['unit'] = $site_detail['local_currency'] . '/' .  getLocalUnitText($site_detail['id']);
 		break;
 
 	    case 'utility_consumption_intensity_per_room_night':
 		$data['performanceReportArray'] = $performanceReportData['UtilityConsumptionRoomNight'];
-		$data['y_axis'] = 'Kwh/RN';
+		$data['y_axis'] = 'kWh/RN';
 		$data['report_title'] = 'Total Energy Consumption Intensity (per room-night)';
 		$data['unit'] = $site_detail['local_currency'] . '/room-night)';
 		break;

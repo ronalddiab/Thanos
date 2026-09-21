@@ -103,8 +103,10 @@ $cost_share = ($kwh_pie_chart_previousmonth_cost_water_share+
                     <td width="100%">
                         <table width="100%" border="0" cellpadding="0" cellspacing="0">
                             <tr>
-                                <td width="50%"><img height="350" src="<?php echo $pieChartNew2Img; ?>" /></td>
-                                <td width="50%"><img height="350" src="<?php echo $pieChartNew3Img; ?>" /></td>
+
+                                <td width="50%"><img height="400" src="<?php echo $pieChartImgkwhMonthly; ?>" /></td>
+
+                                <td width="50%"><img height="400" src="<?php echo $pieChartImgcostMonthly; ?>" /></td>
                             </tr>
                             <tr>
                                 <td valign="top">

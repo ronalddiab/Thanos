@@ -189,32 +189,29 @@ $popupInfoArray = [
 			<?php echo form_label(lang('enter-location'), 'location', ["class" => "input-label"]); ?>
 		    </div>
 		    <div class="form-col-3">
-			<?php
-			$site_location_latitude_data = array(
-			    'name' => 'site_location_latitude',
-			    'id' => 'site_location_latitude',
-			    'value' => set_value('site_location_latitude', ((isset($site_location_latitude)) ? html_entity_decode($site_location_latitude) : '')),
-			    'class' => 'input-control',
-			    'maxlength' => 20
-			);
-			?>
-			<?php echo form_input($site_location_latitude_data); ?><span class="validation_error"><?php echo form_error('site_location_latitude'); ?></span>
-			<?php echo form_label(lang('latitude'), 'latitude', ["class" => "input-label"]); ?>
-		    </div>
-		    <div class="form-col-3">
-			<?php
-			$site_location_longitude_data = array(
-			    'name' => 'site_location_longitude',
-			    'id' => 'site_location_longitude',
-			    'value' => set_value('site_location_longitude', ((isset($site_location_longitude)) ? html_entity_decode($site_location_longitude) : '')),
-			    'class' => 'input-control',
-			    'maxlength' => 20
-			);
-			?>
-			<?php echo form_input($site_location_longitude_data); ?><span class="validation_error"><?php echo form_error('site_location_longitude'); ?></span>
-			<!-- <label class="input-label">Longitude</label> -->
-			<?php echo form_label(lang('longitude'), 'longitude', ["class" => "input-label"]); ?>
-		    </div>
+				<div class="form-dropdown">
+					<?php
+					$country_list_defualt = array('' => 'Select Country');
+					$country_list = $country_list_defualt + $country_list;
+					echo form_dropdown('country_id', $country_list, $country_id, 'data-type = "custom-dropdown" id="country_id" class="country_dropdown"');
+					?><span class="validation_error region-error"><?php echo form_error('country_id'); ?></span>
+				</div>
+				<?php echo form_label(lang('country').'*', 'country_id', ["class" => "input-label"]); ?>
+			</div>
+			<div class="form-col-3">
+				<?php
+				$city = array(
+					'name' => 'city',
+					'id' => 'city',
+					'value' => set_value('city', ((isset($city)) ? htmlspecialchars_decode($city) : '')),
+					'class' => 'input-control',
+				);
+				?>
+				<?php echo form_input($city); ?><span class="validation_error"><?php echo form_error('city'); ?></span>
+				<?php echo form_label(lang('enter-city'), 'city', ["class" => "input-label"]); ?>
+			</div>
+		</div>
+		<div class="row">
 		    <div class="form-col-3">
 			<?php
 			$station_id_data = array(
@@ -338,16 +335,6 @@ $popupInfoArray = [
 			    $region_list = $region_list_defualt + $region_list;
 			    echo form_dropdown('region_id', $region_list, $region_id, 'data-type = "custom-dropdown" id="region_id"');
 			    ?><span class="validation_error region-error"><?php echo form_error('region_id'); ?></span>
-			</div>
-		    </div>
-		    <label class="main-label col-sm-4 rightLabel"><?php echo lang('country'); ?> <span class="asterisk">*</span></label>
-		    <div class="form-col-3">
-			<div class="form-dropdown">
-			    <?php
-			    $country_list_defualt = array('' => 'Select Country');
-			    $country_list = $country_list_defualt + $country_list;
-			    echo form_dropdown('country_id', $country_list, $country_id, 'data-type = "custom-dropdown" id="country_id" class="country_dropdown"');
-			    ?><span class="validation_error region-error"><?php echo form_error('country_id'); ?></span>
 			</div>
 		    </div>
 		</div>
@@ -552,336 +539,356 @@ $popupInfoArray = [
 		    </div>
 		</div>
 	    </li>
-	    <br/>
-	    <div class="form-group-label form-outer-block">
-		<div class="row add-row">
-		    <div class="col-md-2">
-			<h5><strong><?php echo "Areas"; ?></strong></h5>
-		    </div>
-		    <div class="col-md-3">
-			<div class="form-dropdown">
-			    <?php
-			    $areaUpdateList = array('0' => 'None Selected', '1' => 'Update with new information', '2' => 'View update history');
-			    echo form_dropdown('siteArea[area_update_type]', $areaUpdateList, $areaUpdate, 'data-type = "custom-dropdown" onchange="jsFunction(this.value);"');
-			    ?>
+	</ul>
+	<br/>
+	<div class="row col-sm-12">
+		<div class="row col-sm-12">
+			<div class="form-control-block col-sm-12 panel panel-primary" style="border-color:#d4d4d4ff !important;">
+				<div class="panel-heading row add-row" style="background-image:linear-gradient(to bottom, #d4d4d4ff 0px, #d4d4d4ff 100%) !important;color:black;border-color: #d4d4d4ff !important;">
+					<h5><?php echo "Locked Fields - Update Section"; ?></h5>
+				</div>
+				<div class="panel-body">
+					<div class="row">
+						<div class="col-md-3">
+							<div class="form-dropdown">
+								<?php
+								$areaUpdateList = array('0' => 'None Selected', '1' => 'Update with new information', '2' => 'View update history');
+								echo form_dropdown('siteArea[area_update_type]', $areaUpdateList, $areaUpdate, 'data-type = "custom-dropdown" onchange="jsFunction(this.value);"');
+								?>
+							</div>
+							<?php echo form_label('Value Update', 'siteArea[area_update_type]', ["class" => "input-label"]); ?>
+						</div>
+						<div class="area-section col-md-9">
+							<div class="col-md-4">
+								<div class="form-dropdown">
+								<?php
+								$areaUpdateField = array(
+									'0' => 'None Selected',
+									'site_builtup_area' => lang('total-built-up-area'),
+									'cooled_builtup_area' => lang('cooled-built-up-area'),
+									'rooms_keys' => lang('room-keys'),
+									'rental_program_residence' => lang('rental-program-residence'),
+									'rental_program_residence_conditioned' => lang('rental-program-residence-conditioned'),
+									'rental_private_residence' => lang('rental-private-residence'),
+									'rental_private_residence_conditioned' => lang('rental-private-residence-conditioned'),
+									'rental_program_residence_suites' => lang('rental-program-residence-suites'),
+									'rental_private_residence_suites' => lang('rental-private-residence-suites'),
+								);
+								echo form_dropdown('siteArea[area_update_field]', $areaUpdateField, $areaUpdate, 'data-type = "custom-dropdown" ');
+								?>
+								</div>
+							</div>
+							<div class="col-md-4">
+								<input type="text" placeholder="Choose Date" id="datepicker" name="siteArea[area_update_date]" value="" class='input-control'/>
+							</div>
+							<div class="col-md-4">
+								<input type="number" step=".01" name="siteArea[area_update_value]" value="" class='input-control'/>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
-			<?php echo form_label('Value Update', 'siteArea[area_update_type]', ["class" => "input-label"]); ?>
-		    </div>
-		    <div class="area-section">
-			<div class="col-md-3">
-			    <div class="form-dropdown">
-				<?php
-				$areaUpdateField = array(
-				    '0' => 'None Selected',
-				    'site_builtup_area' => lang('total-built-up-area'),
-				    'cooled_builtup_area' => lang('cooled-built-up-area'),
-				    'rooms_keys' => lang('room-keys'),
-				    'rental_program_residence' => lang('rental-program-residence'),
-				    'rental_program_residence_conditioned' => lang('rental-program-residence-conditioned'),
-				    'rental_private_residence' => lang('rental-private-residence'),
-				    'rental_private_residence_conditioned' => lang('rental-private-residence-conditioned'),
-				    'rental_program_residence_suites' => lang('rental-program-residence-suites'),
-				    'rental_private_residence_suites' => lang('rental-private-residence-suites'),
-				);
-				echo form_dropdown('siteArea[area_update_field]', $areaUpdateField, $areaUpdate, 'data-type = "custom-dropdown" ');
-				?>
-			    </div>
-			</div>
-			<div class="col-md-2">
-			    <input type="text" placeholder="Choose Date" id="datepicker" name="siteArea[area_update_date]" value="" class='input-control'/>
-			</div>
-			<div class="col-md-2">
-			    <input type="number" step=".01" name="siteArea[area_update_value]" value="" class='input-control'/>
-			</div>
-		    </div>
 		</div>
-	    </div>
+	</div>
+	<br/>
+	<div class="form-group-label form-outer-block">
+		<div class="row">
+			<div class="col-md-2">
+				<h5><strong><?php echo "Areas"; ?></strong></h5>
+			</div>				
+			<div class="col-md-10">
+			</div>
+		</div>
+	</div>
 
-	    <ul class="form-outer-block">
+	<div class="form-control-block col-sm-12 panel panel-primary" style="border-color:#d4d4d4ff !important;">
+		<ul class="form-outer-block" style="border-color:#d4d4d4ff !important;">
+			<li>
+				<label class="main-label"><?php echo lang('total-built-up-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['total_built_up'];?>" data-original-title="<?php echo $popupInfoArray['total_built_up'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
+				<div class="row">
+				<div class="form-col-3">
+					<?php
+					$site_builtup_area_disabled = array(
+									'value' => (isset($site_builtup_area) ? $site_builtup_area : ''),
+					'class' => 'input-control floatcheck',
+					'id' => 'site_builtup_area_disabled',
+					'disabled' => 'disabled'
+					);
+					?>
+					<input type="hidden" id="site_builtup_area" name="site_builtup_area" value="<?php echo isset($site_builtup_area) ? htmlspecialchars_decode($site_builtup_area) : 0;?>">
+					<?php echo form_input($site_builtup_area_disabled); ?><span class="validation_error"><?php echo form_error('site_builtup_area'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				<label class="main-label col-sm-4 rightLabel"><?php echo lang('cooled-built-up-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['cooled_built_up'];?>" data-original-title="<?php echo $popupInfoArray['cooled_built_up'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
+				<div class="form-col-3">
+					<?php
+					$cooled_builtup_area = array(
+					'name' => 'cooled_builtup_area',
+					'id' => 'cooled_builtup_area',
+									'value' => ((isset($cooled_builtup_area)) ? htmlspecialchars_decode($cooled_builtup_area) : 0),
+					'class' => 'input-control floatcheck',
+					'style' => 'cursor: not-allowed !important;pointer-events: none !important;'
+					);
+					?>
+					<?php echo form_input($cooled_builtup_area); ?><span class="validation_error"><?php echo form_error('cooled_builtup_area'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				</div>
+			</li>
+			<li>
+				<label class="main-label"><?php echo lang('hotel-rooms-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['room_areas'];?>" data-original-title="<?php echo $popupInfoArray['room_areas'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
+				<div class="row">
+				<div class="form-col-3">
+					<?php
+					$hotel_rooms_area = array(
+					'name' => 'hotel_rooms_area',
+					'id' => 'hotel_rooms_area',
+					'value' => set_value('hotel_rooms_area', ((isset($hotel_rooms_area)) ? htmlspecialchars_decode($hotel_rooms_area) : '')),
+					'class' => 'input-control floatcheck',
+					// 'style' => 'cursor: not-allowed !important;pointer-events: none !important;'
+					);
+					?>
+					<?php echo form_input($hotel_rooms_area); ?><span class="validation_error"><?php echo form_error('hotel_rooms_area'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				<label class="main-label col-sm-4 rightLabel"><?php echo lang('residential-common-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['residence_common_area'];?>" data-original-title="<?php echo $popupInfoArray['residence_common_area'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
+				<div class="form-col-3">
+					<?php
+					$residential_common_area = array(
+					'name' => 'residential_common_area',
+					'id' => 'residential_common_area',
+					'value' => set_value('residential_common_area', ((isset($residential_common_area)) ? htmlspecialchars_decode($residential_common_area) : '')),
+					'class' => 'input-control floatcheck'
+					);
+					?>
+					<?php echo form_input($residential_common_area); ?><span class="validation_error"><?php echo form_error('residential_common_area'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				</div>
+			</li>
+			<li>
+				<label class="main-label"><?php echo lang('rental-program-residence').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['rental_built_up'];?>" data-original-title="<?php echo $popupInfoArray['rental_built_up'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
+				<div class="row">
+				<div class="form-col-3">
+					<?php
+					$rental_program_residence = array(
+					'name' => 'rental_program_residence',
+					'id' => 'rental_program_residence',
+									'value' => ((isset($rental_program_residence)) ? htmlspecialchars_decode($rental_program_residence) : ''),
+					'class' => 'input-control',
+					// 'maxlength' => 5,
+					'style' => 'cursor: not-allowed !important;pointer-events: none !important;'
+					);
+					?>
+					<?php echo form_input($rental_program_residence); ?><span class="validation_error"><?php echo form_error('rental_program_residence'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				<label class="main-label col-sm-4 rightLabel"><?php echo lang('rental-program-residence-conditioned').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['rental_conditioned'];?>" data-original-title="<?php echo $popupInfoArray['rental_conditioned'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
+				<div class="form-col-3">
+					<?php
+					$rental_program_residence_conditioned = array(
+					'name' => 'rental_program_residence_conditioned',
+					'id' => 'rental_program_residence_conditioned',
+									'value' => ((isset($rental_program_residence_conditioned)) ? htmlspecialchars_decode($rental_program_residence_conditioned) : ''),
+					'class' => 'input-control',
+					// 'maxlength' => 5,
+					'style' => 'cursor: not-allowed !important;pointer-events: none !important;'
+					);
+					?>
+					<?php echo form_input($rental_program_residence_conditioned); ?><span class="validation_error"><?php echo form_error('rental_program_residence_conditioned'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				</div>
+			</li>
+			<li>
+				<label class="main-label"><?php echo lang('rental-private-residence').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['private_built_up'];?>" data-original-title="<?php echo $popupInfoArray['private_built_up'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
+				<div class="row">
+				<div class="form-col-3">
+					<?php
+					$rental_private_residence = array(
+					'name' => 'rental_private_residence',
+					'id' => 'rental_private_residence',
+									'value' => ((isset($rental_private_residence)) ? htmlspecialchars_decode($rental_private_residence) : ''),
+					'class' => 'input-control',
+					// 'maxlength' => 5,
+					'style' => 'cursor: not-allowed !important;pointer-events: none !important;'
+					);
+					?>
+					<?php echo form_input($rental_private_residence); ?><span class="validation_error"><?php echo form_error('rental_private_residence'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				<label class="main-label col-sm-4 rightLabel"><?php echo lang('rental-private-residence-conditioned').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['private_conditioned'];?>" data-original-title="<?php echo $popupInfoArray['private_conditioned'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
+				<div class="form-col-3">
+					<?php
+					$rental_private_residence_conditioned = array(
+					'name' => 'rental_private_residence_conditioned',
+					'id' => 'rental_private_residence_conditioned',
+									'value' => ((isset($rental_private_residence_conditioned)) ? htmlspecialchars_decode($rental_private_residence_conditioned) : ''),
+					'class' => 'input-control',
+					// 'maxlength' => 5,
+					'style' => 'cursor: not-allowed !important;pointer-events: none !important;'
+					);
+					?>
+					<?php echo form_input($rental_private_residence_conditioned); ?><span class="validation_error"><?php echo form_error('rental_private_residence_conditioned'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				</div>
+			</li>
+			<li>
+				<label class="main-label"><?php echo lang('employee-living-quarters-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['employee_quarter'];?>" data-original-title="<?php echo $popupInfoArray['employee_quarter'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
+				<div class="row">
+				<div class="form-col-3">
+					<?php
+					$employee_living_quarters_area = array(
+					'name' => 'employee_living_quarters_area',
+					'id' => 'employee_living_quarters_area',
+					'value' => set_value('employee_living_quarters_area', ((isset($employee_living_quarters_area)) ? htmlspecialchars_decode($employee_living_quarters_area) : '')),
+					'class' => 'input-control floatcheck'
+					);
+					?>
+					<?php echo form_input($employee_living_quarters_area); ?><span class="validation_error"><?php echo form_error('employee_living_quarters_area'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				<label class="main-label col-sm-4 rightLabel"><?php echo lang('total-meeting-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['meeting_area'];?>" data-original-title="<?php echo $popupInfoArray['meeting_area'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
+				<div class="form-col-3">
+					<?php
+					$total_meeting_area = array(
+					'name' => 'total_meeting_area',
+					'id' => 'total_meeting_area',
+					'value' => set_value('total_meeting_area', ((isset($total_meeting_area)) ? htmlspecialchars_decode($total_meeting_area) : '')),
+					'class' => 'input-control floatcheck'
+					);
+					?>
+					<?php echo form_input($total_meeting_area); ?><span class="validation_error"><?php echo form_error('total_meeting_area'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				</div>
+			</li>
+			<li>
+				<label class="main-label"><?php echo lang('restaurant-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['open_air'];?>" data-original-title="<?php echo $popupInfoArray['open_air'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
+				<div class="row">
+				<div class="form-col-3">
+					<?php
+					$restaurant_area = array(
+					'name' => 'restaurant_area',
+					'id' => 'restaurant_area',
+					'value' => set_value('restaurant_area', ((isset($restaurant_area)) ? htmlspecialchars_decode($restaurant_area) : '')),
+					'class' => 'input-control floatcheck'
+					);
+					?>
+					<?php echo form_input($restaurant_area); ?><span class="validation_error"><?php echo form_error('restaurant_area'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				<label class="main-label col-sm-4 rightLabel"><?php echo lang('landscaped-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['outdoor_area'];?>" data-original-title="<?php echo $popupInfoArray['outdoor_area'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
+				<div class="form-col-3">
+					<?php
+					$landscaped_area = array(
+					'name' => 'landscaped_area',
+					'id' => 'landscaped_area',
+					'value' => set_value('landscaped_area', ((isset($landscaped_area)) ? htmlspecialchars_decode($landscaped_area) : '')),
+					'class' => 'input-control floatcheck'
+					);
+					?>
+					<?php echo form_input($landscaped_area); ?><span class="validation_error"><?php echo form_error('landscaped_area'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				</div>
+			</li>
+			<li>
+				<label class="main-label"><?php echo lang('spa-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['spa_area'];?>" data-original-title="<?php echo $popupInfoArray['spa_area'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
+				<div class="row">
+				<div class="form-col-3">
+					<?php
+					$total_spa_area = array(
+					'name' => 'total_spa_area',
+					'id' => 'total_spa_area',
+					'value' => set_value('total_spa_area', ((isset($total_spa_area)) ? htmlspecialchars_decode($total_spa_area) : '')),
+					'class' => 'input-control floatcheck'
+					);
+					?>
+					<?php echo form_input($total_spa_area); ?><span class="validation_error"><?php echo form_error('total_spa_area'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				<!-- <label class="main-label col-sm-4 rightLabel"><?php echo lang('guest-room-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="Info" data-original-title="Info"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
+				<div class="form-col-3">
+					<?php
+					$total_guest_room_area = array(
+					'name' => 'total_guest_room_area',
+					'id' => 'total_guest_room_area',
+					'value' => set_value('total_guest_room_area', ((isset($total_guest_room_area)) ? htmlspecialchars_decode($total_guest_room_area) : '')),
+					'class' => 'input-control floatcheck'
+					);
+					?>
+					<?php echo form_input($total_guest_room_area); ?><span class="validation_error"><?php echo form_error('total_guest_room_area'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div> -->
+				</div>
+			</li>
+			<li>
+				<label class="main-label"><?php echo lang('room-area-rental-program').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['room_area_rental_program'];?>" data-original-title="<?php echo $popupInfoArray['room_area_rental_program'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
+				<div class="row">
+				<div class="form-col-3">
+					<?php
+					$room_area_rental_program = array(
+					'name' => 'room_area_rental_program',
+					'id' => 'room_area_rental_program',
+					'value' => set_value('room_area_rental_program', ((isset($room_area_rental_program)) ? htmlspecialchars_decode($room_area_rental_program) : '')),
+					'class' => 'input-control floatcheck'
+					);
+					?>
+					<?php echo form_input($room_area_rental_program); ?><span class="validation_error"><?php echo form_error('room_area_rental_program'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				<label class="main-label col-sm-4 rightLabel"><?php echo lang('room-area-private-residence').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['room_area_private_residence'];?>" data-original-title="<?php echo $popupInfoArray['room_area_private_residence'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
+				<div class="form-col-3">
+					<?php
+					$room_area_private_residence = array(
+					'name' => 'room_area_private_residence',
+					'id' => 'room_area_private_residence',
+					'value' => set_value('room_area_private_residence', ((isset($room_area_private_residence)) ? htmlspecialchars_decode($room_area_private_residence) : '')),
+					'class' => 'input-control floatcheck'
+					);
+					?>
+					<?php echo form_input($room_area_private_residence); ?><span class="validation_error"><?php echo form_error('room_area_private_residence'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				</div>
+			</li>
+			<li>
+				<label class="main-label"><?php echo lang('indoor-parking-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['indoor_parking'];?>" data-original-title="<?php echo $popupInfoArray['indoor_parking'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
+				<div class="row">
+				<div class="form-col-3">
+					<?php
+					$indoor_parking_area = array(
+					'name' => 'indoor_parking_area',
+					'id' => 'indoor_parking_area',
+					'value' => set_value('indoor_parking_area', ((isset($indoor_parking_area)) ? htmlspecialchars_decode($indoor_parking_area) : '')),
+					'class' => 'input-control floatcheck'
+					);
+					?>
+					<?php echo form_input($indoor_parking_area); ?><span class="validation_error"><?php echo form_error('indoor_parking_area'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				<label class="main-label col-sm-4 rightLabel"><?php echo lang('f-b-service').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['f_b_service'];?>" data-original-title="<?php echo $popupInfoArray['f_b_service'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
+				<div class="form-col-3">
+					<?php
+					$f_b_service = array(
+					'name' => 'f_b_service',
+					'id' => 'f_b_service',
+					'value' => set_value('f_b_service', ((isset($f_b_service)) ? htmlspecialchars_decode($f_b_service) : '')),
+					'class' => 'input-control floatcheck'
+					);
+					?>
+					<?php echo form_input($f_b_service); ?><span class="validation_error"><?php echo form_error('f_b_service'); ?></span>
+					<label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
+				</div>
+				</div>
+			</li>
+		</ul>
+	</div>
+	<ul class="form-group-label form-outer-block">
 		<li>
-		    <label class="main-label"><?php echo lang('total-built-up-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['total_built_up'];?>" data-original-title="<?php echo $popupInfoArray['total_built_up'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
-		    <div class="row">
-			<div class="form-col-3">
-			    <?php
-			    $site_builtup_area_disabled = array(
-								'value' => (isset($site_builtup_area) ? $site_builtup_area : ''),
-				'class' => 'input-control floatcheck',
-				'id' => 'site_builtup_area_disabled',
-				'disabled' => 'disabled'
-			    );
-			    ?>
-			    <input type="hidden" id="site_builtup_area" name="site_builtup_area" value="<?php echo isset($site_builtup_area) ? htmlspecialchars_decode($site_builtup_area) : 0;?>">
-			    <?php echo form_input($site_builtup_area_disabled); ?><span class="validation_error"><?php echo form_error('site_builtup_area'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-			<label class="main-label col-sm-4 rightLabel"><?php echo lang('cooled-built-up-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['cooled_built_up'];?>" data-original-title="<?php echo $popupInfoArray['cooled_built_up'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
-			<div class="form-col-3">
-			    <?php
-			    $cooled_builtup_area = array(
-				'name' => 'cooled_builtup_area',
-				'id' => 'cooled_builtup_area',
-								'value' => ((isset($cooled_builtup_area)) ? htmlspecialchars_decode($cooled_builtup_area) : 0),
-				'class' => 'input-control floatcheck',
-				'style' => 'cursor: not-allowed !important;pointer-events: none !important;'
-			    );
-			    ?>
-			    <?php echo form_input($cooled_builtup_area); ?><span class="validation_error"><?php echo form_error('cooled_builtup_area'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-		    </div>
-		</li>
-		<li>
-		    <label class="main-label"><?php echo lang('hotel-rooms-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['room_areas'];?>" data-original-title="<?php echo $popupInfoArray['room_areas'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
-		    <div class="row">
-			<div class="form-col-3">
-			    <?php
-			    $hotel_rooms_area = array(
-				'name' => 'hotel_rooms_area',
-				'id' => 'hotel_rooms_area',
-				'value' => set_value('hotel_rooms_area', ((isset($hotel_rooms_area)) ? htmlspecialchars_decode($hotel_rooms_area) : '')),
-				'class' => 'input-control floatcheck',
-				'style' => 'cursor: not-allowed !important;pointer-events: none !important;'
-			    );
-			    ?>
-			    <?php echo form_input($hotel_rooms_area); ?><span class="validation_error"><?php echo form_error('hotel_rooms_area'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-			<label class="main-label col-sm-4 rightLabel"><?php echo lang('residential-common-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['residence_common_area'];?>" data-original-title="<?php echo $popupInfoArray['residence_common_area'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
-			<div class="form-col-3">
-			    <?php
-			    $residential_common_area = array(
-				'name' => 'residential_common_area',
-				'id' => 'residential_common_area',
-				'value' => set_value('residential_common_area', ((isset($residential_common_area)) ? htmlspecialchars_decode($residential_common_area) : '')),
-				'class' => 'input-control floatcheck'
-			    );
-			    ?>
-			    <?php echo form_input($residential_common_area); ?><span class="validation_error"><?php echo form_error('residential_common_area'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-		    </div>
-		</li>
-		<li>
-		    <label class="main-label"><?php echo lang('rental-program-residence').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['rental_built_up'];?>" data-original-title="<?php echo $popupInfoArray['rental_built_up'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
-		    <div class="row">
-			<div class="form-col-3">
-			    <?php
-			    $rental_program_residence = array(
-				'name' => 'rental_program_residence',
-				'id' => 'rental_program_residence',
-								'value' => ((isset($rental_program_residence)) ? htmlspecialchars_decode($rental_program_residence) : ''),
-				'class' => 'input-control',
-				// 'maxlength' => 5,
-				'style' => 'cursor: not-allowed !important;pointer-events: none !important;'
-			    );
-			    ?>
-			    <?php echo form_input($rental_program_residence); ?><span class="validation_error"><?php echo form_error('rental_program_residence'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-			<label class="main-label col-sm-4 rightLabel"><?php echo lang('rental-program-residence-conditioned').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['rental_conditioned'];?>" data-original-title="<?php echo $popupInfoArray['rental_conditioned'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
-			<div class="form-col-3">
-			    <?php
-			    $rental_program_residence_conditioned = array(
-				'name' => 'rental_program_residence_conditioned',
-				'id' => 'rental_program_residence_conditioned',
-								'value' => ((isset($rental_program_residence_conditioned)) ? htmlspecialchars_decode($rental_program_residence_conditioned) : ''),
-				'class' => 'input-control',
-				// 'maxlength' => 5,
-				'style' => 'cursor: not-allowed !important;pointer-events: none !important;'
-			    );
-			    ?>
-			    <?php echo form_input($rental_program_residence_conditioned); ?><span class="validation_error"><?php echo form_error('rental_program_residence_conditioned'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-		    </div>
-		</li>
-		<li>
-		    <label class="main-label"><?php echo lang('rental-private-residence').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['private_built_up'];?>" data-original-title="<?php echo $popupInfoArray['private_built_up'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
-		    <div class="row">
-			<div class="form-col-3">
-			    <?php
-			    $rental_private_residence = array(
-				'name' => 'rental_private_residence',
-				'id' => 'rental_private_residence',
-								'value' => ((isset($rental_private_residence)) ? htmlspecialchars_decode($rental_private_residence) : ''),
-				'class' => 'input-control',
-				// 'maxlength' => 5,
-				'style' => 'cursor: not-allowed !important;pointer-events: none !important;'
-			    );
-			    ?>
-			    <?php echo form_input($rental_private_residence); ?><span class="validation_error"><?php echo form_error('rental_private_residence'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-			<label class="main-label col-sm-4 rightLabel"><?php echo lang('rental-private-residence-conditioned').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['private_conditioned'];?>" data-original-title="<?php echo $popupInfoArray['private_conditioned'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
-			<div class="form-col-3">
-			    <?php
-			    $rental_private_residence_conditioned = array(
-				'name' => 'rental_private_residence_conditioned',
-				'id' => 'rental_private_residence_conditioned',
-								'value' => ((isset($rental_private_residence_conditioned)) ? htmlspecialchars_decode($rental_private_residence_conditioned) : ''),
-				'class' => 'input-control',
-				// 'maxlength' => 5,
-				'style' => 'cursor: not-allowed !important;pointer-events: none !important;'
-			    );
-			    ?>
-			    <?php echo form_input($rental_private_residence_conditioned); ?><span class="validation_error"><?php echo form_error('rental_private_residence_conditioned'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-		    </div>
-		</li>
-		<li>
-		    <label class="main-label"><?php echo lang('employee-living-quarters-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['employee_quarter'];?>" data-original-title="<?php echo $popupInfoArray['employee_quarter'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
-		    <div class="row">
-			<div class="form-col-3">
-			    <?php
-			    $employee_living_quarters_area = array(
-				'name' => 'employee_living_quarters_area',
-				'id' => 'employee_living_quarters_area',
-				'value' => set_value('employee_living_quarters_area', ((isset($employee_living_quarters_area)) ? htmlspecialchars_decode($employee_living_quarters_area) : '')),
-				'class' => 'input-control floatcheck'
-			    );
-			    ?>
-			    <?php echo form_input($employee_living_quarters_area); ?><span class="validation_error"><?php echo form_error('employee_living_quarters_area'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-			<label class="main-label col-sm-4 rightLabel"><?php echo lang('total-meeting-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['meeting_area'];?>" data-original-title="<?php echo $popupInfoArray['meeting_area'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
-			<div class="form-col-3">
-			    <?php
-			    $total_meeting_area = array(
-				'name' => 'total_meeting_area',
-				'id' => 'total_meeting_area',
-				'value' => set_value('total_meeting_area', ((isset($total_meeting_area)) ? htmlspecialchars_decode($total_meeting_area) : '')),
-				'class' => 'input-control floatcheck'
-			    );
-			    ?>
-			    <?php echo form_input($total_meeting_area); ?><span class="validation_error"><?php echo form_error('total_meeting_area'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-		    </div>
-		</li>
-		<li>
-		    <label class="main-label"><?php echo lang('restaurant-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['open_air'];?>" data-original-title="<?php echo $popupInfoArray['open_air'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
-		    <div class="row">
-			<div class="form-col-3">
-			    <?php
-			    $restaurant_area = array(
-				'name' => 'restaurant_area',
-				'id' => 'restaurant_area',
-				'value' => set_value('restaurant_area', ((isset($restaurant_area)) ? htmlspecialchars_decode($restaurant_area) : '')),
-				'class' => 'input-control floatcheck'
-			    );
-			    ?>
-			    <?php echo form_input($restaurant_area); ?><span class="validation_error"><?php echo form_error('restaurant_area'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-			<label class="main-label col-sm-4 rightLabel"><?php echo lang('landscaped-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['outdoor_area'];?>" data-original-title="<?php echo $popupInfoArray['outdoor_area'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
-			<div class="form-col-3">
-			    <?php
-			    $landscaped_area = array(
-				'name' => 'landscaped_area',
-				'id' => 'landscaped_area',
-				'value' => set_value('landscaped_area', ((isset($landscaped_area)) ? htmlspecialchars_decode($landscaped_area) : '')),
-				'class' => 'input-control floatcheck'
-			    );
-			    ?>
-			    <?php echo form_input($landscaped_area); ?><span class="validation_error"><?php echo form_error('landscaped_area'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-		    </div>
-		</li>
-		<li>
-		    <label class="main-label"><?php echo lang('spa-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['spa_area'];?>" data-original-title="<?php echo $popupInfoArray['spa_area'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
-		    <div class="row">
-			<div class="form-col-3">
-			    <?php
-			    $total_spa_area = array(
-				'name' => 'total_spa_area',
-				'id' => 'total_spa_area',
-				'value' => set_value('total_spa_area', ((isset($total_spa_area)) ? htmlspecialchars_decode($total_spa_area) : '')),
-				'class' => 'input-control floatcheck'
-			    );
-			    ?>
-			    <?php echo form_input($total_spa_area); ?><span class="validation_error"><?php echo form_error('total_spa_area'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-			<!-- <label class="main-label col-sm-4 rightLabel"><?php echo lang('guest-room-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="Info" data-original-title="Info"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
-			<div class="form-col-3">
-			    <?php
-			    $total_guest_room_area = array(
-				'name' => 'total_guest_room_area',
-				'id' => 'total_guest_room_area',
-				'value' => set_value('total_guest_room_area', ((isset($total_guest_room_area)) ? htmlspecialchars_decode($total_guest_room_area) : '')),
-				'class' => 'input-control floatcheck'
-			    );
-			    ?>
-			    <?php echo form_input($total_guest_room_area); ?><span class="validation_error"><?php echo form_error('total_guest_room_area'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div> -->
-		    </div>
-		</li>
-		<li>
-		    <label class="main-label"><?php echo lang('room-area-rental-program').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['room_area_rental_program'];?>" data-original-title="<?php echo $popupInfoArray['room_area_rental_program'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
-		    <div class="row">
-			<div class="form-col-3">
-			    <?php
-			    $room_area_rental_program = array(
-				'name' => 'room_area_rental_program',
-				'id' => 'room_area_rental_program',
-				'value' => set_value('room_area_rental_program', ((isset($room_area_rental_program)) ? htmlspecialchars_decode($room_area_rental_program) : '')),
-				'class' => 'input-control floatcheck'
-			    );
-			    ?>
-			    <?php echo form_input($room_area_rental_program); ?><span class="validation_error"><?php echo form_error('room_area_rental_program'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-			<label class="main-label col-sm-4 rightLabel"><?php echo lang('room-area-private-residence').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['room_area_private_residence'];?>" data-original-title="<?php echo $popupInfoArray['room_area_private_residence'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
-			<div class="form-col-3">
-			    <?php
-			    $room_area_private_residence = array(
-				'name' => 'room_area_private_residence',
-				'id' => 'room_area_private_residence',
-				'value' => set_value('room_area_private_residence', ((isset($room_area_private_residence)) ? htmlspecialchars_decode($room_area_private_residence) : '')),
-				'class' => 'input-control floatcheck'
-			    );
-			    ?>
-			    <?php echo form_input($room_area_private_residence); ?><span class="validation_error"><?php echo form_error('room_area_private_residence'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-		    </div>
-		</li>
-		<li>
-		    <label class="main-label"><?php echo lang('indoor-parking-area').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['indoor_parking'];?>" data-original-title="<?php echo $popupInfoArray['indoor_parking'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
-		    <div class="row">
-			<div class="form-col-3">
-			    <?php
-			    $indoor_parking_area = array(
-				'name' => 'indoor_parking_area',
-				'id' => 'indoor_parking_area',
-				'value' => set_value('indoor_parking_area', ((isset($indoor_parking_area)) ? htmlspecialchars_decode($indoor_parking_area) : '')),
-				'class' => 'input-control floatcheck'
-			    );
-			    ?>
-			    <?php echo form_input($indoor_parking_area); ?><span class="validation_error"><?php echo form_error('indoor_parking_area'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-			<label class="main-label col-sm-4 rightLabel"><?php echo lang('f-b-service').'('.getLocalUnitText($site_id).')'; ?><a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['f_b_service'];?>" data-original-title="<?php echo $popupInfoArray['f_b_service'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a> <span class="asterisk">*</span></label>
-			<div class="form-col-3">
-			    <?php
-			    $f_b_service = array(
-				'name' => 'f_b_service',
-				'id' => 'f_b_service',
-				'value' => set_value('f_b_service', ((isset($f_b_service)) ? htmlspecialchars_decode($f_b_service) : '')),
-				'class' => 'input-control floatcheck'
-			    );
-			    ?>
-			    <?php echo form_input($f_b_service); ?><span class="validation_error"><?php echo form_error('f_b_service'); ?></span>
-			    <label class="input-label"><?php echo getLocalUnitText($site_id); ?></label>
-			</div>
-		    </div>
-		</li>
-		<hr/>
-		<li>
-		    <label class="main-label"><?php echo lang('outdoor-pools'); ?> <span class="asterisk">*</span></label>
+		    <label for="outdoor_pools" class="main-label" style="top: 94%;"><?php echo lang('outdoor-pools'); ?> <span class="asterisk">*</span></label>
 		    <div class="row">
 			<div class="form-col-3">
 			    <?php
@@ -896,7 +903,7 @@ $popupInfoArray = [
 			    <?php echo form_input($outdoor_pools); ?><span class="validation_error"><?php echo form_error('outdoor_pools'); ?></span>
 			    <label class="input-label"><?php echo lang('m3'); ?></label>
 			</div>
-			<label class="main-label col-sm-4 rightLabel"><?php echo lang('indoor-pools'); ?> <span class="asterisk">*</span></label>
+			<label for="indoor_pools" class="main-label col-sm-4 rightLabel"><?php echo lang('indoor-pools'); ?> <span class="asterisk">*</span></label>
 			<div class="form-col-3">
 			    <?php
 			    $indoor_pools = array(
@@ -913,10 +920,9 @@ $popupInfoArray = [
 
 		    </div>
 		</li>
-	    </ul>
 	    <br/>
 	    <li>
-	    <label class="main-label"><?php echo lang('laundry'); ?> <a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['laundry'];?>" data-original-title="<?php echo $popupInfoArray['laundry'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
+	    <label for="laundry" class="main-label"><?php echo lang('laundry'); ?> <a href="#" data-toggle="tooltip" data-container="article"  data-placement="right" title="<?php echo $popupInfoArray['laundry'];?>" data-original-title="<?php echo $popupInfoArray['laundry'];?>"><i class="fa fa-info-circle" aria-hidden="true"></i></a></label>
 		<div class="row">
 		    <div class="form-col-3">
 			<div class="form-dropdown">
@@ -941,7 +947,7 @@ $popupInfoArray = [
 	    </li>
 
 	    <li>
-		<label class="main-label"><?php echo lang('substation-rating'); ?> <span class="asterisk">*</span></label>
+		<label for="substation_rating" class="main-label"><?php echo lang('substation-rating'); ?> <span class="asterisk">*</span></label>
 		<?php
 		//echo form_label(lang('substation-rating'), 'substation_rating', ["class" => "main-label"]);
 		if (!empty($substations)) {
@@ -1946,48 +1952,8 @@ $popupInfoArray = [
 	</ul> -->
 
 	<div class="row col-sm-12">
-	    <div class="row col-sm-12">
-		<ul class="form-outer-block">
-		    <li style="padding-left: 0px;">
-			<div class="row">
-			    <div class="form-col-12 form-control-block col-sm-12">
-				<div class="form-control-block col-sm-6">
-				    <div class="form-group-label">
-					<h5><strong><?php echo lang('utility_choice'); ?></strong></h5>
-				    </div>
-				</div>
-				<div class="form-control-block col-sm-6">
-				    <div class="form-group-label">
-					<h5><strong><?php echo lang('regression_analysis'); ?></strong></h5>
-				    </div>
-				</div>
-				<div class="form-control-block col-sm-1 text-center pull-right">
-				    <strong>Report</strong>
-				</div>
-				<div class="form-control-block col-sm-1 text-center pull-right">
-				    <strong>R<sup>2</sup></strong>
-				</div>
-				<div class="form-control-block col-sm-1 text-center pull-right">
-				    <strong>Days</strong>
-				</div>
-				<div class="form-control-block col-sm-1 text-center pull-right">
-				    <strong>X</strong>
-				</div>
-				<div class="form-control-block col-sm-1 text-center pull-right">
-				    <strong>OCC</strong>
-				</div>
-				<div class="form-control-block col-sm-1 text-center pull-right">
-				    <strong>HDD</strong>
-				</div>
-				<div class="form-control-block col-sm-1 text-center pull-right">
-				    <strong>CDD</strong>
-				</div>
-			    </div>
-			</div>
-		    </li>
-		</ul>
 		<?php
-		$utilities = array('show_utility_electricity', 'show_utility_fuel_oil', 'show_utility_lpg', 'show_utility_water', 'show_utility_irrigation_water', 'show_utility_natural_gas', 'show_utility_district_cooling', 'show_utility_district_heating', 'show_utility_water_waste', 'show_waste_management');
+		$utilities = array('show_utility_electricity', 'show_utility_fuel_oil', 'show_utility_lpg', 'show_utility_water', 'show_utility_irrigation_water', 'show_utility_natural_gas', 'show_utility_district_cooling', 'show_utility_district_heating', 'show_utility_water_waste', 'show_waste_management', 'show_utility_fleet');
 		$utilities_unit = array('show_utility_electricity_unit', 'show_utility_fuel_oil_unit', 'show_utility_lpg_unit', 'show_utility_water_unit', 'show_utility_irrigation_water_unit', 'show_utility_natural_gas_unit', 'show_utility_district_cooling_unit', 'show_utility_district_heating_unit', 'show_utility_water_waste_unit', 'show_waste_management_unit');
 		$energy_modelling = [
 		    'show_utility_electricity' => 'electricity',
@@ -2001,141 +1967,190 @@ $popupInfoArray = [
 		];
 		$decimal_point = 2;
 		?>
-		<?php
-		foreach ($utilities as $utility) {
-		    if (!empty($energy_modelling_data[$energy_modelling[$utility]])) {
-			$energy_cdd = round((float) ($energy_modelling_data[$energy_modelling[$utility]]['cdd']), $decimal_point);
-			$energy_hdd = round((float) ($energy_modelling_data[$energy_modelling[$utility]]['hdd']), $decimal_point);
-			$energy_occupancy = round((float) ($energy_modelling_data[$energy_modelling[$utility]]['occupancy']), $decimal_point);
-			$energy_x = round((float) ($energy_modelling_data[$energy_modelling[$utility]]['x']), $decimal_point);
-			$energy_days = round((float) ($energy_modelling_data[$energy_modelling[$utility]]['days']), $decimal_point);
-			$energy_r2 = round((float) ($energy_modelling_data[$energy_modelling[$utility]]['r2']), $decimal_point);
-			$energy_report = !empty($energy_modelling_data[$energy_modelling[$utility]]) && !empty($energy_modelling_data[$energy_modelling[$utility]]['report']) ? 1 : 0;
-		    } else {
-			$energy_cdd = 0;
-			$energy_hdd = 0;
-			$energy_occupancy = 0;
-			$energy_x = 0;
-			$energy_days = 0;
-			$energy_r2 = 0;
-			$energy_report = 0;
-		    }
-		    ?>
-		    <ul class="form-outer-block">
-			<li style="padding-left: 0px; margin-bottom: 0px;">
-			    <div class="row">
-				<div class="form-col-12 form-control-block col-sm-12">
-				    <div class="form-control-block col-sm-2">
-					<?php echo form_label(lang($utility), $utility, ["class" => "main-label"]); ?>
-				    </div>
-				    <div class="form-control-block col-sm-2">
-					<label class="radio-outer"><input type="radio" <?php
-					    if (isset($$utility) && $$utility == 1) {
-						echo 'checked="checked"';
-					    }
-					    ?> class="icheck" name="<?php echo $utility; ?>" value="1">Yes</label>
-					<label><input type="radio" <?php
-					    if (!isset($$utility) || $$utility == 0) {
-						echo 'checked="checked"';
-					    }
-					    ?> class="icheck" name="<?php echo $utility; ?>" value="0">No</label>
-				    </div>
-				    <div class="form-control-block col-sm-1" style="margin-left: 0px;margin-right: 0px;padding-left: 0px;padding-right: 0px;">
-				    <?php if ($utility != 'show_waste_management' && $utility != 'show_utility_water_waste' && $utility != 'show_utility_irrigation_water') { ?>
-					<div class="form-dropdown">
-					    <?php
-					    $list = $energy_modelling_data[$energy_modelling[$utility]]['utility_unit_dropdown'];
-					    $name = 'utility_unit_'.$energy_modelling[$utility];
-					    $value = $energy_modelling_data[$energy_modelling[$utility]]['utility_unit_value'];
-					    echo form_dropdown($name, $list, $value, 'data-type = "custom-dropdown" ');
-					    ?>
-					</div>
-				    <?php } ?>
-				    </div>
-				    <!-- <div class="form-control-block col-sm-1">
-					&nbsp;
-				    </div> -->
-				    <?php if ($utility != 'show_waste_management' && $utility != 'show_utility_water_waste' && $utility != 'show_utility_irrigation_water') { ?>
-					<div class="form-control-block col-sm-1">
-					    <input name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][cdd]'; ?>' type='text' class='input-control' placeholder='CDD' value="<?php echo $energy_cdd; ?>">
-					    <span class="validation_error"><?php echo form_error('energy_modeling[' . $energy_modelling[$utility] . '][cdd]'); ?></span>
-					</div>
-					<div class="form-control-block col-sm-1">
-					    <input name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][hdd]'; ?>' type='text' class='input-control' placeholder='HDD' value="<?php echo $energy_hdd; ?>">
-					    <span class="validation_error"><?php echo form_error('energy_modeling[' . $energy_modelling[$utility] . '][hdd]'); ?></span>
-					</div>
-					<div class="form-control-block col-sm-1">
-					    <input name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][occupancy]'; ?>' type='text' class='input-control' placeholder='OCC' value="<?php echo $energy_occupancy; ?>">
-					    <span class="validation_error"><?php echo form_error('energy_modeling[' . $energy_modelling[$utility] . '][occupancy]'); ?></span>
-					</div>
-					<div class="form-control-block col-sm-1">
-					    <input name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][x]'; ?>' type='text' class='input-control' placeholder='X' value="<?php echo $energy_x; ?>">
-					    <span class="validation_error"><?php echo form_error('energy_modeling[' . $energy_modelling[$utility] . '][x]'); ?></span>
-					</div>
-					<div class="form-control-block col-sm-1">
-					    <input name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][days]'; ?>' type='text' class='input-control' placeholder='X' value="<?php echo $energy_days; ?>">
-					    <span class="validation_error"><?php echo form_error('energy_modeling[' . $energy_modelling[$utility] . '][days]'); ?></span>
-					</div>
-					<div class="form-control-block col-sm-1">
-					    <input name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][r2]'; ?>' type='text' class='input-control' placeholder='X' value="<?php echo $energy_r2; ?>">
-					    <span class="validation_error"><?php echo form_error('energy_modeling[' . $energy_modelling[$utility] . '][r2]'); ?></span>
-					</div>
-					<div class="form-control-block col-sm-1">
-					<input type="checkbox" <?php
-					    if (isset($energy_report) && $energy_report == 1) {
-						echo 'checked="checked"';
-					    }
-					    ?> class="icheck" name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][report]'; ?>' value="1">
-					</div>
-				    <?php }
-				    ?>
-				</div>
-			    </div>
-			</li>
-			<?php if ($utility == 'show_utility_district_heating') { ?>
-			    <li style="padding-left:0px; margin-bottom:0px;left:35px;">
+		<div class="row col-sm-12">
+			<div class="form-control-block col-sm-5 panel panel-primary" style="border-color:#d4d4d4ff !important;">
 				<div class="row">
-				    <div class="form-col-12 form-control-block col-sm-12">
-					<div class="form-control-block col-sm-2" style="width: 10%;">
-					    <?php echo form_label('Select Source', 'Select Source', ["class" => "main-label"]); ?>
+					<div class="panel-heading" style="background-image:linear-gradient(to bottom, #d4d4d4ff 0px, #d4d4d4ff 100%) !important;">
+						<h5 style="text-align: center;"><strong><?php echo lang('utility_choice'); ?></strong></h5>
 					</div>
-					<div class="form-control-block col-sm-3">
-					    <div class="form-dropdown">
-						<?php
-						$list = [
-						    0=>'Select Source',
-						    1=>lang('show_utility_steam_boiler'),
-						    2=>lang('show_utility_hot_water_boiler')
-						];
-						$name = 'show_utility_district_heating_boiler';
-						$value = $show_utility_district_heating_boiler;
-						echo form_dropdown($name, $list, $value, 'data-type = "custom-dropdown" ');
-						?>
-					    </div>
-					</div>
-				    </div>
 				</div>
-			    </li>
-			<?php } ?>
-
-		    </ul>
-
-		<?php }
-		?>
-		<ul class="form-outer-block">
-		    <li style="padding-left:10px;">
-			<div class="row">
-			    <div class="form-control-block col-sm-2">
+				<div class="row">
+					<div class="form-control-block col-sm-12"></br></div>
+				</div>
+				<div class="row">
+					<?php foreach ($utilities as $utility) { ?>
+					<div class="form-col-12 form-control-block col-sm-12">
+						<div class="form-control-block col-sm-4">
+						<?php echo form_label(lang($utility), $utility, ["class" => "main-label"]); ?>
+						</div>
+						<div class="form-control-block col-sm-4">
+						<label class="radio-outer"><input type="radio" <?php
+							if (isset($$utility) && $$utility == 1) {
+							echo 'checked="checked"';
+							}
+							?> class="icheck" name="<?php echo $utility; ?>" value="1">Yes</label>
+						<label><input type="radio" <?php
+							if (!isset($$utility) || $$utility == 0) {
+							echo 'checked="checked"';
+							}
+							?> class="icheck" name="<?php echo $utility; ?>" value="0">No</label>
+						</div>
+						<div class="form-control-block col-sm-4" style="margin-left: 0px;margin-right: 0px;padding-left: 0px;padding-right: 0px;">
+						<?php if ($utility != 'show_waste_management' && $utility != 'show_utility_water_waste' && $utility != 'show_utility_irrigation_water' && $utility != 'show_utility_fleet') { ?>
+						<div class="form-dropdown">
+							<?php
+							$list = $energy_modelling_data[$energy_modelling[$utility]]['utility_unit_dropdown'];
+							$name = 'utility_unit_'.$energy_modelling[$utility];
+							$value = $energy_modelling_data[$energy_modelling[$utility]]['utility_unit_value'];
+							echo form_dropdown($name, $list, $value, 'data-type = "custom-dropdown" ');
+							?>
+							</div>
+							<?php } ?>
+							</div>
+						</div>
+						<?php if($utility == 'show_utility_district_heating') { ?>
+							<br/>
+							<div class="row col-sm-12">
+								<div class="form-control-block col-sm-4" style="padding-left: 10%;">
+									<?php echo form_label('Select Source', 'Select Source'); ?>
+								</div>
+								<div class="form-control-block col-sm-6">
+									<div class="form-dropdown">
+									<?php
+									$list = [
+										0=>'Select Source',
+										1=>lang('show_utility_steam_boiler'),
+										2=>lang('show_utility_hot_water_boiler')
+									];
+									$name = 'show_utility_district_heating_boiler';
+									$value = $show_utility_district_heating_boiler;
+									echo form_dropdown($name, $list, $value, 'data-type = "custom-dropdown" ');
+									?>
+									</div>
+								</div>
+								<div class="col-md-2"></div>
+							</div>
+						<?php } ?>
+					<?php } ?>
+				</div>
+			</div>
+			<div class="form-control-block col-sm-7 panel panel-primary" style="border-color:#d4d4d4ff !important;">
+				<div class="row">
+					<div class="panel-heading" style="background-image:linear-gradient(to bottom, #d4d4d4ff 0px, #d4d4d4ff 100%) !important;">
+						<h5 style="text-align: center;"><strong><?php echo lang('regression_analysis'); ?></strong></h5>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-control-block col-sm-12">
+						<div class="form-control-block col-sm-1 text-center pull-right">
+							<strong>Report</strong>
+						</div>
+						<div class="form-control-block col-sm-1 text-center pull-right">
+							<strong>R<sup>2</sup></strong>
+						</div>
+						<div class="form-control-block col-sm-2 text-center pull-right">
+							<strong>Days</strong>
+						</div>
+						<div class="form-control-block col-sm-2 text-center pull-right">
+							<strong>X</strong>
+						</div>
+						<div class="form-control-block col-sm-2 text-center pull-right">
+							<strong>OCC</strong>
+						</div>
+						<div class="form-control-block col-sm-2 text-center pull-right">
+							<strong>HDD</strong>
+						</div>
+						<div class="form-control-block col-sm-2 text-center pull-right">
+							<strong>CDD</strong>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<?php
+					foreach ($utilities as $utility) {
+						if (!empty($energy_modelling_data[$energy_modelling[$utility]])) {
+						$energy_cdd = round((float) ($energy_modelling_data[$energy_modelling[$utility]]['cdd']), $decimal_point);
+						$energy_hdd = round((float) ($energy_modelling_data[$energy_modelling[$utility]]['hdd']), $decimal_point);
+						$energy_occupancy = round((float) ($energy_modelling_data[$energy_modelling[$utility]]['occupancy']), $decimal_point);
+						$energy_x = round((float) ($energy_modelling_data[$energy_modelling[$utility]]['x']), $decimal_point);
+						$energy_days = round((float) ($energy_modelling_data[$energy_modelling[$utility]]['days']), $decimal_point);
+						$energy_r2 = round((float) ($energy_modelling_data[$energy_modelling[$utility]]['r2']), $decimal_point);
+						$energy_report = !empty($energy_modelling_data[$energy_modelling[$utility]]) && !empty($energy_modelling_data[$energy_modelling[$utility]]['report']) ? 1 : 0;
+						} else {
+						$energy_cdd = 0;
+						$energy_hdd = 0;
+						$energy_occupancy = 0;
+						$energy_x = 0;
+						$energy_days = 0;
+						$energy_r2 = 0;
+						$energy_report = 0;
+						}
+					?>
+						<?php if ($utility != 'show_waste_management' && $utility != 'show_utility_water_waste' && $utility != 'show_utility_irrigation_water' && $utility != 'show_utility_fleet') { ?>
+						<div class="form-col-12 form-control-block col-sm-12">
+						<div class="form-control-block col-sm-2">
+							<input name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][cdd]'; ?>' type='text' class='input-control' placeholder='CDD' value="<?php echo $energy_cdd; ?>">
+							<span class="validation_error"><?php echo form_error('energy_modeling[' . $energy_modelling[$utility] . '][cdd]'); ?></span>
+						</div>
+						<div class="form-control-block col-sm-2">
+							<input name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][hdd]'; ?>' type='text' class='input-control' placeholder='HDD' value="<?php echo $energy_hdd; ?>">
+							<span class="validation_error"><?php echo form_error('energy_modeling[' . $energy_modelling[$utility] . '][hdd]'); ?></span>
+						</div>
+						<div class="form-control-block col-sm-2">
+							<input name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][occupancy]'; ?>' type='text' class='input-control' placeholder='OCC' value="<?php echo $energy_occupancy; ?>">
+							<span class="validation_error"><?php echo form_error('energy_modeling[' . $energy_modelling[$utility] . '][occupancy]'); ?></span>
+						</div>
+						<div class="form-control-block col-sm-2">
+							<input name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][x]'; ?>' type='text' class='input-control' placeholder='X' value="<?php echo $energy_x; ?>">
+							<span class="validation_error"><?php echo form_error('energy_modeling[' . $energy_modelling[$utility] . '][x]'); ?></span>
+						</div>
+						<div class="form-control-block col-sm-2">
+							<input name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][days]'; ?>' type='text' class='input-control' placeholder='X' value="<?php echo $energy_days; ?>">
+							<span class="validation_error"><?php echo form_error('energy_modeling[' . $energy_modelling[$utility] . '][days]'); ?></span>
+						</div>
+						<div class="form-control-block col-sm-1">
+							<input name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][r2]'; ?>' type='text' class='input-control' placeholder='X' value="<?php echo $energy_r2; ?>">
+							<span class="validation_error"><?php echo form_error('energy_modeling[' . $energy_modelling[$utility] . '][r2]'); ?></span>
+						</div>
+						<div class="form-control-block col-sm-1">
+						<input type="checkbox" <?php
+							if (isset($energy_report) && $energy_report == 1) {
+							echo 'checked="checked"';
+							}
+							?> class="icheck" name='<?php echo 'energy_modeling[' . $energy_modelling[$utility] . '][report]'; ?>' value="1">
+						</div>
+					</div>
+						<?php }  else { ?>
+						<div class="form-col-12 form-control-block col-sm-12">
+						<div class="form-col-12 form-control-block col-sm-12">
+							<div class="form-control-block col-sm-12">
+								</br>
+							</div>
+						</div>
+						</div>
+					<?php } 
+					?>
+					<?php } ?>
+					<div class="form-col-12 form-control-block col-sm-12" style="padding-bottom: 1px;">
+						<div class="form-col-12 form-control-block col-sm-12">
+							<div class="form-control-block col-sm-12">
+								<br>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row col-sm-12">
+			<div class="form-control-block col-sm-2">
 				<?php echo form_label(lang('baseline_regression_year'), 'Reference Year', ["class" => "main-label"]); ?>
-			    </div>
-			    <div class="col-sm-2">
+			</div>
+			<div class="form-control-block col-sm-3">
 				<input type="text" name="baseline_regression_year" placeholder="Enter Year" class='input-control' value="<?php echo $baseline_regression_year; ?>">
 				<span class="validation_error"><?php echo form_error('baseline_regression_year'); ?></span>
-			    </div>
 			</div>
-		    </li>
-		</ul>
-	    </div>
+			<div class="col-sm-7"></div>
+		</div>
 	</div>
 
 	<?php /*         * * Daily reading settings start ** */ ?>
@@ -2737,16 +2752,6 @@ if ($is_site_logo_exists == '0') {
 		site_location_name: {
 		    required: true,
 		    maxlength: 50
-		},
-		site_location_latitude: {
-		    required: true,
-		    maxlength: 20
-			    //digits: true
-		},
-		site_location_longitude: {
-		    required: true,
-		    maxlength: 20
-			    //digits: true
 		},
 		station_id: {
 		    required: true,

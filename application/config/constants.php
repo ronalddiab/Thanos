@@ -67,6 +67,12 @@ define('DISTRICT_HEATING', "kWh,Steam lb,Steam Mlbs,mmBTU");
 
 define('EMISSION_FACTOR_UNIT_PERCENTAGE', '%');
 define('EMISSION_FACTOR_UNIT_WASTE_MT', 'KgCO2e/MT');
+define('WASTE_EF_TCO2E_SHORT_TON_TO_KGCO2E_MT', 1102.3113);
+define('WASTE_EF_IMPORT_GROUP_SEPARATOR', ' | ');
+define('WASTE_EF_UNIT_TCO2E_SHORT_TON', 'tCO2e/short ton');
+define('WASTE_EF_UNIT_KGCO2E_MT', 'kgCO2e/MT');
+define('WASTE_EF_IMPORT_SUBCOL_TCO2E', 'tCO2e/short ton');
+define('WASTE_EF_IMPORT_SUBCOL_KGCO2E', 'kgCO2e/MT');
 define('EMISSION_FACTOR_UNIT_PASSENGER_KM', 'KgCO2e/passenger-km');
 define('EMISSION_FACTOR_UNIT_KM', 'KgCO2e/km');
 define('EMISSION_FACTOR_UNIT_KG_LAUNDRY', 'KgCO2e/kg laundry');

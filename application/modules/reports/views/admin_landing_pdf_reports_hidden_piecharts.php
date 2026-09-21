@@ -68,8 +68,8 @@ $cost_pie_chart_pre_h_sum = ($cost_pie_chart_pre['electricity']+$cost_pie_chart_
                     <td>
                         <table width="100%" border="0" cellpadding="5" cellspacing="0">
                             <tr>
-                                <td width="50%"><img height="350" src="<?php echo $pieChartImg; ?>" /></td>
-                                <td width="50%"><img height="350" src="<?php echo $pieChartNewImg; ?>" /></td>
+                                <td width="50%"><img height="400" src="<?php echo $pieChartImg; ?>" /></td>
+                                <td width="50%"><img height="400" src="<?php echo $pieChartNewImg; ?>" /></td>
                             </tr>
                             <tr>
                                 <td valign="top">

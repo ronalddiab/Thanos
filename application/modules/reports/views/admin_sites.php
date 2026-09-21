@@ -377,7 +377,7 @@ $sites_type = array_merge($sites_type1,$sites_type2,$sites_type3);
 						<div class="row">
 							<?php $export_negative_utility_permission = ($role_id == 1) ? 1 : 0; ?>
 							<?php if($export_negative_utility_permission){ ?>
-								<div class="col-lg-3"><a href="<?php echo site_url() . BASE_ADMIN_URL_CUSTOM; ?>import/checkNegative" class="btn btn-success btn-submit" style="width:250px; padding-left: 5px;padding-right: 5px;"><b><?php echo lang('export-negative-utility');?></b></a></div>
+								<div class="col-lg-3"><a href="<?php echo site_url() . BASE_ADMIN_URL_CUSTOM; ?>import/compareUtility" class="btn btn-success btn-submit" style="width:250px; padding-left: 5px;padding-right: 5px;"><b><?php echo lang('export-negative-utility');?></b></a></div>
 							<?php } ?>
 							<?php $export_utility_updated_log_permission = ($role_id == 1) ? 1 : 0;?>
 							<?php if($export_utility_updated_log_permission){ ?>

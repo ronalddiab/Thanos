@@ -75,20 +75,20 @@ class Site_Waste_model extends Base_Model
         $this->db->where('s.deleted_by', NULL);
         $this->db->where('s.site_id', $this->site_id);
 
-        $this->db->where('s.year_id', $year_id);
-
         /**
-         * MONTH Logic:
-         * - If year exists AND month_id is NULL ? filter only rows where month_id IS NOT NULL
-         * - If month_id is provided ? filter by month_id
-         * - If year_id is NULL ? no month filter
+         * Settings rows have year_id and month_id NULL.
+         * Monthly rows are filtered by year, and by month when provided.
          */
         if ($year_id !== NULL) {
+            $this->db->where('s.year_id', $year_id);
             if ($month_id === NULL) {
                 $this->db->where('s.month_id IS NOT NULL', NULL, FALSE);
             } else {
                 $this->db->where('s.month_id', $month_id);
             }
+        } else {
+            $this->db->where('s.year_id IS NULL', NULL, FALSE);
+            $this->db->where('s.month_id IS NULL', NULL, FALSE);
         }
 
         $query = $this->db->get();
@@ -194,14 +194,14 @@ class Site_Waste_model extends Base_Model
                         AND s.site_id = ?
                         AND s.year_id IS NULL
                         AND s.month_id IS NULL
-                        AND {$destinationCol}
+                        AND `{$destinationCol}`
                         LIMIT 1
                     "; // All Waste
                 $queryResponseTotal = $this->db->query($sqlTotal, [$site_id])->row();
                 if (isset($queryResponseTotal) && !empty($queryResponseTotal)) {
                     $sumPartsTotalWaste[] = $unitMeasureSumExpr($colName);
                 }
-                // Check column name set with recycling destination for Diversion calculation 
+                // Diversion numerator: Recycled + Reused + Composted + WTE + Unknown
                 $sql = "
                     SELECT 1
                     FROM {$this->_table} s
@@ -210,14 +210,14 @@ class Site_Waste_model extends Base_Model
                     AND s.site_id = ?
                     AND s.year_id IS NULL
                     AND s.month_id IS NULL
-                    AND {$destinationCol} not in (1,7) 
+                    AND `{$destinationCol}` in (2,3,4,5,7)
                     LIMIT 1
-                "; // Excluded 1 (Landfill) and 7 (Unknown)
+                "; // 2 Recycling, 3 Reused/Donation, 4 Compost, 5 WTE, 7 Unknown
                 $queryResponseRecycling = $this->db->query($sql, [$site_id])->row();
                 if (isset($queryResponseRecycling) && !empty($queryResponseRecycling)) {
                     $sumPartsUnitMeasuresRecyclings[] = $unitMeasureSumExpr($colName);
                 }
-                // Check column name set with recycling destination + Waste to Energy
+                // Recyclables kg: Recycling + Donation + WTE; WTE is subtracted later
                 $sqlRecyclingWTE = "
                     SELECT 1
                     FROM {$this->_table} s
@@ -226,9 +226,9 @@ class Site_Waste_model extends Base_Model
                     AND s.site_id = ?
                     AND s.year_id IS NULL
                     AND s.month_id IS NULL
-                    AND {$destinationCol} in (2,3,5) 
+                    AND `{$destinationCol}` in (2,3,5)
                     LIMIT 1
-                "; // Only Include 2 (Recycling) and 5 (Waste to Energy)
+                "; // 2 Recycling, 3 Donation/Reuse, 5 WTE
                 $queryResponseRecyclingWTE = $this->db->query($sqlRecyclingWTE, [$site_id])->row();
                 if (isset($queryResponseRecyclingWTE) && !empty($queryResponseRecyclingWTE)) {
                     $sumPartsUnitMeasuresWTE[] = $unitMeasureSumExpr($colName);
@@ -242,7 +242,7 @@ class Site_Waste_model extends Base_Model
                     AND s.site_id = ?
                     AND s.year_id IS NULL
                     AND s.month_id IS NULL
-                    AND {$destinationCol} = 5
+                    AND `{$destinationCol}` = 5
                     LIMIT 1
                 ";
                 $queryResponseWasteToEnergy = $this->db->query($sqlWasteToEnergy, [$site_id])->row();
@@ -2190,6 +2190,17 @@ class Site_Waste_model extends Base_Model
             $this->db->set($data_array);
             $id = $this->db->insert($this->_table);
         } else {
+            $existingRow = isset($dataAlreadyExist[0]['s']) ? $dataAlreadyExist[0]['s'] : [];
+            $skipKeys = array('site_id', 'user_id', 'year_id', 'month_id', 'created_at', 'created_by', 'modified_at', 'modified_by', 'id');
+            foreach ($data_array as $field => $value) {
+                if (in_array($field, $skipKeys, true) || !array_key_exists($field, $existingRow)) {
+                    continue;
+                }
+                if ((string) $existingRow[$field] === (string) $value) {
+                    unset($data_array[$field]);
+                }
+            }
+
             $data_array['modified_at'] = GetCurrentDateTime();
             $data_array['modified_by'] = $this->session->userdata[get_current_section($this, true)]['user_id'];
 
@@ -2207,7 +2218,7 @@ class Site_Waste_model extends Base_Model
 
             $this->db->set($data_array);
             $this->db->update($this->_table);
-            $id = $site_waste_id;
+            $id = isset($existingRow['id']) ? $existingRow['id'] : $site_waste_id;
         }
 
         return $id; 
@@ -2491,10 +2502,18 @@ class Site_Waste_model extends Base_Model
         }
         $groupedParents = groupSelectedItems($columnChecked, $siteId, $currYear, $currMonth);
         $itemwiseTotalWasteArray = [];
+        $wasteItemsToSum = [];
         foreach ($groupedParents as $groupColumns) {
             foreach ($groupColumns as $colName) {
-                if(in_array($colName, $columnChecked)) {
-                    $wasteItem = $colName;
+                $wasteItemsToSum[$colName] = $colName;
+            }
+        }
+        foreach ($columnChecked as $colName) {
+            if (!isset($wasteItemsToSum[$colName]) && !isset($groupedParents[$colName])) {
+                $wasteItemsToSum[$colName] = $colName;
+            }
+        }
+        foreach ($wasteItemsToSum as $wasteItem) {
                     $this->db->select("
                         s.site_id,
                         s.year_id,
@@ -2503,18 +2522,18 @@ class Site_Waste_model extends Base_Model
                         CASE 
                             WHEN s.year_id IS NULL AND s.month_id IS NULL 
                             THEN NULL
-                            ELSE SUM(COALESCE(s.unit_measure_{$wasteItem}, 0))
+                            ELSE SUM(COALESCE(s.`unit_measure_{$wasteItem}`, 0))
                         END AS unit_measure,
 
                         CASE 
                             WHEN s.year_id IS NULL AND s.month_id IS NULL 
-                            THEN s.typical_destination_{$wasteItem}
+                            THEN s.`typical_destination_{$wasteItem}`
                             ELSE NULL
                         END AS typical_destination,
 
                         CASE 
                             WHEN s.year_id IS NULL AND s.month_id IS NULL 
-                            THEN s.unit_measure_dropdown_{$wasteItem}
+                            THEN s.`unit_measure_dropdown_{$wasteItem}`
                             ELSE NULL
                         END AS unit
                     ", false);
@@ -2557,9 +2576,6 @@ class Site_Waste_model extends Base_Model
 
                         $itemwiseTotalWasteArray[$wasteItem][$year] = $row;
                     }
-       
-                }
-            }
         }
         if(!empty($itemwiseTotalWasteArray)) {
             switch ($wasteDestination) {
@@ -2578,14 +2594,14 @@ class Site_Waste_model extends Base_Model
                     });
                     break;
 
-                /* Recycling (2) + Waste to Energy (5) — diversion numerator per property methodology */
+                /* Diversion: Recycled (2) + Reused (3) + Composted (4) + WTE (5) + Unknown (7) */
                 case 'recycling_wte':
                     $itemwiseTotalWasteArray = array_filter($itemwiseTotalWasteArray, function ($item) {
                         if (!isset($item['setting']['typical_destination'])) {
                             return false;
                         }
                         $d = (int) $item['setting']['typical_destination'];
-                        return !in_array($d, [1,7], true);// exclude landfill (1) and unknown (7) only
+                        return in_array($d, [2, 3, 4, 5, 7], true);
                     });
                     break;
 
@@ -2655,7 +2671,7 @@ class Site_Waste_model extends Base_Model
                 'previous' => ['unit_measure' => $prevVal],
             ];
         }
-        // Recyclables: typical_destination 2 only — recycling_wte minus WTE (excludes destination 5)
+        // Recyclables: typical_destination 2 + 3 — recycling_wte minus WTE (excludes destination 5)
         $totalRecyclingWteCurrent = $getUnit($wasteMonthlyData, $currYear, $currMonth, 'recycling_wte_unit_measure');
         $totalRecyclingWtePrevious = $getUnit($wasteMonthlyData, $currYear - 1, $currMonth, 'recycling_wte_unit_measure');
 
@@ -2674,7 +2690,7 @@ class Site_Waste_model extends Base_Model
         $currentTotal = $getUnit($wasteMonthlyData, $currYear, $currMonth, 'total_waste_unit_measure');
         $previousTotal = $getUnit($wasteMonthlyData, $currYear - 1, $currMonth, 'total_waste_unit_measure');
 
-        // Waste diverted (%) — numerators already in kg
+        // Waste diversion rate (%) = (Recycled + Reused + Composted + WTE + Unknown) / Total waste × 100
         $totalRecyclingForDiversionCurrent = $getUnit($wasteMonthlyData, $currYear, $currMonth, 'diverted_recycling_unit_measure');
         $totalRecyclingForDiversionPrevious = $getUnit($wasteMonthlyData, $currYear - 1, $currMonth, 'diverted_recycling_unit_measure');
         $currentDivertedPct = ($currentTotal > 0) ? ($totalRecyclingForDiversionCurrent / $currentTotal) * 100 : 0;
