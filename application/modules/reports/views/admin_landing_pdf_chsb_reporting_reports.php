@@ -190,7 +190,7 @@ if((!empty($measures)) && (!empty($measure_readings)))
                                 //     $measure_readings[5]
                                 // );
                                 ?>
-                                <td align="left"><?php echo $measure_readings[5]['measure_name']; ?> (<?php echo GetSiteUtilityUnitName($utility['site_id'],'electricity');?>)</td>
+                                <td align="left"><?php echo $measure_readings[5]['measure_name']; ?> </td>
                                 <td align="center"><?php echo $measure_readings[5]['count']; ?></td>
                                 <td align="center"><?php echo $measure_readings[5]['low']; ?></td>
 
@@ -218,7 +218,7 @@ if((!empty($measures)) && (!empty($measure_readings)))
                                     $measure_readings[6]
                                 );
                                 ?>
-                                <td align="left"><?php echo $measure_readings[6]['measure_name']; ?> (<?php echo GetSiteUtilityUnitName($utility['site_id'],'electricity');?>)</td>
+                                <td align="left"><?php echo $measure_readings[6]['measure_name']; ?> </td>
                                 <!-- <td align="center"><?php echo $measure_readings[6]['count']; ?></td> -->
                                 <td align="center"><?php echo number_format($measure_readings[6]['low']); ?></td>
 
@@ -246,7 +246,7 @@ if((!empty($measures)) && (!empty($measure_readings)))
                                     $measure_readings[7]
                                 );
                                 ?>
-                                <td align="left"><?php echo $measure_readings[7]['measure_name']; ?> (<?php echo GetSiteUtilityUnitName($utility['site_id'],'water');?>)</td>
+                                <td align="left"><?php echo $measure_readings[7]['measure_name']; ?> </td>
                                 <!-- <td align="center"><?php echo $measure_readings[7]['count']; ?></td> -->
                                 <td align="center"><?php echo number_format($measure_readings[7]['low']); ?></td>
 
@@ -274,7 +274,7 @@ if((!empty($measures)) && (!empty($measure_readings)))
                                 //     $measure_readings[8]
                                 // );
                                 ?>
-                                <td align="left"><?php echo $measure_readings[8]['measure_name']; ?>r (<?php echo GetSiteUtilityUnitName($utility['site_id'],'water');?>)</td>
+                                <td align="left"><?php echo $measure_readings[8]['measure_name']; ?></td>
                                 <td align="center"><?php echo $measure_readings[8]['count']; ?></td>
                                 <td align="center"><?php echo $measure_readings[8]['low']; ?></td>
 
@@ -302,7 +302,7 @@ if((!empty($measures)) && (!empty($measure_readings)))
                                     $measure_readings[9]
                                 );
                                 ?>
-                                <td align="left"><?php echo $measure_readings[9]['measure_name']; ?>r (<?php echo GetSiteUtilityUnitName($utility['site_id'],'water');?>)</td>
+                                <td align="left"><?php echo $measure_readings[9]['measure_name']; ?></td>
                                 <!-- <td align="center"><?php echo $measure_readings[9]['count']; ?></td> -->
                                 <td align="center"><?php echo number_format($measure_readings[9]['low']); ?></td>
 
@@ -330,7 +330,7 @@ if((!empty($measures)) && (!empty($measure_readings)))
                                     $measure_readings[10]
                                 );
                                 ?>
-                                <td align="left"><?php echo $measure_readings[10]['measure_name']; ?>r (<?php echo GetSiteUtilityUnitName($utility['site_id'],'water');?>)</td>
+                                <td align="left"><?php echo $measure_readings[10]['measure_name']; ?></td>
                                 <!-- <td align="center"><?php echo $measure_readings[10]['count']; ?></td> -->
                                 <td align="center"><?php echo number_format($measure_readings[10]['low']); ?></td>
 
@@ -358,7 +358,7 @@ if((!empty($measures)) && (!empty($measure_readings)))
                                     $measure_readings[11]
                                 );
                                 ?>
-                                <td align="left"><?php echo $measure_readings[11]['measure_name']; ?>r (<?php echo GetSiteUtilityUnitName($utility['site_id'],'water');?>)</td>
+                                <td align="left"><?php echo $measure_readings[11]['measure_name']; ?></td>
                                 <!-- <td align="center"><?php echo $measure_readings[11]['count']; ?></td> -->
                                 <td align="center"><?php echo number_format($measure_readings[11]['low']); ?></td>
 
@@ -386,7 +386,7 @@ if((!empty($measures)) && (!empty($measure_readings)))
                                 //     $measure_readings[12]
                                 // );
                                 ?>
-                                <td align="left"><?php echo $measure_readings[12]['measure_name']; ?>r (<?php echo GetSiteUtilityUnitName($utility['site_id'],'water');?>)</td>
+                                <td align="left"><?php echo $measure_readings[12]['measure_name']; ?></td>
                                 <td align="center"><?php echo $measure_readings[12]['count']; ?></td>
                                 <td align="center"><?php echo $measure_readings[12]['low']; ?></td>
 
@@ -414,7 +414,7 @@ if((!empty($measures)) && (!empty($measure_readings)))
                                     $measure_readings[13]
                                 );
                                 ?>
-                                <td align="left"><?php echo $measure_readings[13]['measure_name']; ?>r (<?php echo GetSiteUtilityUnitName($utility['site_id'],'water');?>)</td>
+                                <td align="left"><?php echo $measure_readings[13]['measure_name']; ?></td>
                                 <!-- <td align="center"><?php echo $measure_readings[13]['count']; ?></td> -->
                                 <td align="center"><?php echo number_format($measure_readings[13]['low']); ?></td>
 
@@ -442,7 +442,7 @@ if((!empty($measures)) && (!empty($measure_readings)))
                                     $measure_readings[14]
                                 );
                                 ?>
-                                <td align="left"><?php echo $measure_readings[14]['measure_name']; ?>r (<?php echo GetSiteUtilityUnitName($utility['site_id'],'water');?>)</td>
+                                <td align="left"><?php echo $measure_readings[14]['measure_name']; ?></td>
                                 <!-- <td align="center"><?php echo $measure_readings[14]['count']; ?></td> -->
                                 <td align="center"><?php echo number_format($measure_readings[14]['low']); ?></td>
 
@@ -471,7 +471,7 @@ if((!empty($measures)) && (!empty($measure_readings)))
                                     true
                                 );
                                 ?>
-                                <td align="left"><?php echo $measure_readings[15]['measure_name']; ?> (<?php echo GetSiteUtilityUnitName($utility['site_id'],'electricity');?>)</td>
+                                <td align="left"><?php echo $measure_readings[15]['measure_name']; ?> </td>
                                 <!-- <td align="center"><?php echo $measure_readings[15]['count']; ?></td> -->
                                 <td align="center"><?php echo number_format(($measure_readings[15]['low']*100)).'%'; ?></td>
 
@@ -500,7 +500,7 @@ if((!empty($measures)) && (!empty($measure_readings)))
                                     true
                                 );
                                 ?>
-                                <td align="left"><?php echo $measure_readings[16]['measure_name']; ?> (<?php echo GetSiteUtilityUnitName($utility['site_id'],'electricity');?>)</td>
+                                <td align="left"><?php echo $measure_readings[16]['measure_name']; ?> </td>
                                 <!-- <td align="center"><?php echo $measure_readings[16]['count']; ?></td> -->
                                 <td align="center"><?php echo number_format(($measure_readings[16]['low']*100)).'%'; ?></td>
 
@@ -522,23 +522,23 @@ if((!empty($measures)) && (!empty($measure_readings)))
                             </tr>
 
                             <tr>
-                                <td align="left"><?php echo $measure_readings[17]['measure_name']; ?> (<?php echo GetSiteUtilityUnitName($utility['site_id'],'electricity');?>)</td>
+                                <td align="left"><?php echo $measure_readings[17]['measure_name']; ?> </td>
                                 <!-- <td align="center"><?php echo $measure_readings[17]['count']; ?></td> -->
-                                <td align="center"><?php echo number_format(($measure_readings[17]['low'])); ?></td>
+                                <td align="center"><?php echo number_format(($measure_readings[17]['low']),2); ?></td>
 
-                                <td align="center"><?php echo number_format(($measure_readings[17]['lower_quartile'])); ?></td>
+                                <td align="center"><?php echo number_format(($measure_readings[17]['lower_quartile']),2); ?></td>
 
-                                <td align="center"><?php echo number_format(($measure_readings[17]['mean'])); ?></td>
+                                <td align="center"><?php echo number_format(($measure_readings[17]['mean']),2); ?></td>
 
-                                <td align="center"><?php echo number_format(($measure_readings[17]['median'])); ?></td>
+                                <td align="center"><?php echo number_format(($measure_readings[17]['median']),2); ?></td>
 
-                                <td align="center"><?php echo number_format(($measure_readings[17]['upper_quartile'])); ?></td>
+                                <td align="center"><?php echo number_format(($measure_readings[17]['upper_quartile']),2); ?></td>
 
-                                <td align="center"><?php echo number_format(($measure_readings[17]['high'])); ?></td>
+                                <td align="center"><?php echo number_format(($measure_readings[17]['high']),2); ?></td>
 
                                 <!-- <td align="center"><?php echo number_format(($measure_readings[17]['sd'])); ?></td> -->
 
-                                <td align="center" ><?php echo $measures['ElectricityToNonElectricEnergy']['chsb_value']?number_format(($measures['ElectricityToNonElectricEnergy']['chsb_value'])):''; ?></td>
+                                <td align="center" ><?php echo $measures['ElectricityToNonElectricEnergy']['chsb_value']?number_format(($measures['ElectricityToNonElectricEnergy']['chsb_value']),2):''; ?></td>
 
                             </tr>
 

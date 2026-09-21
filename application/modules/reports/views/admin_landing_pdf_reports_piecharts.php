@@ -103,8 +103,8 @@ $kwh_pie_chart_previousmonth_cost_water_share = ($cost_pie_chart_previousmonth_t
                     <td width="100%">
                         <table width="100%" border="0" cellpadding="0" cellspacing="0">
                             <tr>
-                                <td width="50%"><img height="200" src="<?php echo $pieChartImg; ?>" /></td>
-                                <td width="50%"><img height="200" src="<?php echo $pieChartNewImg; ?>" /></td>
+                                <td width="50%"><img height="400" src="<?php echo $pieChartImg; ?>" /></td>
+                                <td width="50%"><img height="400" src="<?php echo $pieChartNewImg; ?>" /></td>
                             </tr>
                             <tr>
                                 <td valign="top">
@@ -310,8 +310,8 @@ $kwh_pie_chart_previousmonth_cost_water_share = ($cost_pie_chart_previousmonth_t
                     <td width="100%">
                         <table width="100%" border="0" cellpadding="0" cellspacing="0">
                             <tr>
-                                <td width="50%"><img height="200" src="<?php echo $pieChartNew2Img; ?>" /></td>
-                                <td width="50%"><img height="200" src="<?php echo $pieChartNew3Img; ?>" /></td>
+                                <td width="50%"><img height="400" src="<?php echo $pieChartNew2Img; ?>" /></td>
+                                <td width="50%"><img height="400" src="<?php echo $pieChartNew3Img; ?>" /></td>
                             </tr>
                             <tr>
                                 <td valign="top">

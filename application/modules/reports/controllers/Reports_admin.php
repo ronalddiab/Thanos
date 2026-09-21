@@ -6231,7 +6231,7 @@ class Reports_admin extends Base_Admin_Controller
 
 		$data['waste']['total_room_night'] = $data['utility_cost_chart'][$currMonthWid][$currYearWid]['room_night'];
 		$data['waste']['total_guests'] = $data['utility_cost_chart'][$currMonthWid][$currYearWid]['guest_night'];
-		$data['WasteReport'] = $this->site_waste_model->getWasteReportData($site_id, $data['waste'], $currYearWid, $currMonthWid);
+		$data['WasteReport'] = $this->site_waste_model->getWasteReportData($site_id, $data['waste'], $currYearWid, $currMonthWid,true);
 		if(empty($data['WasteReport'])) {
 			$content_reports_waste_report = '';
 		} else {
@@ -6543,245 +6543,73 @@ class Reports_admin extends Base_Admin_Controller
 		$data['measures']['HotelEnergyUsagePerSquareMeter'][date("Y")] = round($utility_kwh_total / $result['site_builtup_area'], 2);
 		$data['measures']['HotelWaterUsagePerOccupiedRoom'][date("Y")] = round($water_total_consumption / $total_room_night, 2);
 		$data['measures']['HotelWaterUsagePerSquareMeter'][date("Y")] = round($water_total_consumption / $result['site_builtup_area'], 2);
-		$chsb_getUtilities = $this->utilities_model->getSiteUtilityRolling12Months(
-			$currYear,
-			$currMonth,
-			$site_id
-		);
-		$chsb_carbon_footPrint = 0;
-		$chsb_utility_kwh_total = 0;
-		$chsb_water_total_consumption = 0;
-		$chsb_total_room_night = 0;
-		$chsb_electricity = 0;
-		$chsb_renewable_energy = 0;
-		$chsb_non_electric_energy = 0;
-		$chsb_days = 0;
-
-		foreach ($chsb_getUtilities as $chsb_utility) {
-
-			$chsb_utilities_month = $chsb_utility['month_id'];
-			$chsb_utilities_year = $chsb_utility['year_id'];
-
-			$chsb_totalElectricyKwh = isset($chsb_utility['total_electricity_kwh'])
-				? $chsb_utility['total_electricity_kwh'] : 0;
-
-			$chsb_totalFuelOil = isset($chsb_utility['total_fuel_oil'])
-				? $chsb_utility['total_fuel_oil'] : 0;
-
-			$chsb_totalNaturalGas = isset($chsb_utility['total_natural_gas'])
-				? $chsb_utility['total_natural_gas'] : 0;
-
-			$chsb_totalLpg = isset($chsb_utility['total_lpg'])
-				? $chsb_utility['total_lpg'] : 0;
-
-			$chsb_heatingDistrict = isset($chsb_utility['district_heating'])
-				? $chsb_utility['district_heating'] : 0;
-
-			$chsb_coolingDistrict = isset($chsb_utility['district_cooling'])
-				? $chsb_utility['district_cooling'] : 0;
-
-			$chsb_lpg = $chsb_totalLpg
-				* getUtilityUnitFactorForConversion($site_id, 'lpg');
-			$chsb_electricity_value = $chsb_totalElectricyKwh 
-				* getUtilityUnitFactorForConversion($site_id, 'electricity');
-			$chsb_natural_gas = $chsb_totalNaturalGas
-				* getUtilityUnitFactorForConversion($site_id, 'natural_gas');
-			$chsb_fuel = $chsb_totalFuelOil
-				* getUtilityUnitFactorForConversion($site_id, 'fuel_oil');
-			$chsb_heating_district = $chsb_heatingDistrict 
-				* getUtilityUnitFactorForConversion($site_id, 'district_heating');
-			$chsb_cooling_district = $chsb_coolingDistrict
-				* getUtilityUnitFactorForConversion($site_id, 'district_cooling');
-			
-
-			$chsb_utility_kwh_total +=
-				$chsb_electricity_value +
-				$chsb_fuel +
-				$chsb_lpg +
-				$chsb_natural_gas +
-				$chsb_heating_district +
-				$chsb_cooling_district;
-
-			$chsb_water_total_consumption +=
-				(isset($chsb_utility['water_total_consumption'])
-					? $chsb_utility['water_total_consumption'] : 0) * getUtilityUnitFactorForConversion($site_id, 'water') * 1000;
-
-			$chsb_total_room_night +=
-				isset($chsb_utility['total_room_night'])
-					? $chsb_utility['total_room_night'] : 0;
-
-			$chsb_electricity += $chsb_electricity_value;
-
-			$chsb_renewable_energy +=
-				isset($chsb_utility['total_renewable_energy_production'])
-					? $chsb_utility['total_renewable_energy_production'] : 0;
-
-			$chsb_non_electric_energy +=
-				$chsb_fuel +
-				$chsb_lpg +
-				$chsb_natural_gas +
-				$chsb_heating_district +
-				$chsb_cooling_district + $chsb_water_total_consumption;
-
-			$chsb_emission_electricity += $chsb_electricity_value * $site_detials['electricity_emission_factor'];
-		$chsb_emission_lpg += $chsb_lpg * $site_detials['lpg_emission_factor'];
-		$chsb_emission_fuel += $chsb_fuel * $site_detials['fuel_emission_factor'];
-		$chsb_emission_natural_gas += $chsb_natural_gas * $site_detials['natural_gas_emission_factor'];
-		$chsb_emission_heating += $chsb_heating_district * $site_detials['district_heating_emission_factor'];
-		$chsb_emission_cooling += $chsb_cooling_district * $site_detials['district_cooling_emission_factor'];
-		$chsb_water += $chsb_water_total_consumption * $site_detials['water_emission_factor'];
-		$chsb_carbon_footPrint = $chsb_emission_electricity + $chsb_emission_lpg + $chsb_emission_fuel + $chsb_emission_natural_gas + $chsb_emission_heating + $chsb_emission_cooling + $chsb_water;
-
-		$chsb_days += cal_days_in_month(
-				CAL_GREGORIAN,
-				$chsb_utilities_month,
-				$chsb_utilities_year
-			);
-		}
-
-		$chsb_rooms = isset($result['rooms_keys']) ? (float)$result['rooms_keys'] : 0;
-
-		$chsb_area = isset($result['cooled_builtup_area'])
-			? (float)$result['cooled_builtup_area'] : 0;
-
-		$chsb_rooms_area = !empty($result['hotel_rooms_area'])
-			? (float)$result['hotel_rooms_area'] : 0;
-
-		$chsb_meeting_area = !empty($result['total_meeting_area'])
-			? (float)$result['total_meeting_area'] : 0;
-		// $chsb_carbon_footPrint = $chsb_carbon_footPrint * 1.02;
-
-		$chsb_rooms_percentage = 0;
-		$chsb_carbon_footPrint_rooms = 0;
-		$chsb_carbon_footPrint_meeting = 0;
-		$chsb_water_total_consumption_rooms = 0;
-		$chsb_water_total_consumption_meeting = 0;
-		$chsb_meeting_hours = 0;
-
-		if (($chsb_rooms_area + $chsb_meeting_area) > 0) {
-
-			$chsb_rooms_percentage = $chsb_rooms_area / ($chsb_rooms_area + $chsb_meeting_area);
-			$chsb_carbon_footPrint_rooms = $chsb_carbon_footPrint * $chsb_rooms_percentage;
-			$chsb_carbon_footPrint_meeting = $chsb_carbon_footPrint * (1 - $chsb_rooms_percentage);
-			$chsb_water_total_consumption_rooms = ($chsb_water_total_consumption / 3) + (($chsb_water_total_consumption * 2 / 3) * $chsb_rooms_percentage);
-			$chsb_water_total_consumption_meeting = ($chsb_water_total_consumption * 2 / 3) * (1 - $chsb_rooms_percentage);
-			$chsb_meeting_hours = $chsb_meeting_area * $chsb_days * 10;
-		}
-
-		$chsb_measure_1 = ($chsb_total_room_night > 0 && $chsb_carbon_footPrint_rooms > 0) ? round($chsb_carbon_footPrint_rooms / $chsb_total_room_night, 2) : null;
-
-		$chsb_measure_2 = $chsb_rooms > 0 ? round($chsb_carbon_footPrint / $chsb_rooms, 2) : null;
-
-		$chsb_measure_3 = $chsb_total_room_night > 0 ? round($chsb_carbon_footPrint / $chsb_total_room_night, 2) : null;
-
-		$chsb_measure_4 = $chsb_area > 0 ? round($chsb_carbon_footPrint / $chsb_area, 2) : null;
-
-		$chsb_measure_5 = $chsb_total_room_night > 0 ? round($chsb_utility_kwh_total / $chsb_total_room_night, 2) : null;
-
-		$chsb_measure_6 = $chsb_area > 0 ? round($chsb_utility_kwh_total / $chsb_area, 2) : null;
-
-		$chsb_measure_7 = $chsb_meeting_hours > 0 ? round($chsb_carbon_footPrint_meeting / $chsb_meeting_hours, 4) : null;
-
-		$chsb_measure_8 = $chsb_total_room_night > 0 ? round($chsb_water_total_consumption / $chsb_total_room_night, 2) : null;
-
-		$chsb_measure_9 = $chsb_area > 0 ? round($chsb_water_total_consumption / $chsb_area, 2) : null;
-
-		$chsb_measure_10 = ($chsb_total_room_night > 0 && $chsb_water_total_consumption_rooms > 0) ? round($chsb_water_total_consumption_rooms / $chsb_total_room_night, 2) : null;
-
-		$chsb_measure_11 = $chsb_meeting_hours > 0 ? round($chsb_water_total_consumption_meeting / $chsb_meeting_hours, 4) : null;
-
-		$chsb_measure_12 =
-			$chsb_utility_kwh_total > 0
-				? round($chsb_renewable_energy / $chsb_utility_kwh_total, 4)
-				: 0;
-
-		$chsb_measure_13 =
-			$chsb_electricity > 0
-				? round($chsb_renewable_energy / $chsb_electricity, 4)
-				: 0;
-
-		$chsb_measure_14 =
-			$chsb_non_electric_energy > 0
-				? round($chsb_electricity / $chsb_non_electric_energy, 3)
-				: null;
-				$chsb_measure_4a =
-			$chsb_measure_4 !== null
-				? round($chsb_measure_4 / 10.7639, 2)
-				: null;
-
-		$chsb_measure_6a =
-			$chsb_measure_6 !== null
-				? round($chsb_measure_6 / 10.7639, 2)
-				: null;
-
-		$chsb_measure_9a =
-			$chsb_measure_9 !== null
-				? round($chsb_measure_9 / 10.7639, 2)
-				: null;
+		
+		$chsb_measures = calculateCHSBMeasures($currYear, $currMonth, $site_id, $site_detials, $result, $this->utilities_model);
 
 		// SAVE CHSB VALUES
 
 		$data['measures']['HCMIRoomsFootprintPerOccupiedRoom']['chsb_value'] =
-			$chsb_measure_1;
+			$chsb_measures['chsb_measure_1'];
 
 		$data['measures']['HotelCarbonFootprintPerRoom']['chsb_value'] =
-			$chsb_measure_2;
+			$chsb_measures['chsb_measure_2'];
 
 		$data['measures']['HotelCarbonFootprintPerOccupiedRoom']['chsb_value'] =
-			$chsb_measure_3;
+			$chsb_measures['chsb_measure_3'];
 
 		$data['measures']['HotelCarbonFootprintPerSquareMeter']['chsb_value'] =
-			$chsb_measure_4;
+			$chsb_measures['chsb_measure_4'];
 
 		$data['measures']['HotelEnergyUsagePerOccupiedRoom']['chsb_value'] =
-			$chsb_measure_5;
+			$chsb_measures['chsb_measure_5'];
 
 		$data['measures']['HotelEnergyUsagePerSquareMeter']['chsb_value'] =
-			$chsb_measure_6;
+			$chsb_measures['chsb_measure_6'];
 
 		$data['measures']['HCMIMeetingFootprintPerMeetingHour'] = array(
 			'chsb_measure_no' => 7,
-			'chsb_value' => $chsb_measure_7
+			'chsb_value' => $chsb_measures['chsb_measure_7']
 		);
 
 		$data['measures']['HotelWaterUsagePerOccupiedRoom']['chsb_value'] =
-			$chsb_measure_8;
+			$chsb_measures['chsb_measure_8'];
 
 		$data['measures']['HotelWaterUsagePerSquareMeter']['chsb_value'] =
-			$chsb_measure_9;
+			$chsb_measures['chsb_measure_9'];
 
 		$data['measures']['HWMIRoomsWaterUsagePerOccupiedRoom'] = array(
 			'chsb_measure_no' => 10,
-			'chsb_value' => $chsb_measure_10
+			'chsb_value' => $chsb_measures['chsb_measure_10']
 		);
 
 		$data['measures']['HWMIMeetingWaterUsagePerMeetingHour'] = array(
 			'chsb_measure_no' => 11,
-			'chsb_value' => $chsb_measure_11
+			'chsb_value' => $chsb_measures['chsb_measure_11']
 		);
 
 		$data['measures']['RenewableEnergyPercentage'] = array(
 			'chsb_measure_no' => 12,
-			'chsb_value' => $chsb_measure_12
+			'chsb_value' => $chsb_measures['chsb_measure_12']
 		);
 
 		$data['measures']['RenewableElectricityPercentage'] = array(
 			'chsb_measure_no' => 13,
-			'chsb_value' => $chsb_measure_13
+			'chsb_value' => $chsb_measures['chsb_measure_13']
 		);
 
 		$data['measures']['ElectricityToNonElectricEnergy'] = array(
 			'chsb_measure_no' => 14,
-			'chsb_value' => $chsb_measure_14
+			'chsb_value' => $chsb_measures['chsb_measure_14']
 		);
 		$data['measures']['HotelCarbonFootprintPerSquareFoot']['chsb_value'] =
-			$chsb_measure_4a;
+			$chsb_measures['chsb_measure_4a'];
 
 		$data['measures']['HotelEnergyUsagePerSquareFoot']['chsb_value'] =
-			$chsb_measure_6a;
+			$chsb_measures['chsb_measure_6a'];
 
 		$data['measures']['HotelWaterUsagePerSquareFoot']['chsb_value'] =
-			$chsb_measure_9a;
+			$chsb_measures['chsb_measure_9a'];
+
 		if ($result['chsb_reporting'] == 1) {
 		    $chsb_reporting = $this->load->view('admin_landing_pdf_chsb_reporting_reports', $data, true);
 		}
@@ -11083,295 +10911,71 @@ class Reports_admin extends Base_Admin_Controller
 	$data['measures']['site_location'] = $site_detials['site_location_name'];
 
 	// CHSB calculation
-
-	$chsb_getUtilities = $this->utilities_model->getSiteUtilityRolling12Months(
-		$currYear,
-		$currMonth,
-		$site_id
-	);
-	$chsb_carbon_footPrint = 0;
-	$chsb_utility_kwh_total = 0;
-	$chsb_water_total_consumption = 0;
-	$chsb_total_room_night = 0;
-	$chsb_electricity = 0;
-	$chsb_renewable_energy = 0;
-	$chsb_non_electric_energy = 0;
-	$chsb_days = 0;
-
-	foreach ($chsb_getUtilities as $chsb_utility) {
-
-		$chsb_utilities_month = $chsb_utility['month_id'];
-		$chsb_utilities_year = $chsb_utility['year_id'];
-
-		$chsb_totalElectricyKwh = isset($chsb_utility['total_electricity_kwh'])
-			? $chsb_utility['total_electricity_kwh'] : 0;
-
-		$chsb_totalFuelOil = isset($chsb_utility['total_fuel_oil'])
-			? $chsb_utility['total_fuel_oil'] : 0;
-
-		$chsb_totalNaturalGas = isset($chsb_utility['total_natural_gas'])
-			? $chsb_utility['total_natural_gas'] : 0;
-
-		$chsb_totalLpg = isset($chsb_utility['total_lpg'])
-			? $chsb_utility['total_lpg'] : 0;
-
-		$chsb_heatingDistrict = isset($chsb_utility['district_heating'])
-			? $chsb_utility['district_heating'] : 0;
-
-		$chsb_coolingDistrict = isset($chsb_utility['district_cooling'])
-			? $chsb_utility['district_cooling'] : 0;
-
-		$chsb_lpg = $chsb_totalLpg
-			* getUtilityUnitFactorForConversion($site_id, 'lpg');
-		$chsb_electricity_value = $chsb_totalElectricyKwh;
-		$chsb_natural_gas = $chsb_totalNaturalGas
-			* getUtilityUnitFactorForConversion($site_id, 'natural_gas');
-		$chsb_fuel = $chsb_totalFuelOil
-			* getUtilityUnitFactorForConversion($site_id, 'fuel_oil');
-		$chsb_heating_district = $chsb_heatingDistrict;
-		$chsb_cooling_district = $chsb_coolingDistrict
-			* getUtilityUnitFactorForConversion($site_id, 'district_cooling');
-
-		$chsb_utility_kwh_total +=
-			$chsb_electricity_value +
-			$chsb_fuel +
-			$chsb_lpg +
-			$chsb_natural_gas +
-			$chsb_heating_district +
-			$chsb_cooling_district;
-
-		$chsb_water_total_consumption +=
-			(isset($chsb_utility['water_total_consumption'])
-				? $chsb_utility['water_total_consumption'] : 0) * getUtilityUnitFactorForConversion($site_id, 'water') * 1000;
-
-		$chsb_total_room_night +=
-			isset($chsb_utility['total_room_night'])
-				? $chsb_utility['total_room_night'] : 0;
-
-		$chsb_electricity += $chsb_electricity_value;
-
-		$chsb_renewable_energy +=
-			isset($chsb_utility['total_renewable_energy_production'])
-				? $chsb_utility['total_renewable_energy_production'] : 0;
-
-		$chsb_non_electric_energy +=
-			$chsb_fuel +
-			$chsb_lpg +
-			$chsb_natural_gas +
-			$chsb_heating_district +
-			$chsb_cooling_district;
-
-		$chsb_emission_electricity += $chsb_electricity_value * $site_detials['electricity_emission_factor'];
-		$chsb_emission_lpg += $chsb_lpg * $site_detials['lpg_emission_factor'];
-		$chsb_emission_fuel += $chsb_fuel * $site_detials['fuel_emission_factor'];
-		$chsb_emission_natural_gas += $chsb_natural_gas * $site_detials['natural_gas_emission_factor'];
-		$chsb_emission_heating += $chsb_heating_district * $site_detials['district_heating_emission_factor'];
-		$chsb_emission_cooling += $chsb_cooling_district * $site_detials['district_cooling_emission_factor'];
-
-		$chsb_carbon_footPrint =
-			$chsb_emission_electricity +
-			$chsb_emission_lpg +
-			$chsb_emission_fuel +
-			$chsb_emission_natural_gas +
-			$chsb_emission_heating +
-			$chsb_emission_cooling;
-
-		$chsb_days += cal_days_in_month(
-			CAL_GREGORIAN,
-			$chsb_utilities_month,
-			$chsb_utilities_year
-		);
-	}
-
-	$chsb_rooms = isset($result['rooms_keys']) ? (float)$result['rooms_keys'] : 0;
-
-	$chsb_area = isset($result['cooled_builtup_area'])
-		? (float)$result['cooled_builtup_area'] : 0;
-
-	$chsb_rooms_area = !empty($result['hotel_rooms_area'])
-		? (float)$result['hotel_rooms_area'] : 0;
-
-	$chsb_meeting_area = !empty($result['total_meeting_area'])
-		? (float)$result['total_meeting_area'] : 0;
-	// $chsb_carbon_footPrint = $chsb_carbon_footPrint * 1.02;
-
-	$chsb_rooms_percentage = 0;
-	$chsb_carbon_footPrint_rooms = 0;
-	$chsb_carbon_footPrint_meeting = 0;
-	$chsb_water_total_consumption_rooms = 0;
-	$chsb_water_total_consumption_meeting = 0;
-	$chsb_meeting_hours = 0;
-
-	if (($chsb_rooms_area + $chsb_meeting_area) > 0) {
-
-		$chsb_rooms_percentage =
-			$chsb_rooms_area / ($chsb_rooms_area + $chsb_meeting_area);
-
-		$chsb_carbon_footPrint_rooms =
-			$chsb_carbon_footPrint * $chsb_rooms_percentage;
-
-		$chsb_carbon_footPrint_meeting =
-			$chsb_carbon_footPrint * (1 - $chsb_rooms_percentage);
-
-		$chsb_water_total_consumption_rooms =
-			($chsb_water_total_consumption / 3) +
-			(($chsb_water_total_consumption * 2 / 3) * $chsb_rooms_percentage);
-
-		$chsb_water_total_consumption_meeting =
-			($chsb_water_total_consumption * 2 / 3) *
-			(1 - $chsb_rooms_percentage);
-
-		$chsb_meeting_hours =
-			$chsb_meeting_area * $chsb_days * 10;
-	}
-
-	$chsb_measure_1 =
-		($chsb_total_room_night > 0 && $chsb_carbon_footPrint_rooms > 0)
-			? round($chsb_carbon_footPrint_rooms / $chsb_total_room_night, 2)
-			: null;
-
-	$chsb_measure_2 =
-		$chsb_rooms > 0
-			? round($chsb_carbon_footPrint / $chsb_rooms, 2)
-			: null;
-
-	$chsb_measure_3 =
-		$chsb_total_room_night > 0
-			? round($chsb_carbon_footPrint / $chsb_total_room_night, 2)
-			: null;
-
-	$chsb_measure_4 =
-		$chsb_area > 0
-			? round($chsb_carbon_footPrint / $chsb_area, 2)
-			: null;
-
-	$chsb_measure_5 =
-		$chsb_total_room_night > 0
-			? round($chsb_utility_kwh_total / $chsb_total_room_night, 2)
-			: null;
-
-	$chsb_measure_6 =
-		$chsb_area > 0
-			? round($chsb_utility_kwh_total / $chsb_area, 2)
-			: null;
-
-	$chsb_measure_7 =
-		$chsb_meeting_hours > 0
-			? round($chsb_carbon_footPrint_meeting / $chsb_meeting_hours, 4)
-			: null;
-
-	$chsb_measure_8 =
-		$chsb_total_room_night > 0
-			? round($chsb_water_total_consumption / $chsb_total_room_night, 2)
-			: null;
-
-	$chsb_measure_9 =
-		$chsb_area > 0
-			? round($chsb_water_total_consumption / $chsb_area, 2)
-			: null;
-
-	$chsb_measure_10 =
-		($chsb_total_room_night > 0 && $chsb_water_total_consumption_rooms > 0)
-			? round($chsb_water_total_consumption_rooms / $chsb_total_room_night, 2)
-			: null;
-
-	$chsb_measure_11 =
-		$chsb_meeting_hours > 0
-			? round($chsb_water_total_consumption_meeting / $chsb_meeting_hours, 4)
-			: null;
-
-	$chsb_measure_12 =
-		$chsb_utility_kwh_total > 0
-			? round($chsb_renewable_energy / $chsb_utility_kwh_total, 4)
-			: 0;
-
-	$chsb_measure_13 =
-		$chsb_electricity > 0
-			? round($chsb_renewable_energy / $chsb_electricity, 4)
-			: 0;
-
-	$chsb_measure_14 =
-		$chsb_non_electric_energy > 0
-			? round($chsb_electricity / $chsb_non_electric_energy, 3)
-			: null;
-			$chsb_measure_4a =
-		$chsb_measure_4 !== null
-			? round($chsb_measure_4 / 10.7639, 2)
-			: null;
-
-	$chsb_measure_6a =
-		$chsb_measure_6 !== null
-			? round($chsb_measure_6 / 10.7639, 2)
-			: null;
-
-	$chsb_measure_9a =
-		$chsb_measure_9 !== null
-			? round($chsb_measure_9 / 10.7639, 2)
-			: null;
+	$chsb_measures = calculateCHSBMeasures($currYear, $currMonth, $site_id, $site_detials, $result, $this->utilities_model);
 
 	// SAVE CHSB VALUES
 
 	$data['measures']['HCMIRoomsFootprintPerOccupiedRoom']['chsb_value'] =
-		$chsb_measure_1;
+		$chsb_measures['chsb_measure_1'];
 
 	$data['measures']['HotelCarbonFootprintPerRoom']['chsb_value'] =
-		$chsb_measure_2;
+		$chsb_measures['chsb_measure_2'];
 
 	$data['measures']['HotelCarbonFootprintPerOccupiedRoom']['chsb_value'] =
-		$chsb_measure_3;
+		$chsb_measures['chsb_measure_3'];
 
 	$data['measures']['HotelCarbonFootprintPerSquareMeter']['chsb_value'] =
-		$chsb_measure_4;
+		$chsb_measures['chsb_measure_4'];
 
 	$data['measures']['HotelEnergyUsagePerOccupiedRoom']['chsb_value'] =
-		$chsb_measure_5;
+		$chsb_measures['chsb_measure_5'];
 
 	$data['measures']['HotelEnergyUsagePerSquareMeter']['chsb_value'] =
-		$chsb_measure_6;
+		$chsb_measures['chsb_measure_6'];
 
 	$data['measures']['HCMIMeetingFootprintPerMeetingHour'] = array(
 		'chsb_measure_no' => 7,
-		'chsb_value' => $chsb_measure_7
+		'chsb_value' => $chsb_measures['chsb_measure_7']
 	);
 
 	$data['measures']['HotelWaterUsagePerOccupiedRoom']['chsb_value'] =
-		$chsb_measure_8;
+		$chsb_measures['chsb_measure_8'];
 
 	$data['measures']['HotelWaterUsagePerSquareMeter']['chsb_value'] =
-		$chsb_measure_9;
+		$chsb_measures['chsb_measure_9'];
 
 	$data['measures']['HWMIRoomsWaterUsagePerOccupiedRoom'] = array(
 		'chsb_measure_no' => 10,
-		'chsb_value' => $chsb_measure_10
+		'chsb_value' => $chsb_measures['chsb_measure_10']
 	);
 
 	$data['measures']['HWMIMeetingWaterUsagePerMeetingHour'] = array(
 		'chsb_measure_no' => 11,
-		'chsb_value' => $chsb_measure_11
+		'chsb_value' => $chsb_measures['chsb_measure_11']
 	);
 
 	$data['measures']['RenewableEnergyPercentage'] = array(
 		'chsb_measure_no' => 12,
-		'chsb_value' => $chsb_measure_12
+		'chsb_value' => $chsb_measures['chsb_measure_12']
 	);
 
 	$data['measures']['RenewableElectricityPercentage'] = array(
 		'chsb_measure_no' => 13,
-		'chsb_value' => $chsb_measure_13
+		'chsb_value' => $chsb_measures['chsb_measure_13']
 	);
 
 	$data['measures']['ElectricityToNonElectricEnergy'] = array(
 		'chsb_measure_no' => 14,
-		'chsb_value' => $chsb_measure_14
+		'chsb_value' => $chsb_measures['chsb_measure_14']
 	);
 	$data['measures']['HotelCarbonFootprintPerSquareFoot']['chsb_value'] =
-		$chsb_measure_4a;
+		$chsb_measures['chsb_measure_4a'];
 
 	$data['measures']['HotelEnergyUsagePerSquareFoot']['chsb_value'] =
-		$chsb_measure_6a;
+		$chsb_measures['chsb_measure_6a'];
 
 	$data['measures']['HotelWaterUsagePerSquareFoot']['chsb_value'] =
-		$chsb_measure_9a;
+		$chsb_measures['chsb_measure_9a'];
 	return $data;
     }
 
@@ -12328,7 +11932,36 @@ class Reports_admin extends Base_Admin_Controller
 				$summarySheet->setCellValueByColumnAndRow($col++, $sum_row, $prn_summary_flag);
 				$summarySheet->setCellValueByColumnAndRow($col++, $sum_row, $rn_summary_flag);
 			}
+			$currentWasteRows = $this->db
+				->where('site_id', $row['site_id'])
+				->where('year_id', $year_id)
+				->where('month_id', $month_id)
+				->where('deleted_at IS NULL', null, false)
+				->where('deleted_by IS NULL', null, false)
+				->get('site_waste')
+				->result_array();
+			$waste_has_value = false;
+			$waste_has_zero_or_null = false;
 
+			foreach ($currentWasteRows as $wasteRow) {
+				foreach ($wasteRow as $field => $value) {
+					if (strpos($field, 'unit_measure_') !== 0) {
+						continue;
+					}
+					log_message('debug', "site_location_name: {$row['site_location_name']} - Checking waste field $field with value: " . var_export($value, true));
+
+					if ($value == null || $value == '' || (float) $value == 0) {
+						$waste_has_zero_or_null = true;
+					} elseif ((float) $value > 0) {
+						$waste_has_value = true;
+					}
+				}
+			}
+
+			$waste_is_missing = (
+				$waste_entry_count === 0 ||
+				!$waste_has_value
+			);
 			if ($waste_entry_count == 0) {
 				$waste_pm_count = isset($row['waste_pm_count']) ? (int)$row['waste_pm_count'] : 0;
 				$waste_ly_count = isset($row['waste_ly_count']) ? (int)$row['waste_ly_count'] : 0;
@@ -12348,6 +11981,11 @@ class Reports_admin extends Base_Admin_Controller
 					'N/A',
 					'N/A'
 				]);
+				if ($show_action_notes) {
+					$site_action_notes[] = 'Missing Waste Data';
+				}
+			}
+			if ($waste_is_missing && $waste_entry_count !=0) {
 				if ($show_action_notes) {
 					$site_action_notes[] = 'Missing Waste Data';
 				}
