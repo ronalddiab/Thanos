@@ -50,7 +50,7 @@ $unit_measures = getWasteUnitMeasuresArray();
     <article class="card">
         <div class="article-header">
             <div class="row">
-                <div class="col-md-10"><?php echo 'Site '.lang('waste');?></div>
+                <div class="col-md-10"><?php echo $site_detail['site_location_name'].' - Site '.lang('waste');?></div>
                 <?php $pdf_path = site_url() . "assets/uploads/WasteInstructions.pdf";?>
                 <div class="col-md-2"><a href="<?php echo $pdf_path; ?>" target="_blank" class="btn btn-primary btn-submit" style="width: 100%;">Instructions</a></div>
             </div>    
@@ -136,7 +136,7 @@ $unit_measures = getWasteUnitMeasuresArray();
                             </div>
                             <div class="form-control-block col-sm-2">
                                 <input type='checkbox' class='icheck' value='1' id="<?php echo "is_check_".$name;?>" <?php echo ($site_waste["is_check_".$name]) ? 'checked' : ''; ?> disabled>
-                                <input type='hidden' name="<?php echo "is_check_".$name;?>" value='0' id="<?php echo "is_check_hidden_".$name;?>">
+                                <input type='hidden' name="<?php echo "is_check_".$name;?>" value='<?php echo !empty($site_waste["is_check_".$name]) ? 1 : 0; ?>' id="<?php echo "is_check_hidden_".$name;?>">
                             </div>
                         </div>
                     </div>
@@ -182,7 +182,7 @@ $unit_measures = getWasteUnitMeasuresArray();
                                 </div>
                                 <div class="form-control-block col-sm-2">
                                     <input type='checkbox' class='icheck' value='1'  id="<?php echo "is_check_".$name;?>" <?php echo ($site_waste["is_check_".$name]) ? 'checked' : ''; ?> disabled >
-                                    <input type='hidden' name="<?php echo "is_check_".$name;?>" value='0' id="<?php echo "is_check_hidden_".$name;?>">
+                                    <input type='hidden' name="<?php echo "is_check_".$name;?>" value='<?php echo !empty($site_waste["is_check_".$name]) ? 1 : 0; ?>' id="<?php echo "is_check_hidden_".$name;?>">
                                 </div>
                             </div>
                         </div>
@@ -223,7 +223,7 @@ $unit_measures = getWasteUnitMeasuresArray();
                                     </div>
                                     <div class="form-control-block col-sm-2">
                                         <input type='checkbox' class='icheck' value='1' id="<?php echo "is_check_".$name;?>" <?php echo ($site_waste["is_check_".$name]) ? 'checked' : ''; ?> disabled>
-                                        <input type='hidden' name="<?php echo "is_check_".$name;?>" value='0' id="<?php echo "is_check_hidden_".$name;?>">
+                                        <input type='hidden' name="<?php echo "is_check_".$name;?>" value='<?php echo !empty($site_waste["is_check_".$name]) ? 1 : 0; ?>' id="<?php echo "is_check_hidden_".$name;?>">
                                     </div>
                                 </div>
                             </div>

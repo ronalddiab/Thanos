@@ -36,12 +36,19 @@ $kwh_pie_chart_cooling_district_value = $kwh_pie_chart['cooling_district'];
 
 $kwh_pie_chart_utility_kwh_total = ($kwh_pie_chart_electricity_value+$kwh_pie_chart_fuel_value+$kwh_pie_chart_lpg_value+$kwh_pie_chart_natural_gas_value+$kwh_pie_chart_heating_district_value+$kwh_pie_chart_cooling_district_value);
 
-$kwh_pie_chart_electricity_share = round(($kwh_pie_chart_electricity_value*100)/$kwh_pie_chart_utility_kwh_total,1);
-$kwh_pie_chart_fuel_share = round(($kwh_pie_chart_fuel_value*100)/$kwh_pie_chart_utility_kwh_total,1);
-$kwh_pie_chart_lpg_share = round(($kwh_pie_chart_lpg_value*100)/$kwh_pie_chart_utility_kwh_total,1);
-$kwh_pie_chart_natural_gas_share = round(($kwh_pie_chart_natural_gas_value*100)/$kwh_pie_chart_utility_kwh_total,1);
-$kwh_pie_chart_heating_district_share = round(($kwh_pie_chart_heating_district_value*100)/$kwh_pie_chart_utility_kwh_total,1);
-$kwh_pie_chart_cooling_district_share = round(($kwh_pie_chart_cooling_district_value*100)/$kwh_pie_chart_utility_kwh_total,1);
+$kwh_pie_chart_electricity_share = is_infinite(($kwh_pie_chart_electricity_value * 100) / $kwh_pie_chart_utility_kwh_total) ? 0 : round(($kwh_pie_chart_electricity_value * 100) / $kwh_pie_chart_utility_kwh_total, 1);
+$kwh_pie_chart_fuel_share = is_infinite(($kwh_pie_chart_fuel_value * 100) / $kwh_pie_chart_utility_kwh_total) ? 0 : round(($kwh_pie_chart_fuel_value * 100) / $kwh_pie_chart_utility_kwh_total, 1);
+$kwh_pie_chart_lpg_share = is_infinite(($kwh_pie_chart_lpg_value * 100) / $kwh_pie_chart_utility_kwh_total) ? 0 : round(($kwh_pie_chart_lpg_value * 100) / $kwh_pie_chart_utility_kwh_total, 1);
+$kwh_pie_chart_natural_gas_share = is_infinite(($kwh_pie_chart_natural_gas_value * 100) / $kwh_pie_chart_utility_kwh_total) ? 0 : round(($kwh_pie_chart_natural_gas_value * 100) / $kwh_pie_chart_utility_kwh_total, 1);
+$kwh_pie_chart_heating_district_share = is_infinite(($kwh_pie_chart_heating_district_value * 100) / $kwh_pie_chart_utility_kwh_total) ? 0 : round(($kwh_pie_chart_heating_district_value * 100) / $kwh_pie_chart_utility_kwh_total, 1);
+$kwh_pie_chart_cooling_district_share = is_infinite(($kwh_pie_chart_cooling_district_value * 100) / $kwh_pie_chart_utility_kwh_total) ? 0 : round(($kwh_pie_chart_cooling_district_value * 100) / $kwh_pie_chart_utility_kwh_total, 1);
+
+$kwh_pie_chart_electricity_share = is_nan($kwh_pie_chart_electricity_share) ? 0 : $kwh_pie_chart_electricity_share;
+$kwh_pie_chart_fuel_share = is_nan($kwh_pie_chart_fuel_share) ? 0 : $kwh_pie_chart_fuel_share;
+$kwh_pie_chart_lpg_share = is_nan($kwh_pie_chart_lpg_share) ? 0 : $kwh_pie_chart_lpg_share;
+$kwh_pie_chart_natural_gas_share = is_nan($kwh_pie_chart_natural_gas_share) ? 0 : $kwh_pie_chart_natural_gas_share;
+$kwh_pie_chart_heating_district_share = is_nan($kwh_pie_chart_heating_district_share) ? 0 : $kwh_pie_chart_heating_district_share;
+$kwh_pie_chart_cooling_district_share = is_nan($kwh_pie_chart_cooling_district_share) ? 0 : $kwh_pie_chart_cooling_district_share;
 
 $total_share = ($kwh_pie_chart_electricity_share+$kwh_pie_chart_fuel_share+$kwh_pie_chart_lpg_share+$kwh_pie_chart_natural_gas_share+$kwh_pie_chart_heating_district_share+$kwh_pie_chart_cooling_district_share);
 
@@ -92,8 +99,8 @@ $kwh_pie_chart_previousmonth_cost_water_share = ($cost_pie_chart_previousmonth_t
                     <td width="100%">
                         <table width="100%" border="0" cellpadding="0" cellspacing="0">
                             <tr>
-                                <td width="50%"><img height="200" src="<?php echo $pieChartImg; ?>" /></td>
-                                <td width="50%"><img height="200" src="<?php echo $pieChartNewImg; ?>" /></td>
+                                <td width="50%"><img height="400" src="<?php echo $pieChartImg; ?>" /></td>
+                                <td width="50%"><img height="400" src="<?php echo $pieChartNewImg; ?>" /></td>
                             </tr>
                             <tr>
                                 <td valign="top">
@@ -300,15 +307,15 @@ $kwh_pie_chart_previousmonth_cost_water_share = ($cost_pie_chart_previousmonth_t
                     <td width="100%">
                         <table width="100%" border="0" cellpadding="0" cellspacing="0">
                             <tr>
-                                <td width="50%"><img height="200" src="<?php echo $pieChartNew2Img; ?>" /></td>
-                                <td width="50%"><img height="200" src="<?php echo $pieChartNew3Img; ?>" /></td>
+                                <td width="50%"><img height="400" src="<?php echo $pieChartNew2Img; ?>" /></td>
+                                <td width="50%"><img height="400" src="<?php echo $pieChartNew3Img; ?>" /></td>
                             </tr>
                             <tr>
                                 <td valign="top">
                                     <table border="1" width="100%" cellpadding="2" cellspacing="0">
                                         <thead>
                                             <tr>
-                                                <th style="background-color:#d8e1f2;" align="center"><strong><?php echo 'Energy Consumption (% Share Of Total MJ)'.' - '.$fullmontharray[$filters["previous_month"]].' '.$filters["previous_year"]; ?></strong></th>
+											<th style="background-color:#d8e1f2;" align="center"><strong><?php echo 'Energy Consumption (% Share Of Total kWh)' . ' - ' . $fullmontharray[$filters["previous_month"]] . ' ' . $filters["previous_year"]; ?></strong></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -317,9 +324,9 @@ $kwh_pie_chart_previousmonth_cost_water_share = ($cost_pie_chart_previousmonth_t
                                                     <table width="100%" border="0" cellpadding="0" cellspacing="0">
                                                         <tbody>
                                                             <tr>
-                                                                <td width="38%"><strong>Utilities</strong></td>
-                                                                <td width="38%"><strong>Consumption (MJ)</strong></td>
-                                                                <td width="24%"><strong>% Share</strong></td>
+															<td width="38%"><strong>Utilities</strong></td>
+															<td width="38%"><strong>Consumption (kWh)</strong></td>
+															<td width="24%"><strong>% Share</strong></td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
@@ -411,7 +418,7 @@ $kwh_pie_chart_previousmonth_cost_water_share = ($cost_pie_chart_previousmonth_t
                                                         <tbody>
                                                             <tr>
                                                                 <td width="45%"><strong>Utilities</strong></td>
-                                                                <td width="35%"><strong>Cost (<?php echo REPORT_CURRENCY_SYMBOL ?>)</strong></td>
+                                                                <td width="35%"><strong>Cost (<?php echo CURRENCY_SYMBOL ?>)</strong></td>
                                                                 <td width="20%"><strong>% Share</strong></td>
                                                             </tr>
                                                         </tbody>
@@ -487,7 +494,7 @@ $kwh_pie_chart_previousmonth_cost_water_share = ($cost_pie_chart_previousmonth_t
                                                         <tbody>
                                                             <tr>
                                                                 <td width="45%"><strong>Total</strong></td>
-                                                                <td width="35%"><strong><?php echo number_format(round($cost_pie_chart_previousmonth_t_sum)); ?></strong></td>                                                                
+                                                                <td width="35%"><strong><?php echo number_format($cost_pie_chart_previousmonth_t_sum); ?></strong></td>                                                                
                                                             </tr>
                                                         </tbody>
                                                     </table>

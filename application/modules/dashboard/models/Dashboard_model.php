@@ -325,5 +325,290 @@ class Dashboard_model extends Base_Model {
 	$result = $this->db->query($query);
 	return $result->row_array();
     }
+
+	public function get_action_notifications($site_id, $month_id, $year_id)
+	{
+		$site_id  = (int) $site_id;
+		$month_id = (int) $month_id;
+		$year_id  = (int) $year_id;
+
+		$notifications = array();
+
+		if ($site_id <= 0 || $month_id < 1 || $month_id > 12 || $year_id <= 0) {
+			return $notifications;
+		}
+		//GET SITE + CURRENT MONTH DATA + LAST YEAR SAME MONTH
+
+		$site = $this->db
+			->where('id', $site_id)
+			->where('status', 1)
+			->get('sites')
+			->row_array();
+
+		if (empty($site)) {
+			return $notifications;
+		}
+
+		// Get current month utility record
+
+		$current = $this->db
+			->where('site_id', $site_id)
+			->where('month_id', $month_id)
+			->where('year_id', $year_id)
+			->order_by('id', 'DESC')
+			->limit(1)
+			->get('utilities_cost')
+			->row_array();
+
+
+		// Get last year's same month utility record
+
+		$last_year = $this->db
+			->where('site_id', $site_id)
+			->where('month_id', $month_id)
+			->where('year_id', $year_id - 1)
+			->order_by('id', 'DESC')
+			->limit(1)
+			->get('utilities_cost')
+			->row_array();
+
+
+		$has_current_entry = !empty($current);
+
+
+		/*
+		*  MONTH NAME
+		*/
+
+		$month_names = array(
+			1  => 'January',
+			2  => 'February',
+			3  => 'March',
+			4  => 'April',
+			5  => 'May',
+			6  => 'June',
+			7  => 'July',
+			8  => 'August',
+			9  => 'September',
+			10 => 'October',
+			11 => 'November',
+			12 => 'December'
+		);
+
+		$report_period = $month_names[$month_id] . ' ' . $year_id;
+
+
+		// UTILITY CONFIGURATION
+
+		$utils = array(
+
+			'electricity' => array(
+				'raw'       => 'total_electricity_kwh',
+				'cost'      => 'total_electricity_cost',
+				'ly_raw'    => 'total_electricity_kwh',
+				'ly_cost'   => 'total_electricity_cost',
+				'label'     => 'Electricity',
+				'show_flag' => 'show_utility_electricity'
+			),
+
+			'water' => array(
+				'raw'       => 'water_total_consumption',
+				'cost'      => 'water_total_consumption_cost',
+				'ly_raw'    => 'water_total_consumption',
+				'ly_cost'   => 'water_total_consumption_cost',
+				'label'     => 'Water',
+				'show_flag' => 'show_utility_water'
+			),
+
+			'fuel' => array(
+				'raw'       => 'total_fuel_oil',
+				'cost'      => 'total_fuel_oil_cost',
+				'ly_raw'    => 'total_fuel_oil',
+				'ly_cost'   => 'total_fuel_oil_cost',
+				'label'     => 'Fuel',
+				'show_flag' => 'show_utility_fuel_oil'
+			),
+
+			'lpg' => array(
+				'raw'       => 'total_lpg',
+				'cost'      => 'total_lpg_cost',
+				'ly_raw'    => 'total_lpg',
+				'ly_cost'   => 'total_lpg_cost',
+				'label'     => 'LPG',
+				'show_flag' => 'show_utility_lpg'
+			),
+
+			'natural_gas' => array(
+				'raw'       => 'total_natural_gas',
+				'cost'      => 'total_natural_gas_cost',
+				'ly_raw'    => 'total_natural_gas',
+				'ly_cost'   => 'total_natural_gas_cost',
+				'label'     => 'Natural Gas',
+				'show_flag' => 'show_utility_natural_gas'
+			),
+
+			'heating' => array(
+				'raw'       => 'district_heating',
+				'cost'      => 'district_heating_cost',
+				'ly_raw'    => 'district_heating',
+				'ly_cost'   => 'district_heating_cost',
+				'label'     => 'Heating',
+				'show_flag' => 'show_utility_district_heating'
+			),
+
+			'cooling' => array(
+				'raw'       => 'district_cooling',
+				'cost'      => 'district_cooling_cost',
+				'ly_raw'    => 'district_cooling',
+				'ly_cost'   => 'district_cooling_cost',
+				'label'     => 'Cooling',
+				'show_flag' => 'show_utility_district_cooling'
+			)
+		);
+
+
+		//=====CHECK EACH ENABLED UTILITY
+		foreach ($utils as $key => $utility) {
+
+			// Utility must be enabled for this site
+
+			$utility_enabled = isset($site[$utility['show_flag']]) && (int) $site[$utility['show_flag']] === 1;
+
+
+			//If hotel/site has NOT selected this utility,
+
+			if (!$utility_enabled) {
+				continue;
+			}
+
+			// Current values
+
+			$cur_raw = null;
+			$cur_cost = null;
+
+			if ($has_current_entry) {
+
+				if (isset($current[$utility['raw']]) && $current[$utility['raw']] !== '' && $current[$utility['raw']] !== null) {
+					$cur_raw = (float) $current[$utility['raw']];
+				}
+
+				if (isset($current[$utility['cost']]) && $current[$utility['cost']] !== '' && $current[$utility['cost']] !== null) {
+					$cur_cost = (float) $current[$utility['cost']];
+				}
+			}
+
+
+			// Last year values
+			$ly_raw = null;
+			$ly_cost = null;
+
+			if (!empty($last_year)) {
+
+				if (isset($last_year[$utility['ly_raw']]) &&  $last_year[$utility['ly_raw']] !== '' && $last_year[$utility['ly_raw']] !== null) {
+					$ly_raw = (float) $last_year[$utility['ly_raw']];
+				}
+
+				if (isset($last_year[$utility['ly_cost']]) && $last_year[$utility['ly_cost']] !== '' && $last_year[$utility['ly_cost']] !== null) {
+					$ly_cost = (float) $last_year[$utility['ly_cost']];
+				}
+			}
+
+
+			//==== MISSING CURRENT DATA
+
+			if (!$has_current_entry || $cur_raw === null || $cur_raw <= 0) {
+
+			// 	$notifications[] = array(
+			// 		'site_id'     => $site_id,
+			// 		'site'        => $site['site_location_name'],
+			// 		'period'      => $report_period,
+			// 		'utility'     => $utility['label'],
+			// 		'type'        => 'missing',
+			// 		'message'     => 'Missing ' . $utility['label'] . ' Data'
+			// 	);
+
+			// 	// If current data is missing, don't calculate consumption/tariff variance.
+
+				continue;
+			}
+
+
+			//===== CONSUMPTION YOY CHECK
+
+			if ($ly_raw !== null && $ly_raw > 0) {
+
+				$yoy_consumption = ($cur_raw - $ly_raw) / $ly_raw;
+				if (abs($yoy_consumption) > 0.20) {
+					$direction = ($yoy_consumption > 0)? 'increased': 'decreased';
+
+					$percentage = round(abs($yoy_consumption) * 100);
+					$notifications[] = array(
+						'site_id'     => $site_id,
+						'site'        => $site['site_location_name'],
+						'period'      => $report_period,
+						'utility'     => $utility['label'],
+						'type'        => 'consumption',
+						'direction'   => $direction,
+						'percentage'  => $percentage,
+						'message'     => $utility['label'] .' consumption ' .$direction .' by ' .$percentage .'% compared to last year, verify data'
+					);
+				}
+			}
+			//===  TARIFF YOY CHECK
+
+			// $current_tariff = null;
+			// $last_year_tariff = null;
+
+			// if ($cur_raw > 0 && $cur_cost !== null && $cur_cost > 0) {
+			// 	$current_tariff = $cur_cost / $cur_raw;
+			// }
+			// if ($ly_raw !== null && $ly_raw > 0 && $ly_cost !== null && $ly_cost > 0) {
+			// 	$last_year_tariff = $ly_cost / $ly_raw;
+			// }
+			// if ($current_tariff !== null && $last_year_tariff !== null && $last_year_tariff > 0) {
+			// 	$yoy_tariff = ($current_tariff - $last_year_tariff)/ $last_year_tariff;
+			// 	if (abs($yoy_tariff) > 0.20) {
+			// 		$direction = ($yoy_tariff > 0)? 'increased': 'decreased';
+
+			// 		$percentage = round(abs($yoy_tariff) * 100);
+			// 		$notifications[] = array(
+			// 			'site_id'     => $site_id,
+			// 			'site'        => $site['site_location_name'],
+			// 			'period'      => $report_period,
+			// 			'utility'     => $utility['label'],
+			// 			'type'        => 'tariff',
+			// 			'direction'   => $direction,
+			// 			'percentage'  => $percentage,
+			// 			'message'     => $utility['label'] .' tariff ' .$direction .' by ' .$percentage .'% compared to last year, verify data'
+			// 		);
+			// 	}
+			// }
+		}
+
+
+		//====  WASTE CHECK
+
+		// $waste_current_count = $this->db
+		// 	->where('site_id', $site_id)
+		// 	->where('month_id', $month_id)
+		// 	->where('year_id', $year_id)
+		// 	->where('deleted_at IS NULL', null, false)
+		// 	->count_all_results('site_waste');
+
+
+		// if ($waste_current_count == 0) {
+
+		// 	$notifications[] = array(
+		// 		'site_id' => $site_id,
+		// 		'site'    => $site['site_location_name'],
+		// 		'period'  => $report_period,
+		// 		'utility' => 'Waste',
+		// 		'type'    => 'missing',
+		// 		'message' => 'Missing Waste Data'
+		// 	);
+		// }
+
+		return $notifications;
+	}
 }
 

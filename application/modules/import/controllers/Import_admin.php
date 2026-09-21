@@ -48,7 +48,7 @@ class Import_admin extends Base_Admin_Controller
     {
 	return array(
 	    array(
-		'actions' => array('index', 'export', 'daily', 'export_monthly_data', 'waste', 'emission','site_data','survey','checkNegative','compareUtility'),
+		'actions' => array('index', 'export', 'daily', 'export_monthly_data', 'waste', 'emission', 'emission_scope2_3', 'site_data', 'survey', 'checkNegative', 'compareUtility'),
 		'users' => array('@'),
 	    ),
 	);
@@ -1748,12 +1748,7 @@ class Import_admin extends Base_Admin_Controller
 		}
 
 		if ($process) {
-		    $divergences = $this->import_model->getDailyMonthlyDivergences();
-		    if (!empty($divergences)) {
-			$this->theme->set_message("File imported successfully. " . count($divergences) . " daily vs monthly divergence(s) found. Download Compare Utilities to review.", 'warning');
-		    } else {
-			$this->theme->set_message("File imported successfully.", 'success');
-		    }
+		    $this->theme->set_message("File imported successfully.", 'success');
 
 		    // Save audit trail
 		    $site_id = $this->session->userdata[$this->section_name]['site_id'];
@@ -2108,7 +2103,7 @@ class Import_admin extends Base_Admin_Controller
 		),
 	    );
 	    foreach ($export_columns_by_site_utility_flag as $flag => $column_keys) {
-		if (array_key_exists($flag, $site_detail) && (int) $site_detail[$flag] !== 1) {
+		if (!array_key_exists($flag, $site_detail) || (int) $site_detail[$flag] !== 1) {
 		    foreach ($column_keys as $col_key) {
 			unset($columns[$col_key]);
 		    }
@@ -2121,6 +2116,30 @@ class Import_admin extends Base_Admin_Controller
 		    }
 		}
 	    }
+	}
+	foreach ($columns as $col_key => $column_name) {
+
+		// Keep identifying columns
+		if (in_array($col_key, array('site_id', 'month_id', 'year_id'))) {
+			continue;
+		}
+
+		$has_legitimate_value = false;
+
+		foreach ($utility as $utl) {
+			if (isset($utl[$col_key])) {
+				$value = $utl[$col_key];
+
+				if ($value !== null && $value !== '' && (float)$value != 0) {
+					$has_legitimate_value = true;
+					break;
+				}
+			}
+		}
+
+		if (!$has_legitimate_value) {
+			unset($columns[$col_key]);
+		}
 	}
 
 	$cells = array();
@@ -2252,7 +2271,7 @@ class Import_admin extends Base_Admin_Controller
 
 			    $colmuns['Total cost bottles cans'] = 'total_bottles_cans';
 
-			    $colmuns['Total (per Unit) waste to energy'] = 'unit_measure_wastetoenergy';
+				$colmuns['Total (per Unit) waste to energy'] = 'unit_measure_wastetoenergy';
 
 			    $colmuns['Total cost waste to energy'] = 'total_wastetoenergy';
 
@@ -2629,6 +2648,14 @@ class Import_admin extends Base_Admin_Controller
 			    $colmuns['District Cooling Emission Factor'] = 'district_cooling_emission_factor';
 			    $colmuns['District Heating Emission Factor'] = 'district_heating_emission_factor';
 			    $colmuns['Green Electricity %'] = 'electricity_emission_factor_percentage';
+				$colmuns['General Waste to Landfill Emission Factor'] = 'waste_general_waste_to_landfill_emission_factor';
+				$colmuns['Recycling Streams Emission Factor'] = 'waste_recycling_streams_emission_factor';
+				$colmuns['Business Travel - Flights Emission Factor'] = 'business_travel_flights_emission_factor';
+				$colmuns['Business Travel - Car/Taxi Emission Factor'] = 'business_travel_car_taxi_emission_factor';
+				$colmuns['Employee Commuting - Car Emission Factor'] = 'employee_commuting_car_emission_factor';
+				$colmuns['Employee Commuting - Bus Emission Factor'] = 'employee_commuting_bus_emission_factor';
+				$colmuns['Outsourced Laundry Emission Factor'] = 'outsourced_laundry_emission_factor';
+				$colmuns['Purchased Goods Emission Factor'] = 'purchased_goods_emission_factor';
 			    $sites_name = array();
 			    $k = 0;
 			    $totalCol = 0;
@@ -2743,6 +2770,406 @@ class Import_admin extends Base_Admin_Controller
 	$this->theme->set('page_title', lang('import-emission'));
 	$this->breadcrumb->add(lang('import-emission'));
 	$this->theme->view($data);
+    }
+
+    public function emission_scope2_3()
+    {
+	$data = array();
+	$year = (int) $this->input->get_post('year');
+	if ($year <= 0) {
+	    $year = (int) date('Y');
+	}
+	$data['year'] = $year;
+	$data['disabled'] = '';
+
+	if ($this->input->get('download_template')) {
+	    $this->download_waste_scope_emission_factor_template($year);
+	    return;
+	}
+
+	if (!empty($this->input->post()) && !empty($_FILES['importfile']['name'])) {
+	    $file_tmp = $_FILES['importfile']['tmp_name'];
+	    $file_name = $_FILES['importfile']['name'];
+	    $fileType = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
+	    if ($fileType == '') {
+		$this->theme->set_message('Please upload file type with .xls or .xlsx extension.', 'error');
+		redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import/emission_scope2_3?year=' . $year);
+		exit;
+	    }
+	    if ($fileType != 'xls' && $fileType != 'xlsx' && $fileType != 'ods') {
+		$this->theme->set_message('File type with .xls or .xlsx extension is allowed.', 'error');
+		redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import/emission_scope2_3?year=' . $year);
+		exit;
+	    }
+
+	    require_once APPPATH . 'libraries/PHPExcel/PHPExcel.php';
+	    $destinationFile = BASE_PATH_CUSTOM . '/assets/uploads/imported_excels/';
+	    if (!is_dir($destinationFile)) {
+		mkdir($destinationFile);
+	    }
+	    $newFile = $destinationFile . uniqid() . '_' . date('Y-n-j') . '_' . time() . '.' . $fileType;
+	    if (!move_uploaded_file($file_tmp, $newFile)) {
+		$this->theme->set_message('Unable to upload the selected file.', 'error');
+		redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import/emission_scope2_3?year=' . $year);
+		exit;
+	    }
+
+	    $inputFileType = PHPExcel_IOFactory::identify($newFile);
+	    $objReader = PHPExcel_IOFactory::createReader($inputFileType);
+	    $objReader->setLoadAllSheets();
+	    $objPHPExcel = $objReader->load($newFile);
+	    $worksheetData = $objReader->listWorksheetInfo($newFile);
+	    $numberRow = $worksheetData[0]['totalRows'];
+	    $dataCells = $objPHPExcel->getSheet(0)->toArray(null, true, true, false);
+	    // listWorksheetInfo() counts cells per row, so merged/empty header cells understate the
+	    // width and drop trailing factor groups. Use the widest parsed row instead.
+	    $numberCol = (int) $worksheetData[0]['totalColumns'];
+	    foreach ($dataCells as $dataRow) {
+		$numberCol = max($numberCol, count($dataRow));
+	    }
+	    $headerInfo = $this->find_scope3_emission_factor_header_rows($dataCells, $numberCol);
+	    if (empty($headerInfo)) {
+		$this->theme->set_message('Invalid template. Row labels must include Site Name and Year, then Category | Stream | Destination groups with tCO2e/short ton and kgCO2e/MT column headers.', 'error');
+		redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import/emission_scope2_3?year=' . $year);
+		exit;
+	    }
+	    $groupRow = $headerInfo['group_row'];
+	    $unitRow = $headerInfo['unit_row'];
+	    $dataStartIndex = $headerInfo['data_start'];
+
+	    $yearCol = null;
+	    $siteCol = null;
+	    $wasteGroups = array();
+	    $lastGroupHeader = '';
+	    for ($j = 0; $j < $numberCol; $j++) {
+		$groupHeader = isset($groupRow[$j]) ? trim((string) $groupRow[$j]) : '';
+		$unitHeader = isset($unitRow[$j]) ? trim((string) $unitRow[$j]) : '';
+		$groupNorm = strtolower($groupHeader);
+		$unitNorm = strtolower($unitHeader);
+		if ($groupNorm === 'site name' || $unitNorm === 'site name') {
+		    $siteCol = $j;
+		    continue;
+		}
+		if ($groupNorm === 'year' || $unitNorm === 'year') {
+		    $yearCol = $j;
+		    continue;
+		}
+		if ($groupHeader !== '') {
+		    $lastGroupHeader = $groupHeader;
+		} else {
+		    $groupHeader = $lastGroupHeader;
+		}
+		$parsedGroup = null;
+		$groupParts = array_values(array_filter(array_map('trim', explode('|', $groupHeader)), function ($part) {
+		    return $part !== '';
+		}));
+		if (count($groupParts) >= 3) {
+		    $destinationLabel = array_pop($groupParts);
+		    $categoryLabel = array_shift($groupParts);
+		    $parsedGroup = array(
+			'category_label' => $categoryLabel,
+			'stream_label' => implode(' | ', $groupParts),
+			'typical_destination_label' => $destinationLabel,
+		    );
+		}
+		$factorField = null;
+		$unitNorm = strtolower(str_replace(array('²', ' '), array('2', ''), $unitHeader));
+		if (strpos($unitNorm, 'tco2e') !== false || strpos($unitNorm, 'shortton') !== false) {
+		    $factorField = 'epa_source_factor';
+		} elseif (strpos($unitNorm, 'kgco2e') !== false) {
+		    $factorField = 'hep_factor';
+		}
+		if ($parsedGroup && $factorField) {
+		    $wasteGroups[$j] = array_merge($parsedGroup, array('factor_field' => $factorField));
+		}
+	    }
+
+	    if (empty($wasteGroups)) {
+		$this->theme->set_message('Invalid template. Use Site Name, Year, then merged groups Category | Stream | Destination with tCO2e/short ton and kgCO2e/MT column headers.', 'error');
+		redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import/emission_scope2_3?year=' . $year);
+		exit;
+	    }
+
+	    $this->load->model('sites/site_waste_scope_1_2_emission_factor_model');
+	    $siteNames = array();
+	    for ($i = $dataStartIndex; $i <= $numberRow; $i++) {
+		if (!isset($dataCells[$i]) || $siteCol === null) {
+		    continue;
+		}
+		$siteName = trim((string) $dataCells[$i][$siteCol]);
+		if ($siteName !== '') {
+		    $siteNames[] = $siteName;
+		}
+	    }
+	    $allSiteids = array();
+	    if (!empty($siteNames)) {
+		$allSiteids = $this->import_model->getSiteDetailByName(array_values(array_unique($siteNames)), '');
+	    }
+	    $emissionRowsBySiteYear = array();
+	    $imported = 0;
+	    $skipped = 0;
+	    $sites_name = array();
+
+	    for ($i = $dataStartIndex; $i <= $numberRow; $i++) {
+		if (!isset($dataCells[$i])) {
+		    continue;
+		}
+		$rowYear = ($yearCol !== null && isset($dataCells[$i][$yearCol])) ? (int) trim((string) $dataCells[$i][$yearCol]) : 0;
+		if ($rowYear <= 0) {
+		    continue;
+		}
+		$rowSiteName = ($siteCol !== null && isset($dataCells[$i][$siteCol])) ? trim((string) $dataCells[$i][$siteCol]) : '';
+		if ($rowSiteName === '') {
+		    continue;
+		}
+		$rowSiteId = isset($allSiteids[$rowSiteName]['id']) ? (int) $allSiteids[$rowSiteName]['id'] : 0;
+		if ($rowSiteId <= 0) {
+		    $sites_name[] = $rowSiteName;
+		    continue;
+		}
+		if (!isset($emissionRowsBySiteYear[$rowSiteId][$rowYear])) {
+		    $emissionRowsBySiteYear[$rowSiteId][$rowYear] =
+			$this->site_waste_scope_1_2_emission_factor_model->getRowsWithValues($rowYear, $rowSiteId);
+		}
+		$grouped = array();
+		foreach ($wasteGroups as $colIndex => $parsed) {
+		    $value = isset($dataCells[$i][$colIndex]) ? trim((string) $dataCells[$i][$colIndex]) : '';
+		    if ($value === '' || !is_numeric($value)) {
+			continue;
+		    }
+		    $groupKey = strtolower($parsed['category_label'] . '|' . $parsed['stream_label'] . '|' . $parsed['typical_destination_label']);
+		    if (!isset($grouped[$groupKey])) {
+			$grouped[$groupKey] = $parsed;
+			$grouped[$groupKey]['epa_source_factor'] = null;
+			$grouped[$groupKey]['hep_factor'] = null;
+		    }
+		    $grouped[$groupKey][$parsed['factor_field']] = $value;
+		}
+		foreach ($grouped as $factorRow) {
+		    $matched = null;
+		    foreach ($emissionRowsBySiteYear[$rowSiteId][$rowYear] as $existingRow) {
+			if (strcasecmp(trim((string) $existingRow['category_label']), trim((string) $factorRow['category_label'])) !== 0) {
+			    continue;
+			}
+			if (strcasecmp(trim((string) $existingRow['typical_destination_label']), trim((string) $factorRow['typical_destination_label'])) !== 0) {
+			    continue;
+			}
+			$rowStream = '';
+			if (!empty($existingRow['stream_label'])) {
+			    $rowStream = $existingRow['stream_label'];
+			} elseif (!empty($existingRow['group_label'])) {
+			    $rowStream = $existingRow['group_label'];
+			} elseif (!empty($existingRow['category_label'])) {
+			    $rowStream = $existingRow['category_label'];
+			}
+			if (strcasecmp(trim((string) $rowStream), trim((string) $factorRow['stream_label'])) === 0) {
+			    $matched = $existingRow;
+			    break;
+			}
+		    }
+		    if (empty($matched)) {
+			$skipped++;
+			continue;
+		    }
+		    $epaFactor = $factorRow['epa_source_factor'];
+		    $hepFactor = $factorRow['hep_factor'];
+		    if ($epaFactor !== null && $hepFactor === null) {
+			$hepFactor = convertWasteEmissionFactor($epaFactor, 'tco2e_short_ton');
+		    } elseif ($hepFactor !== null && $epaFactor === null) {
+			$epaFactor = convertWasteEmissionFactor($hepFactor, 'kgco2e_mt');
+		    }
+		    $this->site_waste_scope_1_2_emission_factor_model->upsert(array(
+			'site_id' => $rowSiteId,
+			'year_id' => $rowYear,
+			'column_key' => $matched['column_key'],
+			'node_level' => $matched['node_level'],
+			'category_label' => $matched['category_label'],
+			'group_label' => $matched['group_label'],
+			'stream_label' => $matched['stream_label'],
+			'typical_destination_id' => $matched['typical_destination_id'],
+			'typical_destination_label' => $matched['typical_destination_label'],
+			'epa_source_factor' => $epaFactor,
+			'hep_factor' => $hepFactor,
+			'status' => isset($matched['status']) ? $matched['status'] : 1,
+		    ));
+		    $imported++;
+		}
+	    }
+
+	    $site_id = $this->session->userdata[$this->section_name]['site_id'];
+	    $user_id = $this->session->userdata[$this->section_name]['user_id'];
+	    saveAuditTrail($user_id, $site_id, 'Import Waste Scope Emission Factors', 'Import');
+
+	    if ($imported > 0) {
+		$message = $imported . ' Scope 3 waste emission factor value(s) imported.';
+		if ($skipped > 0) {
+		    $message .= ' ' . $skipped . ' group(s) were skipped because the stream or destination could not be matched.';
+		}
+		if (!empty($sites_name)) {
+		    $message .= ' Sites not found: ' . implode(', ', array_unique($sites_name)) . '.';
+		}
+		$this->theme->set_message($message, 'success');
+	    } else {
+		$errorMessage = 'No valid Scope 3 emission factor values were imported.';
+		if (!empty($sites_name)) {
+		    $errorMessage .= ' Sites not found: ' . implode(', ', array_unique($sites_name)) . '.';
+		}
+		$this->theme->set_message($errorMessage, 'error');
+	    }
+	    redirect(site_url() . BASE_ADMIN_URL_CUSTOM . 'import/emission_scope2_3?year=' . $year);
+	    exit;
+	}
+
+	$this->theme->set('page_title', lang('import-emission-scope2-3'));
+	$this->breadcrumb->add(lang('import-emission-scope2-3'));
+	$this->theme->view($data);
+    }
+
+    private function find_scope3_emission_factor_header_rows($dataCells, $numberCol)
+    {
+	$maxScan = min(6, count($dataCells));
+	for ($i = 0; $i < $maxScan; $i++) {
+	    $hasYear = false;
+	    $hasSite = false;
+	    for ($j = 0; $j < $numberCol; $j++) {
+		$value = strtolower(trim((string) (isset($dataCells[$i][$j]) ? $dataCells[$i][$j] : '')));
+		if ($value === 'year') {
+		    $hasYear = true;
+		}
+		if ($value === 'site name') {
+		    $hasSite = true;
+		}
+	    }
+	    if ($hasYear || $hasSite) {
+		$unitRowIndex = $i + 1;
+		$unitRow = isset($dataCells[$unitRowIndex]) ? $dataCells[$unitRowIndex] : array();
+		$hasUnit = false;
+		foreach ($unitRow as $unitHeader) {
+		    $unitNorm = strtolower(str_replace(array('²', ' '), array('2', ''), (string) $unitHeader));
+		    if (strpos($unitNorm, 'tco2e') !== false || strpos($unitNorm, 'kgco2e') !== false || strpos($unitNorm, 'shortton') !== false) {
+			$hasUnit = true;
+			break;
+		    }
+		}
+		if (!$hasUnit) {
+		    continue;
+		}
+		return array(
+		    'group_row' => $dataCells[$i],
+		    'unit_row' => $unitRow,
+		    'data_start' => $unitRowIndex + 1,
+		);
+	    }
+	}
+	return null;
+    }
+
+    private function download_waste_scope_emission_factor_template($year)
+    {
+	$siteId = isset($this->session->userdata[$this->section_name]['site_id']) ? $this->session->userdata[$this->section_name]['site_id'] : 0;
+	$this->load->model('sites/site_waste_scope_1_2_emission_factor_model');
+	$existing = $this->site_waste_scope_1_2_emission_factor_model->getRowsWithValues($year, $siteId);
+	$siteName = '';
+	if ($siteId) {
+	    $siteDetail = $this->sites_model->get_site_detail_custom($siteId);
+	    $siteName = isset($siteDetail['site_location_name']) ? $siteDetail['site_location_name'] : '';
+	}
+
+	require_once APPPATH . 'libraries/PHPExcel/PHPExcel.php';
+	$objPHPExcel = new PHPExcel();
+	$sheet = $objPHPExcel->getActiveSheet();
+	$sheet->setTitle('Scope 3 Emission Factors');
+	$style = array('font' => array('bold' => true), 'alignment' => array(
+	    'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+	    'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+	    'wrap' => true,
+	));
+	$sheet->getStyle('1:3')->applyFromArray($style);
+	$sheet->getRowDimension(1)->setRowHeight(24);
+	$sheet->getRowDimension(2)->setRowHeight(36);
+	$sheet->getRowDimension(3)->setRowHeight(28);
+
+	$configSheet = $objPHPExcel->createSheet();
+	$configSheet->setTitle('Config');
+	$configSheet->setCellValue('A1', 'WasteEfConversion');
+	$configSheet->setCellValue('B1', WASTE_EF_TCO2E_SHORT_TON_TO_KGCO2E_MT);
+	$configSheet->setSheetState(PHPExcel_Worksheet::SHEETSTATE_HIDDEN);
+
+	$sheet->setCellValue('A1', 'Scope 3 Waste Emission Factors');
+	$sheet->getColumnDimension('A')->setWidth(28);
+	$sheet->mergeCells('A2:A3');
+	$sheet->setCellValue('A2', 'Site Name');
+	$sheet->mergeCells('B2:B3');
+	$sheet->setCellValue('B2', 'Year');
+	$sheet->getColumnDimension('B')->setWidth(12);
+
+	$dataStartRow = 4;
+	$dataEndRow = 23;
+	$factorPairs = array();
+	$colIndex = 2;
+	foreach ($existing as $row) {
+		$streamLabel = '';
+		if (!empty($row['stream_label'])) {
+		    $streamLabel = $row['stream_label'];
+		} elseif (!empty($row['group_label'])) {
+		    $streamLabel = $row['group_label'];
+		} elseif (!empty($row['category_label'])) {
+		    $streamLabel = $row['category_label'];
+		}
+		$start = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+		$end = PHPExcel_Cell::stringFromColumnIndex($colIndex + 1);
+		$sheet->mergeCells($start . '2:' . $end . '2');
+		$sheet->setCellValue($start . '2', $row['category_label'] . WASTE_EF_IMPORT_GROUP_SEPARATOR . $streamLabel . WASTE_EF_IMPORT_GROUP_SEPARATOR . $row['typical_destination_label']);
+		$sheet->setCellValue($start . '3', WASTE_EF_IMPORT_SUBCOL_TCO2E);
+		$sheet->setCellValue($end . '3', WASTE_EF_IMPORT_SUBCOL_KGCO2E);
+		$sheet->getColumnDimension($start)->setWidth(18);
+		$sheet->getColumnDimension($end)->setWidth(18);
+		$factorPairs[] = array(
+		    'epa_col' => $start,
+		    'hep_col' => $end,
+		    'epa_value' => isset($row['epa_source_factor']) ? $row['epa_source_factor'] : '',
+		    'hep_value' => isset($row['hep_factor']) ? $row['hep_factor'] : '',
+		);
+		$colIndex += 2;
+	}
+	$lastCol = PHPExcel_Cell::stringFromColumnIndex(max(2, $colIndex) - 1);
+	$sheet->mergeCells('A1:' . $lastCol . '1');
+
+	for ($r = $dataStartRow; $r <= $dataEndRow; $r++) {
+	    if ($r === $dataStartRow) {
+		$sheet->setCellValue('A' . $r, $siteName);
+		$sheet->setCellValue('B' . $r, (int) $year);
+	    }
+	    foreach ($factorPairs as $pair) {
+		$epaCol = $pair['epa_col'];
+		$hepCol = $pair['hep_col'];
+		$hasEpa = ($pair['epa_value'] !== '' && $pair['epa_value'] !== null && $r === $dataStartRow);
+		$hasHep = ($pair['hep_value'] !== '' && $pair['hep_value'] !== null && $r === $dataStartRow);
+		if ($hasHep && !$hasEpa) {
+		    $sheet->setCellValue($hepCol . $r, $pair['hep_value']);
+		    $sheet->setCellValue($epaCol . $r, '=IF(ISNUMBER(' . $hepCol . $r . '),ROUND(' . $hepCol . $r . '/Config!$B$1,6),"")');
+		} else {
+		    if ($hasEpa) {
+			$sheet->setCellValue($epaCol . $r, $pair['epa_value']);
+		    }
+		    $sheet->setCellValue($hepCol . $r, '=IF(ISNUMBER(' . $epaCol . $r . '),ROUND(' . $epaCol . $r . '*Config!$B$1,6),"")');
+		}
+	    }
+	}
+
+	$sheet->freezePane('C4');
+	$objPHPExcel->setActiveSheetIndex(0);
+
+	if (ob_get_length()) {
+	    ob_end_clean();
+	}
+	header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+	header('Content-Disposition: attachment;filename="Waste_Scope_Emission_Factors_Template_' . $year . '.xlsx"');
+	header('Cache-Control: max-age=0');
+	$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+	$objWriter->save('php://output');
+	exit;
     }
 
     public function site_data() {

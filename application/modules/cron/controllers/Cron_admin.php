@@ -414,200 +414,120 @@ class Cron_admin extends Base_Admin_Controller {
 
     public function updateMonthlyCddHdd($id = 0) {
 
-	ini_set('display_errors', 1);
-
-	error_reporting(E_ALL);
-
-
-
-	$myFile = "logs.txt";
-
-	$fh = fopen($myFile, 'a') or die("can't open file");
-
-	$stringData = "from get_image_from_uri function start " . date("Y-m-d H:i:s") . "\n";
-
-	fwrite($fh, $stringData);
-
-	fclose($fh);
-
-
+	// wget/cron closes the HTTP connection early; keep running until all sites finish
+	ignore_user_abort(true);
+	set_time_limit(0);
+	ini_set('max_execution_time', '0');
+	ini_set('memory_limit', '512M');
 
 	$lastmonth = date('Y-m-d', mktime(0, 0, 0, date("m") - 1, 1, date("Y")));
-
 	$currentmonth = date('Y-m-d', mktime(0, 0, 0, date("m"), 1, date("Y")));
 
-
-
 	$this->load->model('cron/cron_model');
-
 	$sites = $this->cron_model->get_all_sites_for_location($id);
 
-	$dataList = array();
-
-
-
-	if (!empty($sites)) {
-
-	    foreach ($sites as $site) {
-
-
-
-		$stationId = $site['station_id'];
-
-
-
-		$baseCdd = floatval($site['base_cdd_temprature']);
-
-		$baseHdd = floatval($site['base_hdd_temprature']);
-
-
-
-		$baseCddTemprature = (!empty($baseCdd)) ? $baseCdd : 20.5;
-
-		$baseHddTemprature = (!empty($baseHdd)) ? $baseHdd : 15.5;
-
-
-
-		if (empty($stationId)) {
-
-		    continue;
-
-		}
-
-
-
-		$postXml = '<LocationDataRequest>
-
-		    <StationIdLocation>
-
-			<StationId>' . $stationId . '</StationId>
-
-		    </StationIdLocation>
-
-		    <DataSpecs>
-
-			<DatedDataSpec key="dailyHDD">
-
-			    <HeatingDegreeDaysCalculation>
-
-				<CelsiusBaseTemperature>' . $baseHddTemprature . '</CelsiusBaseTemperature>
-
-			    </HeatingDegreeDaysCalculation>
-
-			    <MonthlyBreakdown>
-
-				<DayRangePeriod>
-
-				    <DayRange first="' . $lastmonth . '" last="' . $currentmonth . '"/>
-
-				</DayRangePeriod>
-
-			    </MonthlyBreakdown>
-
-			</DatedDataSpec>
-
-
-
-			<DatedDataSpec key="dailyCDD">
-
-			    <CoolingDegreeDaysCalculation>
-
-				<CelsiusBaseTemperature>' . $baseCddTemprature . '</CelsiusBaseTemperature>
-
-			    </CoolingDegreeDaysCalculation>
-
-			    <MonthlyBreakdown>
-
-				<DayRangePeriod>
-
-				    <DayRange first="' . $lastmonth . '" last="' . $currentmonth . '"/>
-
-				</DayRangePeriod>
-
-			    </MonthlyBreakdown>
-
-			</DatedDataSpec>
-
-		    </DataSpecs>
-
-		</LocationDataRequest>';
-
-
-
-		$result = $this->callCddHddApi($postXml);
-
-		if (isset($result->Failure) && !empty($result->Failure->Code->__toString())) {
-
-		    log_message('error', 'updateMonthlyCddHdd: CDD/HDD API failure for site_id ' . $site['id'] . ', code ' . $result->Failure->Code->__toString());
-
-		    continue;
-
-		}
-
-		$dataSets = $result->LocationDataResponse->DataSets ?? null;
-
-		if (empty($dataSets)) {
-			log_message('error', 'updateMonthlyCddHdd: no DataSets for site_id ' . $site['id']);
-			continue;
-		}
-
-		// Check for failures on either dataset
-		$hasFailure = false;
-		if (isset($dataSets->Failure)) {
-			foreach ($dataSets->Failure as $failure) {
-				$key = (string) $failure->attributes()->key;
-				$code = (string) $failure->Code;
-				$msg = (string) $failure->Message;
-				log_message('error', "updateMonthlyCddHdd: API failure for site_id {$site['id']} key={$key} code={$code} msg={$msg}");
-				$hasFailure = true;
-			}
-		}
-
-		if ($hasFailure || !isset($dataSets->DatedDataSet)) {
-			continue;
-		}
-
-		foreach ($result->LocationDataResponse->DataSets->DatedDataSet[0]->Values->V as $v) {
-
-		    $date = $v->attributes()->d->__toString();
-
-		    $value = $v->__toString();
-
-		    $dataList[$site['id']][$date]['hdd'] = $value;
-
-		}
-
-		foreach ($result->LocationDataResponse->DataSets->DatedDataSet[1]->Values->V as $v) {
-
-		    $date = $v->attributes()->d->__toString();
-
-		    $value = $v->__toString();
-
-		    $dataList[$site['id']][$date]['cdd'] = $value;
-
-		}
-
+	log_message('error', 'updateMonthlyCddHdd: start sites=' . count($sites) . ' range=' . $lastmonth . '/' . $currentmonth);
+
+	if (empty($sites)) {
+	    echo 'End';
+	    exit;
+	}
+
+	foreach ($sites as $site) {
+	    set_time_limit(0);
+
+	    $stationId = $site['station_id'];
+	    if (empty($stationId)) {
+		continue;
 	    }
 
+	    $baseCdd = floatval($site['base_cdd_temprature']);
+	    $baseHdd = floatval($site['base_hdd_temprature']);
+	    $baseCddTemprature = (!empty($baseCdd)) ? $baseCdd : 20.5;
+	    $baseHddTemprature = (!empty($baseHdd)) ? $baseHdd : 15.5;
+
+	    $postXml = '<LocationDataRequest>
+		    <StationIdLocation>
+			<StationId>' . $stationId . '</StationId>
+		    </StationIdLocation>
+		    <DataSpecs>
+			<DatedDataSpec key="dailyHDD">
+			    <HeatingDegreeDaysCalculation>
+				<CelsiusBaseTemperature>' . $baseHddTemprature . '</CelsiusBaseTemperature>
+			    </HeatingDegreeDaysCalculation>
+			    <MonthlyBreakdown>
+				<DayRangePeriod>
+				    <DayRange first="' . $lastmonth . '" last="' . $currentmonth . '"/>
+				</DayRangePeriod>
+			    </MonthlyBreakdown>
+			</DatedDataSpec>
+			<DatedDataSpec key="dailyCDD">
+			    <CoolingDegreeDaysCalculation>
+				<CelsiusBaseTemperature>' . $baseCddTemprature . '</CelsiusBaseTemperature>
+			    </CoolingDegreeDaysCalculation>
+			    <MonthlyBreakdown>
+				<DayRangePeriod>
+				    <DayRange first="' . $lastmonth . '" last="' . $currentmonth . '"/>
+				</DayRangePeriod>
+			    </MonthlyBreakdown>
+			</DatedDataSpec>
+		    </DataSpecs>
+		</LocationDataRequest>';
+
+	    $result = $this->callCddHddApi($postXml);
+	    if ($result === false) {
+		log_message('error', 'updateMonthlyCddHdd: empty/failed API response for site_id ' . $site['id']);
+		continue;
+	    }
+
+	    if (isset($result->Failure) && !empty($result->Failure->Code->__toString())) {
+		log_message('error', 'updateMonthlyCddHdd: CDD/HDD API failure for site_id ' . $site['id'] . ', code ' . $result->Failure->Code->__toString());
+		continue;
+	    }
+
+	    $dataSets = isset($result->LocationDataResponse->DataSets) ? $result->LocationDataResponse->DataSets : null;
+	    if (empty($dataSets) || !isset($dataSets->DatedDataSet)) {
+		log_message('error', 'updateMonthlyCddHdd: no DatedDataSet for site_id ' . $site['id']);
+		continue;
+	    }
+
+	    if (isset($dataSets->Failure)) {
+		foreach ($dataSets->Failure as $failure) {
+		    $key = (string) $failure->attributes()->key;
+		    $code = (string) $failure->Code;
+		    $msg = (string) $failure->Message;
+		    log_message('error', "updateMonthlyCddHdd: API failure for site_id {$site['id']} key={$key} code={$code} msg={$msg}");
+		}
+	    }
+
+	    $siteData = array();
+	    foreach ($dataSets->DatedDataSet as $dataSet) {
+		$specKey = strtolower((string) $dataSet->attributes()->key);
+		$field = (strpos($specKey, 'hdd') !== false) ? 'hdd' : 'cdd';
+		if (!isset($dataSet->Values->V)) {
+		    continue;
+		}
+		foreach ($dataSet->Values->V as $v) {
+		    $date = (string) $v->attributes()->d;
+		    if ($date === '') {
+			continue;
+		    }
+		    if (!isset($siteData[$date])) {
+			$siteData[$date] = array('hdd' => 0, 'cdd' => 0);
+		    }
+		    $siteData[$date][$field] = (string) $v;
+		}
+	    }
+
+	    if (!empty($siteData)) {
+		$this->cron_model->insert_monthly_utilities_cdd(array($site['id'] => $siteData));
+	    }
 	}
 
-
-
-	if (!empty($dataList)) {
-
-	    $this->cron_model->insert_monthly_utilities_cdd($dataList);
-
-	}
-
-
-
+	log_message('error', 'updateMonthlyCddHdd: finished');
 	echo 'End';
-
 	exit;
-
     }
-
-
 
     public function base64url_encode($unencoded) {
 
@@ -681,45 +601,46 @@ class Cron_admin extends Base_Admin_Controller {
 
 
 
-	$ch = curl_init();
+	$responseXml = false;
+	$curlErrno = 0;
+	$curlError = '';
+	$httpCode = 0;
 
-	curl_setopt($ch, CURLOPT_URL, $url);
+	for ($attempt = 1; $attempt <= 3; $attempt++) {
+	    $ch = curl_init();
+	    curl_setopt($ch, CURLOPT_URL, $url);
+	    curl_setopt($ch, CURLOPT_POST, true);
+	    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($requestParameters));
+	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
+	    curl_setopt($ch, CURLOPT_TIMEOUT, 90);
+	    if (defined('CURLOPT_ENCODING')) {
+		curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
+	    }
+	    $responseXml = curl_exec($ch);
+	    $curlErrno = curl_errno($ch);
+	    $curlError = curl_error($ch);
+	    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	    curl_close($ch);
 
-	curl_setopt($ch, CURLOPT_POST, true);
-
-	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($requestParameters));
-
-	if (defined('CURLOPT_ENCODING')) {
-
-	    curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
-
+	    if ($curlErrno === 0 && !empty($responseXml) && (int) $httpCode < 500) {
+		break;
+	    }
+	    log_message('error', 'callCddHddApi: attempt ' . $attempt . ' failed errno=' . $curlErrno . ' http=' . $httpCode . ' ' . $curlError);
+	    sleep($attempt);
 	}
 
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	if ($curlErrno !== 0 || empty($responseXml)) {
+	    log_message('error', 'callCddHddApi: curl failed - errno ' . $curlErrno . ' - ' . $curlError);
+	    return false;
+	}
 
-	$responseXml = curl_exec($ch);
-    $curlErrno = curl_errno($ch);
-    $curlError = curl_error($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    // TEMP DEBUG - remove once root cause confirmed
-    $fh = fopen('logs.txt', 'a');
-    fwrite($fh, date("Y-m-d H:i:s") . " callCddHddApi curl_errno=$curlErrno curl_error=$curlError http_code=$httpCode\n");
-    fwrite($fh, "raw_response: " . substr((string)$responseXml, 0, 2000) . "\n---\n");
-    fclose($fh);
-
-    if ($curlErrno !== 0 || empty($responseXml)) {
-        log_message('error', 'callCddHddApi: curl failed - errno ' . $curlErrno . ' - ' . $curlError);
-        return false;
-    }
-
-    try {
-        $result = new SimpleXMLElement($responseXml);
-    } catch (Exception $e) {
-        log_message('error', 'callCddHddApi: XML parse failed - ' . $e->getMessage());
-        return false;
-    }
+	try {
+	    $result = new SimpleXMLElement($responseXml);
+	} catch (Exception $e) {
+	    log_message('error', 'callCddHddApi: XML parse failed - ' . $e->getMessage());
+	    return false;
+	}
 
 	return $result;
 

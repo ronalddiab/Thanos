@@ -64,8 +64,8 @@ $cost_pie_chart_pre_h_sum = ($cost_pie_chart_pre['electricity']+$cost_pie_chart_
                     <td>
                         <table width="100%" border="0" cellpadding="5" cellspacing="0">
                             <tr>
-                                <td width="50%"><img height="350" src="<?php echo $pieChartImg; ?>" /></td>
-                                <td width="50%"><img height="350" src="<?php echo $pieChartNewImg; ?>" /></td>
+                                <td width="50%"><img height="400" src="<?php echo $pieChartImg; ?>" /></td>
+                                <td width="50%"><img height="400" src="<?php echo $pieChartNewImg; ?>" /></td>
                             </tr>
                             <tr>
                                 <td valign="top">
@@ -175,7 +175,7 @@ $cost_pie_chart_pre_h_sum = ($cost_pie_chart_pre['electricity']+$cost_pie_chart_
                                                         <tbody>
                                                             <tr>
                                                                 <td width="45%"><strong>Utilities</strong></td>
-                                                                <td width="35%"><strong>Cost (<?php echo REPORT_CURRENCY_SYMBOL  ?>)</strong></td>
+                                                                <td width="35%"><strong>Cost (<?php echo $isLocal ? currency_symbol($isLocal) : BASE_CURRENCY ?>)</strong></td>
                                                                 <td width="20%"><strong>% Share</strong></td>
                                                             </tr>
                                                         </tbody>
@@ -246,7 +246,7 @@ $cost_pie_chart_pre_h_sum = ($cost_pie_chart_pre['electricity']+$cost_pie_chart_
                                                         <tbody>
                                                             <tr>
                                                                 <td width="45%"><strong>Total</strong></td>
-                                                                <td width="35%"><strong><?php echo number_format(round($cost_pie_chart_pre_h_sum)); ?></strong></td>
+                                                                <td width="35%"><strong><?php echo number_format($cost_pie_chart_pre_h_sum); ?></strong></td>
                                                             </tr>
                                                         </tbody>
                                                     </table>

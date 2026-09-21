@@ -1213,6 +1213,131 @@ function getUtilityPanelColor() {
     return $utility_colors;
 }
 
+function getChsbColor($chsb_value, $chsb_reading, $chsb_higher_better = false)
+{
+    // Not computable / missing input
+    if ($chsb_value === null || $chsb_value === '') {
+        return array(
+            'background' => '#D9D9D9',
+            'font'       => '#808080'
+        );
+    }
+
+    $value = (float) $chsb_value;
+
+    $low             = (float) $chsb_reading['low'];
+    $lower_quartile  = (float) $chsb_reading['lower_quartile'];
+    $median          = (float) $chsb_reading['median'];
+    $upper_quartile  = (float) $chsb_reading['upper_quartile'];
+    $high            = (float) $chsb_reading['high'];
+
+    // Median always gets its own band.
+    if ($value == $median) {
+        return array(
+            'background' => '#BDD7EE',
+            'font'       => '#000000'
+        );
+    }
+
+    // HIGHER IS BETTER
+    if ($chsb_higher_better) {
+
+        // Better than peer maximum
+        if ($value > $high) {
+            return array(
+                'background' => '#006100',
+                'font'       => '#FFFFFF'
+            );
+        }
+
+        // Top quartile
+        if ($value > $upper_quartile && $value <= $high) {
+            return array(
+                'background' => '#63BE7B',
+                'font'       => '#000000'
+            );
+        }
+
+        // Second quartile
+        if ($value > $median && $value <= $upper_quartile) {
+            return array(
+                'background' => '#C6E0B4',
+                'font'       => '#000000'
+            );
+        }
+
+        // Third quartile
+        if ($value >= $lower_quartile && $value < $median) {
+            return array(
+                'background' => '#FFD966',
+                'font'       => '#000000'
+            );
+        }
+
+        // Bottom quartile
+        if ($value >= $low && $value < $lower_quartile) {
+            return array(
+                'background' => '#F4B183',
+                'font'       => '#000000'
+            );
+        }
+
+        // Worse than peer minimum
+        return array(
+            'background' => '#C00000',
+            'font'       => '#FFFFFF'
+        );
+    }
+
+    // LOWER IS BETTER
+
+    // Better than peer minimum
+    if ($value < $low) {
+        return array(
+            'background' => '#006100',
+            'font'       => '#FFFFFF'
+        );
+    }
+
+    // Top quartile
+    if ($value >= $low && $value < $lower_quartile) {
+        return array(
+            'background' => '#63BE7B',
+            'font'       => '#000000'
+        );
+    }
+
+    // Second quartile
+    if ($value >= $lower_quartile && $value < $median) {
+        return array(
+            'background' => '#C6E0B4',
+            'font'       => '#000000'
+        );
+    }
+
+    // Third quartile
+    if ($value > $median && $value < $upper_quartile) {
+        return array(
+            'background' => '#FFD966',
+            'font'       => '#000000'
+        );
+    }
+
+    // Bottom quartile
+    if ($value >= $upper_quartile && $value <= $high) {
+        return array(
+            'background' => '#F4B183',
+            'font'       => '#000000'
+        );
+    }
+
+    // Worse than peer maximum
+    return array(
+        'background' => '#C00000',
+        'font'       => '#FFFFFF'
+    );
+}
+
 function getConsumptionConstant() {
     $consumption_constants = [
 	1 => 'Charged by meter',
@@ -1384,100 +1509,27 @@ function getWasteTabDisplayLabel($rawKey)
 }
 
 /**
- * Flat list of every category / group / stream node from getWasteTabData().
- * Used for emission-factor UI, import validation, and site_waste lookups.
+ * Convert waste emission factor between tCO2e/short ton and kgCO2e/MT.
+ * kgCO2e/MT = tCO2e/short ton × WASTE_EF_TCO2E_SHORT_TON_TO_KGCO2E_MT
+ *
+ * @param mixed $value Numeric factor value
+ * @param string $from 'tco2e_short_ton' or 'kgco2e_mt'
+ * @return float|null
  */
-function getWasteTabDataFlatList()
+function convertWasteEmissionFactor($value, $from = 'tco2e_short_ton')
 {
-    $tabData = getWasteTabData();
-    $rows = [];
-
-    foreach ($tabData as $categoryKey => $groups) {
-        $categoryLabel = getWasteTabDisplayLabel($categoryKey);
-        $categoryColumnKey = getWasteColumnKey($categoryKey);
-
-        $rows[] = [
-            'node_level' => 'category',
-            'column_key' => $categoryColumnKey,
-            'category_label' => $categoryLabel,
-            'group_label' => null,
-            'stream_label' => null,
-            'display_label' => $categoryLabel,
-        ];
-
-        if (!is_array($groups) || empty($groups)) {
-            continue;
-        }
-
-        foreach ($groups as $groupKey => $streams) {
-            $groupLabel = getWasteTabDisplayLabel($groupKey);
-            $groupColumnKey = getWasteColumnKey($groupKey);
-
-            $rows[] = [
-                'node_level' => 'group',
-                'column_key' => $groupColumnKey,
-                'category_label' => $categoryLabel,
-                'group_label' => $groupLabel,
-                'stream_label' => null,
-                'display_label' => $groupLabel,
-            ];
-
-            if (!is_array($streams) || empty($streams)) {
-                continue;
-            }
-
-            foreach ($streams as $stream) {
-                if (!is_array($stream)) {
-                    continue;
-                }
-                $nameMapping = isset($stream['name']) ? $stream['name'] : $stream['label'];
-                $streamColumnKey = getWasteColumnKey($nameMapping);
-                $streamLabel = isset($stream['label']) ? $stream['label'] : $nameMapping;
-
-                $rows[] = [
-                    'node_level' => 'stream',
-                    'column_key' => $streamColumnKey,
-                    'category_label' => $categoryLabel,
-                    'group_label' => $groupLabel,
-                    'stream_label' => $streamLabel,
-                    'display_label' => $streamLabel,
-                ];
-            }
-        }
+    if ($value === '' || $value === null || !is_numeric($value)) {
+        return null;
     }
 
-    return $rows;
-}
+    $value = (float) $value;
+    $factor = WASTE_EF_TCO2E_SHORT_TON_TO_KGCO2E_MT;
 
-/**
- * Matrix seed rows: each tab node × each typical destination (excl. None Select).
- */
-function getWasteEmissionFactorMatrixSeed($yearId)
-{
-    $nodes = getWasteTabDataFlatList();
-    $destinations = getWasteTypicalDestinationArray();
-    $seed = [];
-
-    foreach ($nodes as $node) {
-        foreach ($destinations as $destinationId => $destinationLabel) {
-            if ((int) $destinationId === 0) {
-                continue;
-            }
-            $seed[] = [
-                'year_id' => (int) $yearId,
-                'column_key' => $node['column_key'],
-                'node_level' => $node['node_level'],
-                'category_label' => $node['category_label'],
-                'group_label' => $node['group_label'],
-                'stream_label' => $node['stream_label'],
-                'typical_destination_id' => (int) $destinationId,
-                'typical_destination_label' => $destinationLabel,
-                'status' => 1,
-            ];
-        }
+    if ($from === 'kgco2e_mt') {
+        return $value / $factor;
     }
 
-    return $seed;
+    return $value * $factor;
 }
 
 /**
@@ -1695,6 +1747,7 @@ function sanitizeMmbtuFactorForQuery($factor)
 }
 
 function formatNumberAbbreviation($number) {
+	$number = (float)$number;
     if ($number >= 1000000000) {
         return rtrim(rtrim(number_format($number / 1000000000, 2), '0'), '.') . 'b';
     } elseif ($number >= 1000000) {
@@ -1756,6 +1809,8 @@ function groupSelectedItems($selectedItems, $site_id = 0, $year_id = 0, $month_i
     foreach ($selectedItems as $item) {
         if ($parent = findTopCategory($item, $master)) {
             $grouped[$parent][] = $item;
+        } else {
+            $grouped[$item][] = $item;
         }
     }
 
@@ -1768,7 +1823,7 @@ function groupSelectedItems($selectedItems, $site_id = 0, $year_id = 0, $month_i
     // Whitelist parent columns
     $parents = array_keys($grouped);
     $selects = array_map(function ($p) {
-		return "COALESCE(unit_measure_{$p}, 0) AS unit_measure_{$p}";
+		return "COALESCE(`unit_measure_{$p}`, 0) AS `unit_measure_{$p}`";
 	}, $parents);
 
 
@@ -1784,8 +1839,19 @@ function groupSelectedItems($selectedItems, $site_id = 0, $year_id = 0, $month_i
         ->row_array();
 
     foreach ($parents as $parent) {
-        if (!empty($row["unit_measure_{$parent}"])) {
+        if (!empty($row["unit_measure_{$parent}"]) && in_array($parent, $selectedItems, true)) {
             $grouped[$parent] = [$parent];
+        }
+    }
+    $listed = [];
+    foreach ($grouped as $cols) {
+        foreach ($cols as $col) {
+            $listed[$col] = true;
+        }
+    }
+    foreach ($selectedItems as $item) {
+        if (empty($listed[$item])) {
+            $grouped[$item][] = $item;
         }
     }
     return $grouped;
@@ -2147,7 +2213,7 @@ function calculateProgressOnTarget($progressOnTarget, $current_month, $current_y
             'water_last_YTD' => $previous['water'] ?? 0,
             'water_baseline_YTD' => $baseline['water'] ?? 0
         ],
-        /* Diversion % = (Recyclables + Waste to Energy) / Total waste — typical_destination 2 & 5 */
+        /* Waste diversion rate (%) = (Recycled + Reused + Composted + WTE + Unknown) / Total waste generated × 100 */
         'waste' => [
             'waste_YTD' => (!empty($current['total_waste_target']))
                 ? (($current['waste_diversion_numerator'] ?? 0) / $current['total_waste_target']) * 100 : 0,
@@ -2186,7 +2252,7 @@ function calculateProgressOnTarget($progressOnTarget, $current_month, $current_y
         $baselineVal = $data[$type . '_baseline_YTD'] ?? 0;
 
 		// YTD comparison
-        $differenceYTD = $lastVal - $currentVal;
+        $differenceYTD = (float)$lastVal - (float)$currentVal;
 
         $ProgressTargetPercentage[$key]['YTD'] =
             calculateDashboardPercentage($differenceYTD, $lastVal);
@@ -2200,7 +2266,7 @@ function calculateProgressOnTarget($progressOnTarget, $current_month, $current_y
         // e.g. annual target 3 => Target = Baseline * 0.97
         if (is_numeric($annualTarget)) {
             $ProgressTargetPercentage[$key]['TARGET_YTD'] =
-                $baselineVal * (1 - ((float) $annualTarget / 100));
+                (float)$baselineVal * (1 - ((float) $annualTarget / 100));
         } else {
             $ProgressTargetPercentage[$key]['TARGET_YTD'] = $baselineVal;
         }
@@ -2308,4 +2374,164 @@ function sanitize_report_spreadsheet($objPHPExcel, $fallback = 0)
     }
 
     return $objPHPExcel;
+}
+
+function calculateCHSBMeasures($currYear, $currMonth, $site_id, $site_detials, $result, $utilities_model)
+{
+    $chsb_getUtilities = $utilities_model->getSiteUtilityRolling12Months($currYear, $currMonth, $site_id);
+
+    $chsb_carbon_footPrint = 0;
+    $chsb_utility_kwh_total = 0;
+    $chsb_water_total_consumption = 0;
+    $chsb_total_room_night = 0;
+    $chsb_electricity = 0;
+    $chsb_renewable_energy = 0;
+    $chsb_non_electric_energy = 0;
+    $chsb_days = 0;
+
+    $chsb_emission_electricity = 0;
+    $chsb_emission_lpg = 0;
+    $chsb_emission_fuel = 0;
+    $chsb_emission_natural_gas = 0;
+    $chsb_emission_heating = 0;
+    $chsb_emission_cooling = 0;
+    $chsb_emission_water = 0;
+
+    foreach ($chsb_getUtilities as $chsb_utility) {
+
+        $chsb_utilities_month = $chsb_utility['month_id'];
+        $chsb_utilities_year = $chsb_utility['year_id'];
+
+        $chsb_totalElectricyKwh = isset($chsb_utility['total_electricity_kwh']) ? $chsb_utility['total_electricity_kwh'] : 0;
+
+        $chsb_totalFuelOil = isset($chsb_utility['total_fuel_oil']) ? $chsb_utility['total_fuel_oil'] : 0;
+
+        $chsb_totalNaturalGas = isset($chsb_utility['total_natural_gas']) ? $chsb_utility['total_natural_gas'] : 0;
+
+        $chsb_totalLpg = isset($chsb_utility['total_lpg']) ? $chsb_utility['total_lpg'] : 0;
+
+        $chsb_heatingDistrict = isset($chsb_utility['district_heating']) ? $chsb_utility['district_heating'] : 0;
+
+        $chsb_coolingDistrict = isset($chsb_utility['district_cooling']) ? $chsb_utility['district_cooling'] : 0;
+
+        $chsb_lpg = $chsb_totalLpg * getUtilityUnitFactorForConversion($site_id, 'lpg');
+
+        $chsb_electricity_value = $chsb_totalElectricyKwh;
+
+        $chsb_natural_gas = $chsb_totalNaturalGas * getUtilityUnitFactorForConversion($site_id, 'natural_gas');
+
+        $chsb_fuel = $chsb_totalFuelOil * getUtilityUnitFactorForConversion($site_id, 'fuel_oil');
+
+        $chsb_heating_district = $chsb_heatingDistrict * getUtilityUnitFactorForConversion($site_id, 'district_heating');
+
+        $chsb_cooling_district = $chsb_coolingDistrict * getUtilityUnitFactorForConversion($site_id, 'district_cooling');
+
+        $chsb_utility_kwh_total += $chsb_electricity_value + $chsb_fuel + $chsb_lpg + $chsb_natural_gas + $chsb_heating_district + $chsb_cooling_district;
+
+        $chsb_water_total_consumption += (isset($chsb_utility['water_total_consumption']) ? $chsb_utility['water_total_consumption'] : 0) * getUtilityUnitFactorForConversion($site_id, 'water') * 1000;
+
+        $chsb_total_room_night += isset($chsb_utility['total_room_night']) ? $chsb_utility['total_room_night'] : 0;
+
+        $chsb_electricity += $chsb_electricity_value;
+
+        $chsb_renewable_energy += isset($chsb_utility['total_renewable_energy_production']) ? $chsb_utility['total_renewable_energy_production'] : 0;
+
+        $chsb_non_electric_energy += $chsb_fuel + $chsb_lpg + $chsb_natural_gas + $chsb_heating_district + $chsb_cooling_district + $chsb_water_total_consumption;
+
+        $chsb_emission_electricity += $chsb_electricity_value * $site_detials['electricity_emission_factor'];
+        $chsb_emission_lpg += $chsb_lpg * $site_detials['lpg_emission_factor'];
+        $chsb_emission_fuel += $chsb_fuel * $site_detials['fuel_emission_factor'];
+        $chsb_emission_natural_gas += $chsb_natural_gas * $site_detials['natural_gas_emission_factor'];
+        $chsb_emission_heating += $chsb_heating_district * $site_detials['district_heating_emission_factor'];
+        $chsb_emission_cooling += $chsb_cooling_district * $site_detials['district_cooling_emission_factor'];
+        $chsb_emission_water += $chsb_water_total_consumption * $site_detials['water_emission_factor'];
+
+        $chsb_carbon_footPrint = $chsb_emission_electricity + $chsb_emission_lpg + $chsb_emission_fuel + $chsb_emission_natural_gas + $chsb_emission_heating + $chsb_emission_cooling + $chsb_emission_water;
+
+        $chsb_days += cal_days_in_month(CAL_GREGORIAN, $chsb_utilities_month, $chsb_utilities_year);
+    }
+
+    $chsb_rooms_keys = isset($result['rooms_keys']) ? (float)$result['rooms_keys'] : 0;
+
+    $chsb_cooled_builtup_area = isset($result['cooled_builtup_area']) ? (float)$result['cooled_builtup_area'] : 0;
+
+    $chsb_hotel_rooms_area = !empty($result['hotel_rooms_area']) ? (float)$result['hotel_rooms_area'] : 0;
+
+    $chsb_meeting_area = !empty($result['total_meeting_area']) ? (float)$result['total_meeting_area'] : 0;
+
+    $chsb_rooms_percentage = 0;
+    $chsb_carbon_footPrint_rooms = 0;
+    $chsb_carbon_footPrint_meeting = 0;
+    $chsb_water_total_consumption_rooms = 0;
+    $chsb_water_total_consumption_meeting = 0;
+    $chsb_meeting_hours = 0;
+
+    if (($chsb_hotel_rooms_area + $chsb_meeting_area) > 0) {
+
+        $chsb_rooms_percentage = $chsb_hotel_rooms_area / ($chsb_hotel_rooms_area + $chsb_meeting_area);
+
+        $chsb_carbon_footPrint_rooms = $chsb_carbon_footPrint * $chsb_rooms_percentage;
+
+        $chsb_carbon_footPrint_meeting = $chsb_carbon_footPrint * (1 - $chsb_rooms_percentage);
+
+        $chsb_water_total_consumption_rooms = ($chsb_water_total_consumption / 3) + (($chsb_water_total_consumption * 2 / 3) * $chsb_rooms_percentage);
+
+        $chsb_water_total_consumption_meeting = ($chsb_water_total_consumption * 2 / 3) * (1 - $chsb_rooms_percentage);
+
+        $chsb_meeting_hours = $chsb_meeting_area * $chsb_days * 10;
+    }
+
+    $chsb_measure_1 = ($chsb_total_room_night > 0 && $chsb_carbon_footPrint_rooms > 0) ? round($chsb_carbon_footPrint_rooms / $chsb_total_room_night, 2) : null;
+
+    $chsb_measure_2 = $chsb_rooms_keys > 0 ? round($chsb_carbon_footPrint / $chsb_rooms_keys, 2) : null;
+
+    $chsb_measure_3 = $chsb_total_room_night > 0 ? round($chsb_carbon_footPrint / $chsb_total_room_night, 2) : null;
+
+    $chsb_measure_4 = $chsb_cooled_builtup_area > 0 ? round($chsb_carbon_footPrint / $chsb_cooled_builtup_area, 2) : null;
+
+    $chsb_measure_5 = $chsb_total_room_night > 0 ? round($chsb_utility_kwh_total / $chsb_total_room_night, 2) : null;
+
+    $chsb_measure_6 = $chsb_cooled_builtup_area > 0 ? round($chsb_utility_kwh_total / $chsb_cooled_builtup_area, 2) : null;
+
+    $chsb_measure_7 = $chsb_meeting_hours > 0 ? round($chsb_carbon_footPrint_meeting / $chsb_meeting_hours, 4) : null;
+
+    $chsb_measure_8 = $chsb_total_room_night > 0 ? round($chsb_water_total_consumption / $chsb_total_room_night, 2) : null;
+
+    $chsb_measure_9 = $chsb_cooled_builtup_area > 0 ? round($chsb_water_total_consumption / $chsb_cooled_builtup_area, 2) : null;
+
+    $chsb_measure_10 = ($chsb_total_room_night > 0 && $chsb_water_total_consumption_rooms > 0) ? round($chsb_water_total_consumption_rooms / $chsb_total_room_night, 2) : null;
+
+    $chsb_measure_11 = $chsb_meeting_hours > 0 ? round($chsb_water_total_consumption_meeting / $chsb_meeting_hours, 4) : null;
+
+    $chsb_measure_12 = $chsb_utility_kwh_total > 0 ? round($chsb_renewable_energy / $chsb_utility_kwh_total, 4) : 0;
+
+    $chsb_measure_13 = $chsb_electricity > 0 ? round($chsb_renewable_energy / $chsb_electricity, 4) : 0;
+
+    $chsb_measure_14 = $chsb_non_electric_energy > 0 ? round($chsb_electricity / $chsb_non_electric_energy, 3) : null;
+
+    $chsb_measure_4a = $chsb_measure_4 !== null ? round($chsb_measure_4 / 10.7639, 2) : null;
+
+    $chsb_measure_6a = $chsb_measure_6 !== null ? round($chsb_measure_6 / 10.7639, 2) : null;
+
+    $chsb_measure_9a = $chsb_measure_9 !== null ? round($chsb_measure_9 / 10.7639, 2) : null;
+
+    return array(
+        'chsb_measure_1' => $chsb_measure_1,
+        'chsb_measure_2' => $chsb_measure_2,
+        'chsb_measure_3' => $chsb_measure_3,
+        'chsb_measure_4' => $chsb_measure_4,
+        'chsb_measure_5' => $chsb_measure_5,
+        'chsb_measure_6' => $chsb_measure_6,
+        'chsb_measure_7' => $chsb_measure_7,
+        'chsb_measure_8' => $chsb_measure_8,
+        'chsb_measure_9' => $chsb_measure_9,
+        'chsb_measure_10' => $chsb_measure_10,
+        'chsb_measure_11' => $chsb_measure_11,
+        'chsb_measure_12' => $chsb_measure_12,
+        'chsb_measure_13' => $chsb_measure_13,
+        'chsb_measure_14' => $chsb_measure_14,
+        'chsb_measure_4a' => $chsb_measure_4a,
+        'chsb_measure_6a' => $chsb_measure_6a,
+        'chsb_measure_9a' => $chsb_measure_9a
+    );
 }

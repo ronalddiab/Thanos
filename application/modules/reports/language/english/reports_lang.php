@@ -388,7 +388,7 @@ $lang['excel_electricity_cost_year'] = 'Electricity %s ('.CURRENCY_SYMBOL.')';
 $lang['excel_fuel_cost_year'] = 'Fuel %s ('.CURRENCY_SYMBOL.')';
 $lang['excel_lpg_cost_year'] = 'LPG %s ('.CURRENCY_SYMBOL.')';
 $lang['excel_natural_gas_cost_year'] = 'Natural Gas %s ('.CURRENCY_SYMBOL.')';
-$lang['excel_water_cost_year'] = 'Water %s';
+$lang['excel_water_cost_year'] = 'Water %s ('.CURRENCY_SYMBOL.')';
 $lang['excel_heating_district_cost_year'] = 'District Heating %s ('.CURRENCY_SYMBOL.')';
 $lang['excel_cooling_district_cost_year'] = 'District Cooling %s ('.CURRENCY_SYMBOL.')';
 
