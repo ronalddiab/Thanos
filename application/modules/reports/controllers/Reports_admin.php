@@ -3092,7 +3092,7 @@ class Reports_admin extends Base_Admin_Controller
 			    $calculated_result['cooling_district'] = ($result['cooling_district'] / $result['cooled_builtup_area']);
 			    $calculated_result['water'] = ($result['water'] / $result['cooled_builtup_area']);
 			    $calculated_result['electricity_budget'] = ($result['electricity_budget'] / $result['cooled_builtup_area']);
-			    $calculated_result['fuel_budget'] = ($result['fuel_budget'] / $result['cooled_builtup_area']);
+			    $calculated_result['fuel_budget'] = ((float)$result['fuel_budget'] / (float)$result['cooled_builtup_area']);
 			    $calculated_result['lpg_budget'] = ($result['lpg_budget'] / $result['cooled_builtup_area']);
 			    $calculated_result['natural_gas_budget'] = ($result['natural_gas_budget'] / $result['cooled_builtup_area']);
 			    $calculated_result['heating_district_budget'] = ($result['heating_district_budget'] / $result['cooled_builtup_area']);
@@ -6231,7 +6231,7 @@ class Reports_admin extends Base_Admin_Controller
 
 		$data['waste']['total_room_night'] = $data['utility_cost_chart'][$currMonthWid][$currYearWid]['room_night'];
 		$data['waste']['total_guests'] = $data['utility_cost_chart'][$currMonthWid][$currYearWid]['guest_night'];
-		$data['WasteReport'] = $this->site_waste_model->getWasteReportData($site_id, $data['waste'], $currYearWid, $currMonthWid,true);
+		$data['WasteReport'] = $this->site_waste_model->getWasteReportData($site_id, $data['waste'], $currYearWid, $currMonthWid,false,true);
 		if(empty($data['WasteReport'])) {
 			$content_reports_waste_report = '';
 		} else {
@@ -11742,7 +11742,7 @@ class Reports_admin extends Base_Admin_Controller
 							$yoy_cons_pct = ($cur_raw - $ly_raw) / $ly_raw;
 							if (abs($yoy_cons_pct) > 0.20) {
 								$direction = $yoy_cons_pct > 0 ? 'increased' : 'decreased';
-								$site_action_notes[] = $f['label'] . ' consumption ' . $direction . ' by ' . round(abs($yoy_cons_pct) * 100) . '% compared to last year, verify data';
+								$site_action_notes[] = $f['label'] . ' consumption ' . $direction . ' by ' . round(abs($yoy_cons_pct) * 100) . '% compared to last year.';
 							}
 						}
 						$cur_tariff = ($cur_raw !== null && $cur_raw > 0 && $cur_cost !== null && $cur_cost > 0) ? ($cur_cost / $cur_raw) : null;
@@ -11751,7 +11751,7 @@ class Reports_admin extends Base_Admin_Controller
 							$yoy_tariff_pct = ($cur_tariff - $ly_tariff) / $ly_tariff;
 							if (abs($yoy_tariff_pct) > 0.20) {
 								$direction = $yoy_tariff_pct > 0 ? 'increased' : 'decreased';
-								$site_action_notes[] = $f['label'] . ' tariff ' . $direction . ' by ' . round(abs($yoy_tariff_pct) * 100) . '% compared to last year, verify data';
+								$site_action_notes[] = $f['label'] . ' tariff ' . $direction . ' by ' . round(abs($yoy_tariff_pct) * 100) . '% compared to last year.';
 							}
 						}
 					}
@@ -11989,6 +11989,18 @@ class Reports_admin extends Base_Admin_Controller
 				if ($show_action_notes) {
 					$site_action_notes[] = 'Missing Waste Data';
 				}
+				$site_rows[$sheet_missing][$row['site_location_name']][] = $trackers[$sheet_missing];
+				$this->write_row($objPHPExcel, $sheet_missing, $trackers[$sheet_missing]++, [
+					$row['site_location_name'],
+					'Waste',
+					'Zero/missing - historical data exists',
+					$waste_pm_count > 0 ? $waste_pm_count . ' entry(ies)' : 'N/A',
+					$waste_ly_count > 0 ? $waste_ly_count . ' entry(ies)' : 'N/A',
+					'N/A',
+					'N/A',
+					'N/A',
+					'N/A'
+				]);
 			}
 
 			$action_notes_text = '';

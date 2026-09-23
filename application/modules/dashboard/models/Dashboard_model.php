@@ -550,7 +550,7 @@ class Dashboard_model extends Base_Model {
 						'type'        => 'consumption',
 						'direction'   => $direction,
 						'percentage'  => $percentage,
-						'message'     => $utility['label'] .' consumption ' .$direction .' by ' .$percentage .'% compared to last year, verify data'
+						'message'     => $utility['label'] .' consumption ' .$direction .' by ' .$percentage .'% compared to last year.'
 					);
 				}
 			}
@@ -579,7 +579,7 @@ class Dashboard_model extends Base_Model {
 			// 			'type'        => 'tariff',
 			// 			'direction'   => $direction,
 			// 			'percentage'  => $percentage,
-			// 			'message'     => $utility['label'] .' tariff ' .$direction .' by ' .$percentage .'% compared to last year, verify data'
+			// 			'message'     => $utility['label'] .' tariff ' .$direction .' by ' .$percentage .'% compared to last year.'
 			// 		);
 			// 	}
 			// }

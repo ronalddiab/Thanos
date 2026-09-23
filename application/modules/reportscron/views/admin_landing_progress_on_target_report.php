@@ -52,19 +52,19 @@ $baseline_year = $site_detials['baseline_regression_year'];
 			$targetIntensity = 0;
 			$unitRNText = '/RN';
 			if ($key == 'Water' || $key == 'Carbon') {
-				$actualIntensity = !empty($progress_guestnight_YTD) ? ($value['ACTUAL_YTD'] / $progress_guestnight_YTD) : 0;
-				$targetIntensity = !empty($progress_baseline_guestnight_YTD) ? ($targetYtdVal / $progress_baseline_guestnight_YTD) : 0;
+					$actualIntensity = !empty($progress_guestnight_YTD) ? ((float)$value['ACTUAL_YTD'] / (float)$progress_guestnight_YTD) : 0;
+					$targetIntensity = !empty($progress_baseline_guestnight_YTD) ? ((float)$targetYtdVal / (float)$progress_baseline_guestnight_YTD) : 0;
 				$unitRNText = '/GN';
 			} else if ($key == 'Waste') {
 				$wasteTargetTotal = $value['TOTAL_WASTE_TARGET_YTD']
 					?? ((!empty($value['site_saving_target']))
 						? ($value['TOTAL_WASTE_BASELINE_YTD'] * (1 - ((float) $value['site_saving_target'] / 100)))
 						: $value['TOTAL_WASTE_BASELINE_YTD']);
-				$actualIntensity = !empty($progress_roomnight_YTD) ? ($value['TOTAL_WASTE_YTD'] / $progress_roomnight_YTD) : 0;
-				$targetIntensity = !empty($progress_baseline_roomnight_YTD) ? ($wasteTargetTotal / $progress_baseline_roomnight_YTD) : 0;
+					$actualIntensity = !empty($progress_roomnight_YTD) ? ((float)$value['TOTAL_WASTE_YTD'] / (float)$progress_roomnight_YTD) : 0;
+					$targetIntensity = !empty($progress_baseline_roomnight_YTD) ? ((float)$wasteTargetTotal / (float)$progress_baseline_roomnight_YTD) : 0;
 			} else {
-				$actualIntensity = !empty($progress_roomnight_YTD) ? ($value['ACTUAL_YTD'] / $progress_roomnight_YTD) : 0;
-				$targetIntensity = !empty($progress_baseline_roomnight_YTD) ? ($targetYtdVal / $progress_baseline_roomnight_YTD) : 0;
+					$actualIntensity = !empty($progress_roomnight_YTD) ? ((float)$value['ACTUAL_YTD'] / (float)$progress_roomnight_YTD) : 0;
+					$targetIntensity = !empty($progress_baseline_roomnight_YTD) ? ((float)$targetYtdVal / (float)$progress_baseline_roomnight_YTD) : 0;
 			}
 			$baseRoomnightValue = number_format($actualIntensity, 2);
 			$baseRoomnightBaselineValue = number_format($targetIntensity, 2);

@@ -2436,7 +2436,7 @@ function calculateCHSBMeasures($currYear, $currMonth, $site_id, $site_detials, $
 
         $chsb_renewable_energy += isset($chsb_utility['total_renewable_energy_production']) ? $chsb_utility['total_renewable_energy_production'] : 0;
 
-        $chsb_non_electric_energy += $chsb_fuel + $chsb_lpg + $chsb_natural_gas + $chsb_heating_district + $chsb_cooling_district + $chsb_water_total_consumption;
+        $chsb_non_electric_energy += $chsb_fuel + $chsb_lpg + $chsb_natural_gas + $chsb_heating_district + $chsb_cooling_district;
 
         $chsb_emission_electricity += $chsb_electricity_value * $site_detials['electricity_emission_factor'];
         $chsb_emission_lpg += $chsb_lpg * $site_detials['lpg_emission_factor'];

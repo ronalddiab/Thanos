@@ -2420,7 +2420,13 @@ class Site_Waste_model extends Base_Model
     }
 
     public function getLastMonthForSite($site_id) {
-        $this->db->select(['month_id','year_id']);
+        $this->site_id = $site_id;
+        $checkedColumns = $this->getCheckedColumnNames();
+        if (empty($checkedColumns)) {
+            return 'Waste Data Settings Not Set';
+        }
+
+        $this->db->select(['month_id', 'year_id']);
         $this->db->from($this->_table);
         $this->db->where('site_id', $site_id);
         $this->db->where('month_id is NOT NULL', NULL, FALSE);
@@ -2428,7 +2434,17 @@ class Site_Waste_model extends Base_Model
         $this->db->where('year_id is NOT NULL', NULL, FALSE);
         $this->db->where('year_id != ', 0);
         $this->db->where('month_id != ', 0);
-        $this->db->order_by('site_waste_id',"desc")->limit(1);
+
+        $this->db->group_start();
+        foreach ($checkedColumns as $colName) {
+            $this->db->or_where("COALESCE(unit_measure_{$colName}, 0) !=", 0);
+        }
+        $this->db->group_end();
+
+        $this->db->order_by('year_id', 'DESC');
+        $this->db->order_by('month_id', 'DESC');
+        $this->db->order_by('site_waste_id', 'DESC');
+        $this->db->limit(1);
         $result = $this->db->get()->row();
         $result = json_decode(json_encode($result), true);
         $lastMonthUpdated = isset($result) && !empty($result) ? date('F', mktime(0, 0, 0, $result['month_id'])).' '.$result['year_id'] : 'Waste Data Not Uploaded';
@@ -2631,13 +2647,13 @@ class Site_Waste_model extends Base_Model
         return ['ItemwiseYTDTotal' => $itemwiseTotalWasteArray, 'YTDTotal' => $YTDTotal];
     }
 
-    public function getWasteReportData($site_id, $wasteData, $currYear, $currMonth, $isYtd = false) {
+    public function getWasteReportData($site_id, $wasteData, $currYear, $currMonth, $isYtd = false, $isAnnual = false) {
         $this->site_id = $site_id;
         $columnChecked =  $this->getCheckedColumnNames();
         if(empty($columnChecked)) {
             return []; // No data to report
         }
-        $wasteMonthlyData = $this->get_site_waste_utility_data($site_id, $currYear, $currMonth, $columnChecked, $isYtd);
+        $wasteMonthlyData = $this->get_site_waste_utility_data($site_id, $currYear, $currMonth, $columnChecked, $isYtd || $isAnnual);
         // Helper function inside model (or move to a trait/helper)
         $percentChange = function ($current, $previous) {
             if ($previous == 0) {
@@ -2805,6 +2821,6 @@ class Site_Waste_model extends Base_Model
                 'value'    => $fmt($percentChange($currentRebate, $previousRebate),2),
         ];
 
-        return ['wasteReport' => $wasteReportArray, 'wastePerGuest' => $wastePerGuest, 'currentMonth' => $currMonth, 'currentYear' => $currYear, 'isYtd' => $isYtd,'rebates'=>$rebates];
+        return ['wasteReport' => $wasteReportArray, 'wastePerGuest' => $wastePerGuest, 'currentMonth' => $currMonth, 'currentYear' => $currYear, 'isYtd' => $isYtd,'rebates'=>$rebates,'isAnnual' => $isAnnual];
     }
 }
