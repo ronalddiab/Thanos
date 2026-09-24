@@ -63,30 +63,31 @@ $progressOnTargetWasteYtd = isset($site['progressOnTargetWasteYtd']) ? $site['pr
 			} else {
 				$unitText = '';
 			}
-			$baseRoomnightValue =  isset($progress_roomnight_YTD) && !empty($progress_roomnight_YTD) ? number_format($progressTargetvalue['ACTUAL_YTD'] / $progress_roomnight_YTD, 2) : 0;
-			$baseRoomnightBaselineValue =  isset($progress_baseline_roomnight_YTD) && !empty($progress_baseline_roomnight_YTD) ? number_format($progressTargetvalue['TARGET_BASELINE_YTD'] / $progress_baseline_roomnight_YTD, 2) : 0;
+			$targetYtdVal = $progressTargetvalue['TARGET_YTD'] ?? $progressTargetvalue['TARGET_BASELINE_YTD'];
+			$actualIntensity = 0;
+			$targetIntensity = 0;
 			$unitRNText = '/RN';
 			if ($ProgressTargetkey == 'Water' || $ProgressTargetkey == 'Carbon') {
-				$baseRoomnightValue =  isset($progress_guestnight_YTD) && !empty($progress_guestnight_YTD) ? number_format($progressTargetvalue['ACTUAL_YTD'] / $progress_guestnight_YTD, 2) : 0;
-				$baseRoomnightBaselineValue =  isset($progress_baseline_guestnight_YTD) && !empty($progress_baseline_guestnight_YTD) ? number_format($progressTargetvalue['TARGET_BASELINE_YTD'] / $progress_baseline_guestnight_YTD, 2) : 0;
+				$actualIntensity = !empty($progress_guestnight_YTD) ? ($progressTargetvalue['ACTUAL_YTD'] / $progress_guestnight_YTD) : 0;
+				$targetIntensity = !empty($progress_baseline_guestnight_YTD) ? ($targetYtdVal / $progress_baseline_guestnight_YTD) : 0;
 				$unitRNText = '/GN';
-			}
-			if($ProgressTargetkey == 'Waste') {
-				$baseRoomnightValue =  isset($progress_roomnight_YTD) && !empty($progress_roomnight_YTD) ? number_format($progressTargetvalue['TOTAL_WASTE_YTD']/$progress_roomnight_YTD, 2) : 0;
-				$baseRoomnightBaselineValue =  isset($progress_baseline_roomnight_YTD) && !empty($progress_baseline_roomnight_YTD) ? number_format($progressTargetvalue['TOTAL_WASTE_BASELINE_YTD']/$progress_baseline_roomnight_YTD, 2) : 0;
-			}
-			if ($baseRoomnightValue > $baseRoomnightBaselineValue && $baseRoomnightValue != 0) {
-				$progressTargetvalue['YTD_Variance'] = (($baseRoomnightValue - $baseRoomnightBaselineValue) / $baseRoomnightValue) * 100;
-			} else if ($baseRoomnightBaselineValue != 0) {
-				$progressTargetvalue['YTD_Variance'] = -(($baseRoomnightBaselineValue - $baseRoomnightValue) / $baseRoomnightBaselineValue) * 100;
+			} else if ($ProgressTargetkey == 'Waste') {
+				$wasteTargetTotal = $progressTargetvalue['TOTAL_WASTE_TARGET_YTD']
+					?? ((!empty($progressTargetvalue['site_saving_target']))
+						? ($progressTargetvalue['TOTAL_WASTE_BASELINE_YTD'] * (1 - ((float) $progressTargetvalue['site_saving_target'] / 100)))
+						: $progressTargetvalue['TOTAL_WASTE_BASELINE_YTD']);
+				$actualIntensity = !empty($progress_roomnight_YTD) ? ($progressTargetvalue['TOTAL_WASTE_YTD'] / $progress_roomnight_YTD) : 0;
+				$targetIntensity = !empty($progress_baseline_roomnight_YTD) ? ($wasteTargetTotal / $progress_baseline_roomnight_YTD) : 0;
 			} else {
-				$progressTargetvalue['YTD_Variance'] = 0;
+				$actualIntensity = !empty($progress_roomnight_YTD) ? ($progressTargetvalue['ACTUAL_YTD'] / $progress_roomnight_YTD) : 0;
+				$targetIntensity = !empty($progress_baseline_roomnight_YTD) ? ($targetYtdVal / $progress_baseline_roomnight_YTD) : 0;
 			}
-			if($ProgressTargetkey == 'Waste' && ($progressTargetvalue['ACTUAL_YTD'] > $progressTargetvalue['TARGET_BASELINE_YTD'])) {
-				$progressTargetvalue['YTD_Variance'] =  (($progressTargetvalue['ACTUAL_YTD'] - $progressTargetvalue['TARGET_BASELINE_YTD']) / ($progressTargetvalue['ACTUAL_YTD'])) * 100;
-			} else if($ProgressTargetkey == 'Waste' && ($progressTargetvalue['ACTUAL_YTD'] <= $progressTargetvalue['TARGET_BASELINE_YTD'])) {
-				$progressTargetvalue['YTD_Variance'] = '-'.(($progressTargetvalue['TARGET_BASELINE_YTD'] - $progressTargetvalue['ACTUAL_YTD']) / ($progressTargetvalue['TARGET_BASELINE_YTD'])) * 100;
-			}
+			$baseRoomnightValue = number_format($actualIntensity, 2);
+			$baseRoomnightBaselineValue = number_format($targetIntensity, 2);
+			// Performance YTD = (actual - target) / target  (always divide by target)
+			$progressTargetvalue['YTD_Variance'] = ($targetIntensity != 0)
+				? (($actualIntensity - $targetIntensity) / $targetIntensity) * 100
+				: 0;
 			$image = $progressTargetvalue['YTD_Variance'] < 0 ? 'downArrow.png' : 'upArrow.png';
 			$color = $progressTargetvalue['YTD_Variance'] < 0 ? '#dc2727' : '#2ecc71';
 			if($ProgressTargetkey == 'Waste') {

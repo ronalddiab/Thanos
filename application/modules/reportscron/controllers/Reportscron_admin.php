@@ -793,6 +793,11 @@ class Reportscron_admin extends Base_Admin_Controller
 
 		$filters_comparision_chart['end_year'] = (isset($enddateexplode[1])) ? $enddateexplode[1] : '';
 
+		if ($monthly && !empty($filters_comparision_chart['start_month']) && !empty($filters_comparision_chart['start_year'])) {
+			$filters['previous_month'] = (int) $filters_comparision_chart['start_month'];
+			$filters['previous_year'] = $filters_comparision_chart['start_year'];
+		}
+
 		if ($isLocal) {
 
 			$utility_cost_chart_results = $this->reportscron_model->utilityCostBarChart($filters_comparision_chart);
@@ -2657,11 +2662,12 @@ class Reportscron_admin extends Base_Admin_Controller
 				$progressOnTarget = array();
 				$dateParams = getProgressWidgetDateParams();
 				$current_month = $dateParams['month'];
+				$annualMonthWindow = 12;
 				$current_year = $dateParams['year'];
 				$running_year = $dateParams['running_year'];
 				$baselineYear = $site_detail['baseline_regression_year'];
 				$progressOnTargetMonthly = $this->reports_model->getProgressOnTargetWithBaseline($baselineYear, 'month');
-				$progressOnTarget = $this->reports_model->getProgressOnTargetWithBaseline($baselineYear);
+				$progressOnTarget = $this->reports_model->getProgressOnTargetWithBaseline($baselineYear,'',$annualMonthWindow,$current_year);
 				$wasteDiversionNumeratorData = $this->site_waste_model->getWasteYTDByDestinationAndCurrMonth($site_detail, 'recycling_wte', $current_year, $current_month);
 				$totalWasteData = $this->site_waste_model->getWasteYTDByDestinationAndCurrMonth($site_detail, '', $current_year, $current_month);
 

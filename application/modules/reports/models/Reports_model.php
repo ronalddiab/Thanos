@@ -2827,9 +2827,9 @@ class Reports_model extends Base_Model
      * @param int $baseline_year The baseline/regression year for the site
      * @return array ['current' => [...], 'baseline' => [...]]
      */
-    function getProgressOnTargetWithBaseline($baseline_year, $groupBy = '')
+    function getProgressOnTargetWithBaseline($baseline_year, $groupBy = '', $selectedMonth = null, $selectedYear = null)
     {
-        $dateParams = getProgressWidgetDateParams();
+        $dateParams = getProgressWidgetDateParams($selectedMonth, $selectedYear);
         $current_year = $dateParams['year'];
         $previous_year = $dateParams['previous_year'];
         $current_month = $dateParams['month'];

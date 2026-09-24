@@ -791,7 +791,7 @@ class Reports_admin extends Base_Admin_Controller
 	} else {
 	    $data['cost_pie_chart'] = array();
 	}
-	// kWh pie chart for last 12 months
+	// KWh pie chart for last 12 months
 	$data['kwh_pie_chart_previousmonth'] = array();
 	$data['cost_pie_chart_previousmonth'] = array();
 	$monthly_pie_filters = $filters;
@@ -6171,24 +6171,39 @@ class Reports_admin extends Base_Admin_Controller
 		$this->load->model('sites/site_waste_model');
 		$baselineYear = $site_detials['baseline_regression_year'];
 		
-		$progressOnTarget = $this->reports_model->getProgressOnTargetWithBaseline($baselineYear);
+		$progressOnTarget = $this->reports_model->getProgressOnTargetWithBaseline($baselineYear,'',$current_month,$current_year);
 
 		$wasteDiversionNumeratorData = $this->site_waste_model->getWasteYTDByDestinationAndCurrMonth($site_detials, 'recycling_wte', $current_year, $current_month);
 		$totalWasteData = $this->site_waste_model->getWasteYTDByDestinationAndCurrMonth($site_detials, '', $current_year, $current_month);
 
-		foreach ($progressOnTarget as $monthId => &$yearData) {
-			foreach ($yearData as $yearId => &$progressValue) {
-				if (!is_array($progressValue)) {
-					$progressValue = array();
-				}
-				$progressValue['waste_diversion_numerator_baseline_target'] = isset($wasteDiversionNumeratorData['YTDTotal'][$baselineYear]) ? $wasteDiversionNumeratorData['YTDTotal'][$baselineYear] : 0;
-				$progressValue['total_waste_baseline_target'] = isset($totalWasteData['YTDTotal'][$baselineYear]) ? $totalWasteData['YTDTotal'][$baselineYear] : 0;
-				$progressValue['waste_diversion_numerator_target'] = isset($wasteDiversionNumeratorData['YTDTotal'][$running_year]) ? $wasteDiversionNumeratorData['YTDTotal'][$running_year] : 0;
-				$progressValue['total_waste_target'] = isset($totalWasteData['YTDTotal'][$running_year]) ? $totalWasteData['YTDTotal'][$running_year] : 0;
+	
+		foreach ($progressOnTarget as $yearId => &$yearData) {
+			if (!is_array($yearData)) {
+				$yearData = array();
 			}
-		}
-		unset($yearData, $progressValue);
 
+			$yearData['waste_diversion_numerator_baseline_target'] =
+				isset($wasteDiversionNumeratorData['YTDTotal'][$baselineYear])
+					? $wasteDiversionNumeratorData['YTDTotal'][$baselineYear]
+					: 0;
+
+			$yearData['total_waste_baseline_target'] =
+				isset($totalWasteData['YTDTotal'][$baselineYear])
+					? $totalWasteData['YTDTotal'][$baselineYear]
+					: 0;
+
+			$yearData['waste_diversion_numerator'] =
+				isset($wasteDiversionNumeratorData['YTDTotal'][$yearId])
+					? $wasteDiversionNumeratorData['YTDTotal'][$yearId]
+					: 0;
+
+			$yearData['total_waste_target'] =
+				isset($totalWasteData['YTDTotal'][$yearId])
+					? $totalWasteData['YTDTotal'][$yearId]
+					: 0;
+		}
+		unset($yearData);
+	
 		$progressValueWasteYTD = [
 			'total_waste_baseline_target' => isset($totalWasteData['YTDTotal'][$baselineYear]) ? $totalWasteData['YTDTotal'][$baselineYear] : 0,
 			'total_waste_target' => isset($totalWasteData['YTDTotal'][$running_year]) ? $totalWasteData['YTDTotal'][$running_year] : 0
