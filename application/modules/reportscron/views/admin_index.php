@@ -9,11 +9,13 @@ if (!defined('BASEPATH'))
 
 <div id="ajax_table" class="report-detail">
 
+<script type="text/javascript" src="<?php echo site_url(); ?>themes/default/js/highcharts.js"></script>
 <script type="text/javascript" src="<?php echo site_url(); ?>themes/default/js/exporting.js"></script>
 <script type="text/javascript" src="<?php echo site_url(); ?>themes/default/js/export-data.js"></script>
 <script type="text/javascript" src="<?php echo site_url(); ?>themes/default/js/data.js"></script>
-    <script type="text/javascript" src="<?php echo site_url(); ?>themes/default/js/gstatic_loader.js"></script>
     <script type="text/javascript" src="<?php echo site_url(); ?>themes/default/js/google_charts.js"></script>
+    <script type="text/javascript" src="<?php echo site_url(); ?>themes/default/js/corechart-1.js"></script>
+    <script type="text/javascript" src="<?php echo site_url(); ?>themes/default/js/gstatic_loader.js"></script>
 
     <?php
 

@@ -1,6 +1,4 @@
-var fs = require('fs');
-
-var sites = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150];
+var sites = [1,2,3];
 
 var pages = [];
 
@@ -9,8 +7,6 @@ var $i = 0;
 
 
 function openpage(){
-
-	// Manage pages
 
 	if(sites.length == 0){
 
@@ -22,19 +18,55 @@ function openpage(){
 
 		var currentPage = sites[0];
 
-		
-
-		// Open Page
-
 		pages[$i] = require( 'webpage' ).create();
 
-		pages[$i].viewportSize = {width: 1903, height: 521};
+		pages[$i].viewportSize = {width: 1903, height: 1400};
 
 		pages[$i].settings.userAgent = 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:49.0) Gecko/20100101 Firefox/49.0';
 
-		
+		pages[$i].settings.webSecurityEnabled = false;
 
-		pages[$i].open('https://www.heportal.net/Thanos/reportscron?ni='+currentPage+'&type=mytd', function( status ) {
+		pages[$i].onInitialized = function() {
+			pages[$i].evaluate(function() {
+				if (!Object.assign) {
+					Object.assign = function(target) {
+						if (target == null) {
+							throw new TypeError('Cannot convert undefined or null to object');
+						}
+						var to = Object(target);
+						for (var i = 1; i < arguments.length; i++) {
+							var next = arguments[i];
+							if (next != null) {
+								for (var key in next) {
+									if (Object.prototype.hasOwnProperty.call(next, key)) {
+										to[key] = next[key];
+									}
+								}
+							}
+						}
+						return to;
+					};
+				}
+				window.requestAnimationFrame = function(callback) {
+					return window.setTimeout(function() { callback(Date.now()); }, 16);
+				};
+				window.cancelAnimationFrame = function(id) {
+					window.clearTimeout(id);
+				};
+			});
+		};
+
+		pages[$i].onError = function(msg) {
+			console.log('Page error: ' + msg);
+		};
+
+		pages[$i].onResourceError = function(resourceError) {
+			console.log('Resource error: ' + resourceError.url + ' ' + resourceError.errorString);
+		};
+
+		var openedPage = pages[$i];
+
+		openedPage.open('https://www.heportal.net/Thanos/reportscron?ni='+currentPage+'&type=mytd', function( status ) {
 
 			if ( status === "success" ) {
 
@@ -42,7 +74,7 @@ function openpage(){
 
 		    }else{
 
-		        nextRequest(currentPage, pages[$i]);
+		        nextRequest(currentPage, openedPage);
 
 		    }
 
@@ -50,19 +82,11 @@ function openpage(){
 
 		});
 
-
-
-		
-
-
-
-
-
-		pages[$i].onConsoleMessage = function(msg) {
+		openedPage.onConsoleMessage = function(msg) {
 
 			if(msg == 'complete_pdf_cron'){
 
-		        nextRequest(currentPage, pages[$i]);
+		        nextRequest(currentPage, openedPage);
 
 		    }
 
@@ -76,6 +100,11 @@ function openpage(){
 
 function nextRequest(currentPage, page){
 
+	if (page.__done) {
+		return;
+	}
+	page.__done = true;
+
 	console.log("Complete Request #"+currentPage+": ");
 
     page.clearMemoryCache();
@@ -88,15 +117,10 @@ function nextRequest(currentPage, page){
 
 	sites.shift();
 
-    
-
     openpage();
 
 }
 
 
 
-// init request
-
 openpage();
-

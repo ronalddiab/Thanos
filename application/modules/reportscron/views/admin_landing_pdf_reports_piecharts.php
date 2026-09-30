@@ -301,14 +301,14 @@ $kwh_pie_chart_previousmonth_cost_water_share = ($cost_pie_chart_previousmonth_t
                 </tr>
             </table>
         </div>
-        <div style="border:2px solid  #f69546;padding:10px;">
+        <div style="border:2px solid  #f69546;padding:10px;page-break-inside:avoid;">
             <table width="100%" cellpadding="5" cellspacing="0">
                 <tr>
                     <td width="100%">
                         <table width="100%" border="0" cellpadding="0" cellspacing="0">
                             <tr>
-                                <td width="50%"><img height="400" src="<?php echo $pieChartNew2Img; ?>" /></td>
-                                <td width="50%"><img height="400" src="<?php echo $pieChartNew3Img; ?>" /></td>
+                                <td width="50%" align="center"><img height="400" src="<?php echo $pieChartNew2Img; ?>" /></td>
+                                <td width="50%" align="center"><img height="400" src="<?php echo $pieChartNew3Img; ?>" /></td>
                             </tr>
                             <tr>
                                 <td valign="top">

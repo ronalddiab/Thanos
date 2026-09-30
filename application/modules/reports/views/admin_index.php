@@ -2907,6 +2907,1229 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 			});
 			chart_hidden1.draw(data, options);
 		<?php } ?>
+		<?php
+		if (!empty($kwh_pie_chart)) {
+			?>
+			var data = google.visualization.arrayToDataTable([
+				['Energy', 'Usage'],
+				<?php
+					foreach ($kwh_pie_chart as $key => $val) {
+						if ($val != 0) {
+							echo '["' . lang($key) . '",' . $val . '],';
+						}
+					}
+					?>
+			]);
+			var options = {
+				height: 600,
+				title: '<?php echo lang("kWh-pie-chart-title"); ?>',
+				sliceVisibilityThreshold: .0,
+				pieHole: 0.4,
+				titleTextStyle: {
+					fontName: 'Arial',
+					fontSize: 24
+				},
+				legend: {
+					textStyle: {
+						fontSize: 17
+					}
+				},
+				chartArea: {
+					width: '100%',
+				},
+				slices: {
+					<?php $i = 0;
+						if ($kwh_pie_chart['electricity'] != 0) {
+							?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorElectricity; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+					<?php if ($kwh_pie_chart['fuel'] != 0) { ?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorFuel; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+					<?php if ($kwh_pie_chart['lpg'] != 0) { ?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorLpg; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+					<?php if ($kwh_pie_chart['natural_gas'] != 0) { ?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorNaturalGas; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+					<?php if ($kwh_pie_chart['water'] != 0) { ?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorWater; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+					<?php if ($kwh_pie_chart['heating_district'] != 0) { ?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorHeatingDistrict; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+					<?php if ($kwh_pie_chart['cooling_district'] != 0) { ?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorCoolingDistrict; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+				}
+			};
+			var kwh_pie_chart_chart_hidden1 = new google.visualization.PieChart(document.getElementById('kwh_pie_chart_YTD'));
+			google.visualization.events.addListener(kwh_pie_chart_chart_hidden1, 'ready', function() {
+				setTimeout(function() {
+					var imgUri = kwh_pie_chart_chart_hidden1.getImageURI();
+					console.log(kwh_pie_chart_chart_hidden1.getImageURI());
+					document.getElementById('pieChartImg').value = imgUri;
+				}, 1000);
+			});
+			kwh_pie_chart_chart_hidden1.draw(data, options);
+		<?php } ?>
+		<?php
+		if (!empty($cost_pie_chart)) {
+			?>
+			var data = google.visualization.arrayToDataTable([
+				['Energy', 'Usage'],
+				<?php
+					foreach ($cost_pie_chart as $key => $val) {
+						if ($val != 0) {
+							echo '["' . lang($key) . '",' . $val . '],';
+						}
+					}
+					?>
+			]);
+			var options = {
+				height: 600,
+				title: '<?php echo lang("cost-pie-chart-title"); ?>',
+				sliceVisibilityThreshold: .0,
+				pieHole: 0.4,
+				titleTextStyle: {
+					fontName: 'Arial',
+					fontSize: 24
+				},
+				legend: {
+					textStyle: {
+						fontSize: 17
+					}
+				},
+				chartArea: {
+					width: '100%',
+				},
+				slices: {
+					<?php $i = 0;
+						if ($cost_pie_chart['electricity'] != 0) {
+							?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorElectricity; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+					<?php if ($cost_pie_chart['fuel'] != 0) { ?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorFuel; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+					<?php if ($cost_pie_chart['lpg'] != 0) { ?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorLpg; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+					<?php if ($cost_pie_chart['natural_gas'] != 0) { ?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorNaturalGas; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+					<?php if ($cost_pie_chart['water'] != 0) { ?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorWater; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+					<?php if ($cost_pie_chart['heating_district'] != 0) { ?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorHeatingDistrict; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+					<?php if ($cost_pie_chart['cooling_district'] != 0) { ?>
+						<?php echo $i; ?>: {
+							color: '<?php echo $colorCoolingDistrict; ?>',
+							textStyle: {
+								fontSize: 18
+							}
+						},
+					<?php $i += 1;
+						} ?>
+				}
+			};
+			var cost_pie_chart_chart_hidden1 = new google.visualization.PieChart(document.getElementById('cost_pie_chart_YTD'));
+			google.visualization.events.addListener(cost_pie_chart_chart_hidden1, 'ready', function() {
+				setTimeout(function() {
+					var imgUri = cost_pie_chart_chart_hidden1.getImageURI();
+					document.getElementById('pieChartNewImg').value = imgUri;
+				}, 1000);
+			});
+			cost_pie_chart_chart_hidden1.draw(data, options);
+		<?php } ?>
+		<?php
+		$monthlyPieTitleMonth = !empty($filters['monthly_pie_month']) ? (int) $filters['monthly_pie_month'] : (int) $filters['previous_month'];
+		$monthlyPieTitleYear = !empty($filters['monthly_pie_year']) ? $filters['monthly_pie_year'] : $filters['previous_year'];
+			if (!empty($kwh_pie_chart_previousmonth)) {
+				$kwhPiePreSeriesArray = array();
+				foreach ($kwh_pie_chart_previousmonth as $kwhPiePrekey => $kwhPiePreValue) {
+					if ($kwhPiePreValue != 0) {
+						$kwhPiePreName = $kwhPiePrekey;
+						$kwhPiePreSeriesArray[$kwhPiePreName] = isset($kwhPiePreSeriesArray[$kwhPiePreName]) ? $kwhPiePreSeriesArray[$kwhPiePreName] + $kwhPiePreValue : $kwhPiePreValue;
+					}
+				}
+				if (!empty($kwhPiePreSeriesArray)) {
+					?>
+					var data = google.visualization.arrayToDataTable([
+						['Energy', 'Usage'],
+						<?php
+							foreach ($kwhPiePreSeriesArray as $key => $val) {
+								if ($val != 0) {
+									echo '["' . lang($key) . '",' . $val . '],';
+								}
+							}
+							?>
+					]);
+					var options = {
+						height: 600,
+						title: '<?php echo lang("kWh-pie-chart-last12month-title") . ' - ' . $fullmontharray[$monthlyPieTitleMonth] . ' ' . $monthlyPieTitleYear; ?>',
+						sliceVisibilityThreshold: .0,
+						pieHole: 0.4,
+						titleTextStyle: {
+							fontName: 'Arial',
+							fontSize: 	24
+						},
+						legend: {
+							textStyle: {
+								fontSize: 17
+							}
+						},
+						chartArea: {
+							width: '100%',
+						},
+						slices: {
+							<?php $i = 0;
+								if ($kwhPiePreSeriesArray['electricity'] != 0) {
+									?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorElectricity; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+							<?php if ($kwhPiePreSeriesArray['fuel'] != 0) { ?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorFuel; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+							<?php if ($kwhPiePreSeriesArray['lpg'] != 0) { ?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorLpg; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+							<?php if ($kwhPiePreSeriesArray['natural_gas'] != 0) { ?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorNaturalGas; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+							<?php if ($kwhPiePreSeriesArray['water'] != 0) { ?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorWater; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+							<?php if ($kwhPiePreSeriesArray['heating_district'] != 0) { ?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorHeatingDistrict; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+							<?php if ($kwhPiePreSeriesArray['cooling_district'] != 0) { ?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorCoolingDistrict; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+						}
+					};
+					var kwh_pre_mon_share_chart_hidden1 = new google.visualization.PieChart(document.getElementById('kwh_pie_chart_monthly_chart_ytd'));
+					google.visualization.events.addListener(kwh_pre_mon_share_chart_hidden1, 'ready', function() {
+						setTimeout(function() {
+							var imgUri = kwh_pre_mon_share_chart_hidden1.getImageURI();
+							document.getElementById('pieChartNew2Img').value = imgUri;
+						}, 1000);
+					});
+					kwh_pre_mon_share_chart_hidden1.draw(data, options);
+				<?php } 
+			}?>
+			<?php
+			if (!empty($cost_pie_chart_previousmonth)) {
+				$costPiePreSeriesArray = array();
+				foreach ($cost_pie_chart_previousmonth as $costPiePreKey => $costPiePreVal) {
+					if ($costPiePreVal != 0) {
+						$costPiePreName = $costPiePreKey;
+						$costPiePreSeriesArray[$costPiePreName] = isset($costPiePreSeriesArray[$costPiePreName]) ? $costPiePreSeriesArray[$costPiePreName] + $costPiePreVal : $costPiePreVal;
+					}
+				}
+				if (!empty($costPiePreSeriesArray)) {
+				?>
+					var data = google.visualization.arrayToDataTable([
+						['Energy', 'Usage'],
+						<?php
+							foreach ($costPiePreSeriesArray as $key => $val) {
+								if ($val != 0) {
+									echo '["' . lang($key) . '",' . $val . '],';
+								}
+							}
+							?>
+					]);
+					var options = {
+						height: 600,
+						title: '<?php echo lang("cost-pie-chart-last12month-title") . ' - ' . $fullmontharray[$monthlyPieTitleMonth] . ' ' . $monthlyPieTitleYear; ?>',
+						sliceVisibilityThreshold: .0,
+						pieHole: 0.4,
+						titleTextStyle: {
+							fontName: 'Arial',
+							fontSize: 24
+						},
+						legend: {
+							textStyle: {
+								fontSize: 17
+							}
+						},
+						chartArea: {
+							width: '100%',
+						},
+						slices: {
+							<?php $i = 0;
+								if ($costPiePreSeriesArray['electricity'] != 0) {
+									?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorElectricity; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+							<?php if ($costPiePreSeriesArray['fuel'] != 0) { ?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorFuel; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+							<?php if ($costPiePreSeriesArray['lpg'] != 0) { ?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorLpg; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+							<?php if ($costPiePreSeriesArray['natural_gas'] != 0) { ?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorNaturalGas; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+							<?php if ($costPiePreSeriesArray['water'] != 0) { ?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorWater; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+							<?php if ($costPiePreSeriesArray['heating_district'] != 0) { ?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorHeatingDistrict; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+							<?php if ($costPiePreSeriesArray['cooling_district'] != 0) { ?>
+								<?php echo $i; ?>: {
+									color: '<?php echo $colorCoolingDistrict; ?>',
+									textStyle: {
+										fontSize: 18
+									}
+								},
+							<?php $i += 1;
+								} ?>
+						}
+					};
+					var cost_pre_mon_share_chart_hidden1 = new google.visualization.PieChart(document.getElementById('cost_pie_chart_monthly_chart_ytd'));
+					google.visualization.events.addListener(cost_pre_mon_share_chart_hidden1, 'ready', function() {
+						setTimeout(function() {
+							var imgUri = cost_pre_mon_share_chart_hidden1.getImageURI();
+							document.getElementById('pieChartNew3Img').value = imgUri;
+						}, 1000);
+					});
+					cost_pre_mon_share_chart_hidden1.draw(data, options);
+				<?php } 
+			}?>
+			// YTD Carbon Footrpint
+			var arrTitle = ['Month'];
+
+			var arrValuesMulti = [];
+
+			<?php if ($totalElectricity != 0) { ?>
+
+			arrTitle.push('<?php echo lang("electricity"); ?>');
+
+			<?php } ?>
+
+			<?php if ($totalFuel != 0) { ?>
+
+			arrTitle.push('<?php echo lang("fuel"); ?>');
+
+			<?php } ?>
+
+			<?php if ($totalLpg != 0) { ?>
+
+			arrTitle.push('<?php echo lang("lpg"); ?>');
+
+			<?php } ?>
+
+			<?php if ($totalNaturalGas != 0) { ?>
+
+			arrTitle.push('<?php echo lang("natural-gas"); ?>');
+
+			<?php } ?>
+
+			<?php if ($totalHeatingDistrict != 0) { ?>
+
+			arrTitle.push('<?php echo lang("heating-district"); ?>');
+
+			<?php } ?>
+
+			<?php if ($totalCoolingDistrict != 0) { ?>
+
+			arrTitle.push('<?php echo lang("cooling-district"); ?>');
+
+			<?php } ?>
+
+			<?php if (in_array('fleet', $showUtilityArray)) { ?>
+
+			arrTitle.push('<?php echo lang("fleet-petrol"); ?>');
+
+			<?php } ?>
+
+			arrTitle.push('<?php echo lang("occupancy") . "-" . $last_year; ?>');
+
+			arrTitle.push('<?php echo lang("occupancy") . "-" . $current_year; ?>');
+
+			arrValuesMulti.push(arrTitle);
+
+			<?php
+
+			$total_months = 0;
+
+			$total_sum_pre_data_electricity = 0;
+
+			$total_sum_pre_data_fuel = 0;
+
+			$total_sum_pre_data_lpg = 0;
+
+			$total_sum_pre_data_natural_gas = 0;
+
+			$total_sum_pre_data_heating_district = 0;
+
+			$total_sum_pre_data_cooling_district = 0;
+			$total_sum_pre_data_fleet_petrol = 0;
+
+			$total_sum_pre_data_water = 0;
+
+			$total_sum_pre_data_cdd = 0;
+
+			$total_sum_pre_data_hdd = 0;
+
+			$total_sum_pre_data_occupancy = 0;
+
+			$total_sum_pre_data_budget = 0;
+
+			$total_sum_data_electricity = 0;
+
+			$total_sum_data_fuel = 0;
+
+			$total_sum_data_lpg = 0;
+
+			$total_sum_data_natural_gas = 0;
+
+			$total_sum_data_heating_district = 0;
+
+			$total_sum_data_cooling_district = 0;
+			$total_sum_data_fleet_petrol = 0;
+
+			$total_sum_data_water = 0;
+
+			$total_sum_data_cdd = 0;
+
+			$total_sum_data_hdd = 0;
+
+			$total_sum_data_occupancy = 0;
+
+			$total_sum_data_budget = 0;
+
+
+
+			foreach ($resultkeys as $year => $value) {
+
+
+				foreach ($value as $key1 => $month) {
+								$YTDmonth = !empty($filters['monthly_pie_month']) ? (int) $filters['monthly_pie_month'] : (int) $filters['previous_month'];
+								// Previous year data
+							if ($month <= $YTDmonth) { 
+
+								$prevYear = $year - 1;
+
+								$pre_monthdata = $montharray[$month] . ' ' . ($prevYear);
+
+								$pre_data_carbon_electricity = (!empty($utility_cost_chart[$month][$prevYear]['total_electricity_kwh'])) ? ($utility_cost_chart[$month][$prevYear]['total_electricity_kwh'] - $utility_cost_chart[$month][$prevYear]['onsite_generator'] - $utility_cost_chart[$month][$prevYear]['renewable_energy']) : 0;
+
+								$pre_data_carbon_fuel = (!empty($utility_cost_chart[$month][$prevYear]['fuel_consumption'])) ? $utility_cost_chart[$month][$prevYear]['fuel_consumption'] : 0;
+
+								$pre_data_carbon_lpg = (!empty($utility_cost_chart[$month][$prevYear]['lpg_consumption'])) ? $utility_cost_chart[$month][$prevYear]['lpg_consumption'] : 0;
+
+								$pre_data_carbon_natural_gas = (!empty($utility_cost_chart[$month][$prevYear]['natural_gas_consumption'])) ? $utility_cost_chart[$month][$prevYear]['natural_gas_consumption'] : 0;
+
+								$pre_data_carbon_heating_district = (!empty($utility_cost_chart[$month][$prevYear]['heating_district_consumption'])) ? $utility_cost_chart[$month][$prevYear]['heating_district_consumption'] : 0;
+
+								$pre_data_carbon_cooling_district = (!empty($utility_cost_chart[$month][$prevYear]['cooling_district_consumption'])) ? $utility_cost_chart[$month][$prevYear]['cooling_district_consumption'] : 0;
+
+								$pre_data_carbon_fleet_petrol = (!empty($utility_cost_chart[$month][$prevYear]['fleet_petrol'])) ? $utility_cost_chart[$month][$prevYear]['fleet_petrol'] : 0;
+
+								$pre_data_carbon_water = (!empty($utility_cost_chart[$month][$prevYear]['water_consumption'])) ? $utility_cost_chart[$month][$prevYear]['water_consumption'] : 0;
+
+								$pre_data_carbon_cdd = (!empty($utility_cost_chart[$month][$prevYear]['cdd'])) ? $utility_cost_chart[$month][$prevYear]['cdd'] : 0;
+
+								$pre_data_carbon_hdd = (!empty($utility_cost_chart[$month][$prevYear]['hdd'])) ? $utility_cost_chart[$month][$prevYear]['hdd'] : 0;
+
+								$pre_data_carbon_occupancy = (!empty($utility_cost_chart[$month][$prevYear]['occupancy'])) ? $utility_cost_chart[$month][$prevYear]['occupancy'] : 0;
+
+								$pre_data_carbon_budget = (!empty($utility_cost_chart[$month][$prevYear]['budget'])) ? $utility_cost_chart[$month][$prevYear]['budget'] : 0;
+
+
+
+								// Current year data
+
+								$monthdata = $montharray[$month] . ' ' . $year;
+
+								$data_carbon_electricity = (!empty($utility_cost_chart[$month][$year]['total_electricity_kwh'])) ? ($utility_cost_chart[$month][$year]['total_electricity_kwh'] - $utility_cost_chart[$month][$year]['onsite_generator'] - $utility_cost_chart[$month][$year]['renewable_energy']) : 0;
+
+								$data_carbon_fuel = (!empty($utility_cost_chart[$month][$year]['fuel_consumption'])) ? $utility_cost_chart[$month][$year]['fuel_consumption'] : 0;
+
+								$data_carbon_lpg = (!empty($utility_cost_chart[$month][$year]['lpg_consumption'])) ? $utility_cost_chart[$month][$year]['lpg_consumption'] : 0;
+
+								$data_carbon_natural_gas = (!empty($utility_cost_chart[$month][$year]['natural_gas_consumption'])) ? $utility_cost_chart[$month][$year]['natural_gas_consumption'] : 0;
+
+								$data_carbon_heating_district = (!empty($utility_cost_chart[$month][$year]['heating_district_consumption'])) ? $utility_cost_chart[$month][$year]['heating_district_consumption'] : 0;
+
+								$data_carbon_cooling_district = (!empty($utility_cost_chart[$month][$year]['cooling_district_consumption'])) ? $utility_cost_chart[$month][$year]['cooling_district_consumption'] : 0;
+
+								$data_carbon_fleet_petrol = (!empty($utility_cost_chart[$month][$year]['fleet_petrol'])) ? $utility_cost_chart[$month][$year]['fleet_petrol'] : 0;
+
+								$data_carbon_water = (!empty($utility_cost_chart[$month][$year]['water_consumption'])) ? $utility_cost_chart[$month][$year]['water_consumption'] : 0;
+
+								$data_carbon_cdd = (!empty($utility_cost_chart[$month][$year]['cdd'])) ? $utility_cost_chart[$month][$year]['cdd'] : 0;
+
+								$data_carbon_hdd = (!empty($utility_cost_chart[$month][$year]['hdd'])) ? $utility_cost_chart[$month][$year]['hdd'] : 0;
+
+								$data_carbon_occupancy = (!empty($utility_cost_chart[$month][$year]['occupancy'])) ? $utility_cost_chart[$month][$year]['occupancy'] : 0;
+
+								$data_carbon_budget = (!empty($utility_cost_chart[$month][$year]['budget'])) ? $utility_cost_chart[$month][$year]['budget'] : 0;
+
+
+
+								// Round values
+
+								$pre_data_carbon_occupancy = round($pre_data_carbon_occupancy, 2);
+
+								$data_carbon_occupancy = round($data_carbon_occupancy, 2);
+
+								$dataFactor = getMmbtuFactorConversionAllUtility($site_detail['id']);
+
+								// Calculate carbon footprint
+
+								$pre_data_carbon_electricity = round($pre_data_carbon_electricity  * $dataFactor['electricity'] * $site_detail['electricity_emission_factor'], 2);
+
+								$pre_data_carbon_fuel = round($pre_data_carbon_fuel  * $dataFactor['fuel_oil'] * $site_detail['fuel_emission_factor'], 2);
+
+								$pre_data_carbon_lpg = round($pre_data_carbon_lpg  * $dataFactor['lpg'] * $site_detail['lpg_emission_factor'], 2);
+
+								$pre_data_carbon_natural_gas = round($pre_data_carbon_natural_gas  * $dataFactor['natural_gas'] * $site_detail['natural_gas_emission_factor'], 2);
+
+								$pre_data_carbon_heating_district = round($pre_data_carbon_heating_district  * $dataFactor['district_heating'] * $site_detail['district_heating_emission_factor'], 2);
+
+								$pre_data_carbon_cooling_district = round($pre_data_carbon_cooling_district  * $dataFactor['district_cooling'] * $site_detail['district_cooling_emission_factor'], 2);
+
+								$pre_data_carbon_fleet_petrol = round($pre_data_carbon_fleet_petrol  * 2.3 * 1, 2);
+
+								$data_carbon_electricity = round($data_carbon_electricity  * $dataFactor['electricity'] * $site_detail['electricity_emission_factor'], 2);
+
+								$data_carbon_fuel = round($data_carbon_fuel  * $dataFactor['fuel_oil'] * $site_detail['fuel_emission_factor'], 2);
+
+								$data_carbon_lpg = round($data_carbon_lpg  * $dataFactor['lpg'] * $site_detail['lpg_emission_factor'], 2);
+
+								$data_carbon_natural_gas = round($data_carbon_natural_gas  * $dataFactor['natural_gas'] * $site_detail['natural_gas_emission_factor'], 2);
+
+								$data_carbon_heating_district = round($data_carbon_heating_district  * $dataFactor['district_heating'] * $site_detail['district_heating_emission_factor'], 2);
+
+								$data_carbon_cooling_district = round($data_carbon_cooling_district  * $dataFactor['district_cooling'] * $site_detail['district_cooling_emission_factor'], 2);
+
+								$data_carbon_fleet_petrol = round($data_carbon_fleet_petrol  * 2.3 * 1, 2);
+
+								// if ($month <= $CURRENT_YEAR_MAX_MONTH_ID) { //commented cause of average issue(average is taken jan data by default)
+
+								// Average Previous year data
+
+								$total_sum_pre_data_electricity += $pre_data_carbon_electricity;
+
+								$total_sum_pre_data_fuel += $pre_data_carbon_fuel;
+
+								$total_sum_pre_data_lpg += $pre_data_carbon_lpg;
+
+								$total_sum_pre_data_natural_gas += $pre_data_carbon_natural_gas;
+
+								$total_sum_pre_data_heating_district += $pre_data_carbon_heating_district;
+
+								$total_sum_pre_data_cooling_district += $pre_data_carbon_cooling_district;
+								$total_sum_pre_data_fleet_petrol += $pre_data_carbon_fleet_petrol;
+
+								$total_sum_pre_data_water += $pre_data_carbon_water;
+
+								$total_sum_pre_data_cdd += $pre_data_carbon_cdd;
+
+								$total_sum_pre_data_hdd += $pre_data_carbon_hdd;
+
+								$total_sum_pre_data_occupancy += $pre_data_carbon_occupancy;
+
+								$total_sum_pre_data_budget += $pre_data_carbon_budget;
+
+
+
+								// Average Current year data
+
+								$total_sum_data_electricity += $data_carbon_electricity;
+
+								$total_sum_data_fuel += $data_carbon_fuel;
+
+								$total_sum_data_lpg += $data_carbon_lpg;
+
+								$total_sum_data_natural_gas += $data_carbon_natural_gas;
+
+								$total_sum_data_heating_district += $data_carbon_heating_district;
+
+								$total_sum_data_cooling_district += $data_carbon_cooling_district;
+								$total_sum_data_fleet_petrol += $data_carbon_fleet_petrol;
+
+								$total_sum_data_water += $data_carbon_water;
+
+								$total_sum_data_cdd += $data_carbon_cdd;
+
+								$total_sum_data_hdd += $data_carbon_hdd;
+
+								$total_sum_data_occupancy += $data_carbon_occupancy;
+
+								$total_sum_data_budget += $data_carbon_budget;
+
+
+
+								$total_months++;
+
+								// }
+
+								?>
+
+								var arrValuesNull = [null];
+
+								<?php if ($totalElectricity != 0) { ?>
+
+								arrValuesNull.push(null);
+
+								<?php } ?>
+
+								<?php if ($totalFuel != 0) { ?>
+
+								arrValuesNull.push(null);
+
+								<?php } ?>
+
+								<?php if ($totalLpg != 0) { ?>
+
+								arrValuesNull.push(null);
+
+								<?php } ?>
+
+								<?php if ($totalNaturalGas != 0) { ?>
+
+								arrValuesNull.push(null);
+
+								<?php } ?>
+
+								<?php if ($totalHeatingDistrict != 0) { ?>
+
+								arrValuesNull.push(null);
+
+								<?php } ?>
+
+								<?php if ($totalCoolingDistrict != 0) { ?>
+
+								arrValuesNull.push(null);
+
+								<?php } ?>
+								<?php if (in_array('fleet', $showUtilityArray)) { ?>
+
+								arrValuesNull.push(null);
+
+								<?php } ?>
+
+								arrValuesNull.push(null);
+
+								arrValuesNull.push(null);
+
+								var arrValuesPre = ['<?php echo $pre_monthdata; ?>'];
+
+								<?php if ($totalElectricity != 0) { ?>
+								arrValuesPre.push(<?php echo isset($pre_data_carbon_electricity) && is_finite($pre_data_carbon_electricity) ? $pre_data_carbon_electricity : 0; ?>);
+								<?php } ?>
+								<?php if ($totalFuel != 0) { ?>
+								arrValuesPre.push(<?php echo isset($pre_data_carbon_fuel) && is_finite($pre_data_carbon_fuel) ? $pre_data_carbon_fuel : 0; ?>);
+								<?php } ?>
+								<?php if ($totalLpg != 0) { ?>
+								arrValuesPre.push(<?php echo isset($pre_data_carbon_lpg) && is_finite($pre_data_carbon_lpg) ? $pre_data_carbon_lpg : 0; ?>);
+								<?php } ?>
+								<?php if ($totalNaturalGas != 0) { ?>
+								arrValuesPre.push(<?php echo isset($pre_data_carbon_natural_gas) && is_finite($pre_data_carbon_natural_gas) ? $pre_data_carbon_natural_gas : 0; ?>);
+								<?php } ?>
+								<?php if ($totalHeatingDistrict != 0) { ?>
+								arrValuesPre.push(<?php echo isset($pre_data_carbon_heating_district) && is_finite($pre_data_carbon_heating_district) ? $pre_data_carbon_heating_district : 0; ?>);
+								<?php } ?>
+								<?php if ($totalCoolingDistrict != 0) { ?>
+								arrValuesPre.push(<?php echo isset($pre_data_carbon_cooling_district) && is_finite($pre_data_carbon_cooling_district) ? $pre_data_carbon_cooling_district : 0; ?>);
+								<?php } ?>
+								<?php if (in_array('fleet', $showUtilityArray)) { ?>
+								arrValuesPre.push(<?php echo isset($pre_data_carbon_fleet_petrol) && is_finite($pre_data_carbon_fleet_petrol) ? $pre_data_carbon_fleet_petrol : 0; ?>);
+								<?php } ?>
+								arrValuesPre.push(<?php echo isset($pre_data_carbon_occupancy) && is_finite($pre_data_carbon_occupancy) ? $pre_data_carbon_occupancy : 0; ?>);
+								arrValuesPre.push(null);
+								var arrValues = ['<?php echo $monthdata; ?>'];
+								<?php if ($totalElectricity != 0) { ?>
+								arrValues.push(<?php echo isset($data_carbon_electricity) && is_finite($data_carbon_electricity) ? $data_carbon_electricity : 0; ?>);
+								<?php } ?>
+								<?php if ($totalFuel != 0) { ?>
+								arrValues.push(<?php echo isset($data_carbon_fuel) && is_finite($data_carbon_fuel) ? $data_carbon_fuel : 0; ?>);
+								<?php } ?>
+								<?php if ($totalLpg != 0) { ?>
+								arrValues.push(<?php echo isset($data_carbon_lpg) && is_finite($data_carbon_lpg) ? $data_carbon_lpg : 0; ?>);
+								<?php } ?>
+								<?php if ($totalNaturalGas != 0) { ?>
+								arrValues.push(<?php echo isset($data_carbon_natural_gas) && is_finite($data_carbon_natural_gas) ? $data_carbon_natural_gas : 0; ?>);
+								<?php } ?>
+								<?php if ($totalHeatingDistrict != 0) { ?>
+								arrValues.push(<?php echo isset($data_carbon_heating_district) && is_finite($data_carbon_heating_district) ? $data_carbon_heating_district : 0; ?>);
+								<?php } ?>
+								<?php if ($totalCoolingDistrict != 0) { ?>
+								arrValues.push(<?php echo isset($data_carbon_cooling_district) && is_finite($data_carbon_cooling_district) ? $data_carbon_cooling_district : 0; ?>);
+								<?php } ?>
+								<?php if (in_array('fleet', $showUtilityArray)) { ?>
+								arrValues.push(<?php echo isset($data_carbon_fleet_petrol) && is_finite($data_carbon_fleet_petrol) ? $data_carbon_fleet_petrol : 0; ?>);
+								<?php } ?>
+								arrValues.push(null);
+								arrValues.push(<?php echo isset($data_carbon_occupancy) && is_finite($data_carbon_occupancy) ? $data_carbon_occupancy : 0; ?>);
+								arrValuesMulti.push(arrValuesNull);
+								arrValuesMulti.push(arrValuesPre);
+								arrValuesMulti.push(arrValues);
+							
+				<?php
+				}
+
+				}
+			}
+
+			// Average Previous year data
+
+			$AVG_pre_data_electricity = ($total_sum_pre_data_electricity / $total_months);
+
+			$AVG_pre_data_fuel = ($total_sum_pre_data_fuel / $total_months);
+
+			$AVG_pre_data_lpg = ($total_sum_pre_data_lpg / $total_months);
+
+			$AVG_pre_data_natural_gas = ($total_sum_pre_data_natural_gas / $total_months);
+
+			$AVG_pre_data_heating_district = ($total_sum_pre_data_heating_district / $total_months);
+
+			$AVG_pre_data_cooling_district = ($total_sum_pre_data_cooling_district / $total_months);
+			$AVG_pre_data_fleet_petrol = ($total_sum_pre_data_fleet_petrol / $total_months);
+
+			$AVG_pre_data_water = ($total_sum_pre_data_water / $total_months);
+
+			$AVG_pre_data_cdd = ($total_sum_pre_data_cdd / $total_months);
+
+			$AVG_pre_data_hdd = ($total_sum_pre_data_hdd / $total_months);
+
+			$AVG_pre_data_occupancy = ($total_sum_pre_data_occupancy / $total_months);
+
+			$AVG_pre_data_budget = ($total_sum_pre_data_budget / $total_months);
+
+
+
+				// Average Current year data
+
+				// $YTD_total_months = $this->_ci->config->config['YTD_month_count']; //commented cause of average issue(average is taken jan data by default)
+
+				$YTD_total_months = $total_months;
+
+				$AVG_data_electricity = ($total_sum_data_electricity / $YTD_total_months);
+
+				$AVG_data_fuel = ($total_sum_data_fuel / $YTD_total_months);
+
+				$AVG_data_lpg = ($total_sum_data_lpg / $YTD_total_months);
+
+				$AVG_data_natural_gas = ($total_sum_data_natural_gas / $YTD_total_months);
+
+				$AVG_data_heating_district = ($total_sum_data_heating_district / $YTD_total_months);
+
+				$AVG_data_cooling_district = ($total_sum_data_cooling_district / $YTD_total_months);
+				$AVG_data_fleet_petrol = ($total_sum_data_fleet_petrol / $YTD_total_months);
+
+				$AVG_data_water = ($total_sum_data_water / $YTD_total_months);
+
+				$AVG_data_cdd = ($total_sum_data_cdd / $YTD_total_months);
+
+				$AVG_data_hdd = ($total_sum_data_hdd / $YTD_total_months);
+
+				$AVG_data_occupancy = ($total_sum_data_occupancy / $YTD_total_months);
+
+				$AVG_data_budget = ($total_sum_data_budget / $total_months);
+
+
+
+				$AVG_pre_data_occupancy = round($AVG_pre_data_occupancy, 2);
+
+				$AVG_data_occupancy = round($AVG_data_occupancy, 2);
+
+
+
+				$chart_legend_colors = $this->_ci->config->config['chart_legend_colors'];
+
+				$prevYear = $year - 1;
+
+				?>
+
+				var arrAvgNull = [null];
+
+				<?php if ($totalElectricity != 0) { ?>
+
+				arrAvgNull.push(null);
+
+				<?php } ?>
+
+				<?php if ($totalFuel != 0) { ?>
+
+				arrAvgNull.push(null);
+
+				<?php } ?>
+
+				<?php if ($totalLpg != 0) { ?>
+
+				arrAvgNull.push(null);
+
+				<?php } ?>
+
+				<?php if ($totalNaturalGas != 0) { ?>
+
+				arrAvgNull.push(null);
+
+				<?php } ?>
+
+				<?php if ($totalHeatingDistrict != 0) { ?>
+
+				arrAvgNull.push(null);
+
+				<?php } ?>
+
+				<?php if ($totalCoolingDistrict != 0) { ?>
+
+				arrAvgNull.push(null);
+
+				<?php } ?>
+
+				<?php if (in_array('fleet', $showUtilityArray)) { ?>
+
+				arrAvgNull.push(null);
+
+				<?php } ?>
+
+				arrAvgNull.push(null);
+
+				arrAvgNull.push(null);
+
+				var arrAvgPre = ['<?php echo ($prevYear) . " " . lang("average"); ?>'];
+
+				<?php if ($totalElectricity != 0) { ?>
+				arrAvgPre.push(<?php echo (!empty($AVG_pre_data_electricity) && is_finite($AVG_pre_data_electricity)) ? $AVG_pre_data_electricity : 0; ?>);
+				<?php } ?>
+				<?php if ($totalFuel != 0) { ?>
+				arrAvgPre.push(<?php echo (!empty($AVG_pre_data_fuel) && is_finite($AVG_pre_data_fuel)) ? $AVG_pre_data_fuel : 0; ?>);
+				<?php } ?>
+				<?php if ($totalLpg != 0) { ?>
+				arrAvgPre.push(<?php echo (!empty($AVG_pre_data_lpg) && is_finite($AVG_pre_data_lpg)) ? $AVG_pre_data_lpg : 0; ?>);
+				<?php } ?>
+				<?php if ($totalNaturalGas != 0) { ?>
+				arrAvgPre.push(<?php echo (!empty($AVG_pre_data_natural_gas) && is_finite($AVG_pre_data_natural_gas)) ? $AVG_pre_data_natural_gas : 0; ?>);
+				<?php } ?>
+				<?php if ($totalHeatingDistrict != 0) { ?>
+				arrAvgPre.push(<?php echo (!empty($AVG_pre_data_heating_district) && is_finite($AVG_pre_data_heating_district)) ? $AVG_pre_data_heating_district : 0; ?>);
+				<?php } ?>
+				<?php if ($totalCoolingDistrict != 0) { ?>
+				arrAvgPre.push(<?php echo (!empty($AVG_pre_data_cooling_district) && is_finite($AVG_pre_data_cooling_district)) ? $AVG_pre_data_cooling_district : 0; ?>);
+				<?php } ?>
+				<?php if (in_array('fleet', $showUtilityArray)) { ?>
+				arrAvgPre.push(<?php echo (!empty($AVG_pre_data_fleet_petrol) && is_finite($AVG_pre_data_fleet_petrol)) ? $AVG_pre_data_fleet_petrol : 0; ?>);
+				<?php } ?>
+				arrAvgPre.push(<?php echo (!empty($AVG_pre_data_occupancy) && is_finite($AVG_pre_data_occupancy)) ? $AVG_pre_data_occupancy : 0; ?>);
+				arrAvgPre.push(null);
+				var arrAvg = ['<?php echo ($year) . " " . lang("average"); ?>'];
+				<?php if ($totalElectricity != 0) { ?>
+				arrAvg.push(<?php echo (!empty($AVG_data_electricity) && is_finite($AVG_data_electricity)) ? $AVG_data_electricity : 0; ?>);
+				<?php } ?>
+				<?php if ($totalFuel != 0) { ?>
+				arrAvg.push(<?php echo (!empty($AVG_data_fuel) && is_finite($AVG_data_fuel)) ? $AVG_data_fuel : 0; ?>);
+				<?php } ?>
+				<?php if ($totalLpg != 0) { ?>
+				arrAvg.push(<?php echo (!empty($AVG_data_lpg) && is_finite($AVG_data_lpg)) ? $AVG_data_lpg : 0; ?>);
+				<?php } ?>
+				<?php if ($totalNaturalGas != 0) { ?>
+				arrAvg.push(<?php echo (!empty($AVG_data_natural_gas) && is_finite($AVG_data_natural_gas)) ? $AVG_data_natural_gas : 0; ?>);
+				<?php } ?>
+				<?php if ($totalHeatingDistrict != 0) { ?>
+				arrAvg.push(<?php echo (!empty($AVG_data_heating_district) && is_finite($AVG_data_heating_district)) ? $AVG_data_heating_district : 0; ?>);
+				<?php } ?>
+				<?php if ($totalCoolingDistrict != 0) { ?>
+				arrAvg.push(<?php echo (!empty($AVG_data_cooling_district) && is_finite($AVG_data_cooling_district)) ? $AVG_data_cooling_district : 0; ?>);
+				<?php } ?>
+				<?php if (in_array('fleet', $showUtilityArray)) { ?>
+				arrAvg.push(<?php echo (!empty($AVG_data_fleet_petrol) && is_finite($AVG_data_fleet_petrol)) ? $AVG_data_fleet_petrol : 0; ?>);
+				<?php } ?>
+				arrAvg.push(null);
+				arrAvg.push(<?php echo (!empty($AVG_data_occupancy) && is_finite($AVG_data_occupancy)) ? $AVG_data_occupancy : 0; ?>);
+				arrValuesMulti.push(arrAvgNull);
+
+				arrValuesMulti.push(arrAvgPre);
+
+				arrValuesMulti.push(arrAvg);
+				var data = google.visualization.arrayToDataTable(arrValuesMulti);
+				var series = {};
+				var i = 0;
+				var chart_index_carbon = ["electricity",
+					"fuel",
+					"lpg",
+					"natural_gas",
+					"heating_district",
+					"cooling_district",
+					"fleet_petrol"
+				]
+				$.each(chart_index_carbon, function(index, value) {
+					<?php if (in_array('electricity', $showUtilityArray)) { ?>
+					if (value == "electricity") {
+						series[index] = {
+							targetAxisIndex: 0,
+							color: '<?php echo $colorElectricity; ?>'
+						};
+					}
+					<?php } ?>
+					<?php if (in_array('fuel_oil', $showUtilityArray)) { ?>
+					if (value == "fuel") {
+						series[index] = {
+							targetAxisIndex: 0,
+							color: '<?php echo $colorFuel; ?>'
+						};
+					}
+					<?php } ?>
+					<?php if (in_array('lpg', $showUtilityArray)) { ?>
+					if (value == "lpg") {
+						series[index] = {
+							targetAxisIndex: 0,
+							color: '<?php echo $colorLpg; ?>'
+						};
+					}
+					<?php } ?>
+					<?php if (in_array('natural_gas', $showUtilityArray)) { ?>
+					if (value == "natural_gas") {
+						series[index] = {
+							targetAxisIndex: 0,
+							color: '<?php echo $colorNaturalGas; ?>'
+						};
+					}
+					<?php } ?>
+					<?php if (in_array('district_heating', $showUtilityArray)) { ?>
+					if (value == "heating_district") {
+						series[index] = {
+							targetAxisIndex: 0,
+							color: '<?php echo $colorHeatingDistrict; ?>'
+						};
+					}
+					<?php } ?>
+					<?php if (in_array('district_cooling', $showUtilityArray)) { ?>
+					if (value == "cooling_district") {
+						series[index] = {
+							targetAxisIndex: 0,
+							color: '<?php echo $colorCoolingDistrict; ?>'
+						};
+					}
+					<?php } ?>
+					<?php if (in_array('fleet', $showUtilityArray)) { ?>
+					if (value == "fleet_petrol") {
+						series[index] = {
+							targetAxisIndex: 0,
+							color: '<?php echo $colorFleetPetrol; ?>'
+						};
+					}
+					<?php } ?>
+					i = index;
+				});
+				series[i + 1] = {
+					targetAxisIndex: 1,
+					type: "line",
+					color: '#000',
+					pointShape: 'square',
+					pointSize: 10
+				};
+				var series1 = {
+
+					<?php $i = 0;
+
+				if ($totalElectricity != 0) {
+
+					?>
+
+				<?php echo $i; ?>: {
+					targetAxisIndex: 0,
+					color: '<?php echo $colorElectricity; ?>'
+				},
+
+			<?php $i += 1;
+				} ?>
+
+			<?php if ($totalFuel != 0) { ?>
+
+				<?php echo $i; ?>: {
+					targetAxisIndex: 0,
+					color: '<?php echo $colorFuel; ?>'
+				},
+
+			<?php $i += 1;
+				} ?>
+
+			<?php if ($totalLpg != 0) { ?>
+
+				<?php echo $i; ?>: {
+					targetAxisIndex: 0,
+					color: '<?php echo $colorLpg; ?>'
+				},
+
+			<?php $i += 1;
+				} ?>
+
+			<?php if ($totalNaturalGas != 0) { ?>
+
+				<?php echo $i; ?>: {
+					targetAxisIndex: 0,
+					color: '<?php echo $colorNaturalGas; ?>'
+				},
+
+			<?php $i += 1;
+				} ?>
+
+			<?php if ($totalHeatingDistrict != 0) { ?>
+
+				<?php echo $i; ?>: {
+					targetAxisIndex: 0,
+					color: '<?php echo $colorHeatingDistrict; ?>'
+				},
+
+			<?php $i += 1;
+				} ?>
+
+			<?php if ($totalCoolingDistrict != 0) { ?>
+
+				<?php echo $i; ?>: {
+					targetAxisIndex: 0,
+					color: '<?php echo $colorCoolingDistrict; ?>'
+				},
+
+			<?php $i += 1;
+				} ?>
+
+			<?php if (in_array('fleet', $showUtilityArray)) { ?>
+			<?php echo $i; ?>: {
+					targetAxisIndex: 0,
+					color: '<?php echo $colorFleetPetrol; ?>'
+				},
+
+			<?php $i += 1;
+				} ?>
+
+			<?php echo $i; ?>: {
+				targetAxisIndex: 1,
+				type: "line",
+				pointShape: 'square',
+				pointSize: 10
+			},
+
+			<?php $i += 1; ?>
+
+			<?php echo $i; ?>: {
+				targetAxisIndex: 1,
+				type: "line",
+				pointShape: 'square',
+				pointSize: 10
+			},
+
+		};
+				var options = {
+					height: 700,
+					isStacked: true,
+					title: 'Carbon Emissions (Scope 1 & Scope 2)',
+					titleTextStyle: {
+						fontName: 'Arial',
+						fontSize: 22
+					},
+					hAxis: {
+						title: '<?php echo lang("month"); ?>',
+						titleTextStyle: {
+							fontName: 'Arial',
+							fontSize: 24
+						},
+						slantedText: true,
+						slantedTextAngle: 45
+					},
+					vAxes: {
+						0: {
+							title: 'KgCO2e',
+							titleTextStyle: {
+								fontName: 'Arial',
+								fontSize: 24
+							}
+						},
+						1: {
+							title: '<?php echo lang("occupancy"); ?>',
+							titleTextStyle: {
+								fontName: 'Arial',
+								fontSize: 24
+							},
+							'minValue': 100,
+							ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+						}
+					},
+					interpolateNulls: true,
+					series: series1,
+					legend: {
+						position: 'top',
+						maxLines: 3,
+						textStyle: {
+							fontSize: 18
+						}
+					}
+				};
+				var chart1_carbon_footprint_ytd = new google.visualization.ColumnChart(document.getElementById('utility_cost_chart_carbon_footprint_ytd'));
+				google.visualization.events.addListener(chart1_carbon_footprint_ytd, 'ready', function() {
+					setTimeout(function() {
+						var imgUri = '';
+						imgUri = chart1_carbon_footprint_ytd.getImageURI();
+						document.getElementById('columnChartCarbonFootprintImg').value = imgUri;
+					}, 1000);
+				});
+				chart1_carbon_footprint_ytd.draw(data, options);
 		<?php if (!empty($waste_anual_pie_chart)) { ?>
 			var data = google.visualization.arrayToDataTable([
 				['Waste', 'Usage'],
@@ -4097,6 +5320,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 							<div id="utility_cost_chart" style="height:0px;opacity:0;"></div>
 							<div id="utility_cost_chart_carbon_footprint_monthly" style="height:0px;opacity:0;"></div>
 							<div id="utility_cost_chart_carbon_footprint_annual" style="height:0px;opacity:0;"></div>
+							<div id="utility_cost_chart_carbon_footprint_ytd" style="height:0px;opacity:0;"></div>
 							<div id="utility_cost_chart_pre" style="height:0px;opacity:0;"></div>
 							<div id="utility_waste_chart_pre" style="height:0px;opacity:0;"></div>
 							<div id="utility_cost_chart_5years" style="height:0px;opacity:0;"></div>
@@ -4124,6 +5348,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 										</div>
 									<?php } ?>
 								</div>
+								<div id="kwh_pie_chart_YTD" style="height:0px;opacity:0;"></div>
 								<div id="kwh_pie_chart_pre" style="height:0px;opacity:0;"></div>
 								<form method="post">
 									<input type="hidden" name="view_type" value="excel" />
@@ -4144,6 +5369,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 										</div>
 									<?php } ?>
 								</div>
+								<div id="cost_pie_chart_YTD" style="height:0px;opacity:0;"></div>
 								<div id="cost_pie_chart_pre" style="height:0px;opacity:0;"></div>
 								<form method="post">
 									<input type="hidden" name="view_type" value="excel" />
@@ -4172,6 +5398,8 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 								<div id="waste_annual_landfill_pie_chart" style="height:0px;opacity:0;"></div>
 								<div id="cost_pie_chart_monthly_chart" style="height:0px;opacity:0;"></div>
 								<div id="kwh_pie_chart_monthly_chart" style="height:0px;opacity:0;"></div>
+								<div id="cost_pie_chart_monthly_chart_ytd" style="height:0px;opacity:0;"></div>
+								<div id="kwh_pie_chart_monthly_chart_ytd" style="height:0px;opacity:0;"></div>
 							</div>
 						</div>
 					</div>

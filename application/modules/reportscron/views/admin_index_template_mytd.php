@@ -3192,9 +3192,11 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 			var options = {
 
-				height: 480,
+				width: 640,
 
-				title: '<?php echo lang("kwh-pie-chart-last12month-title-monthly") . ' - ' . $fullmontharray[$filters["previous_month"]] . ' ' . $filters["previous_year"]; ?>',
+				height: 600,
+
+				title: '<?php echo lang("kWh-pie-chart-last12month-title-monthly") . ' - ' . $fullmontharray[$filters["previous_month"]] . ' ' . $filters["previous_year"]; ?>',
 
 				sliceVisibilityThreshold: .0,
 
@@ -3204,19 +3206,22 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 					fontName: 'Arial',
 
-					fontSize: 22
+					fontSize: 16
 
 				},
 
 				legend: {
 					textStyle: {
 						fontName: 'Arial',
-						fontSize: 17
+						fontSize: 14
 					}
 				},
 
 				chartArea: {
-					width: "100%"
+					left: 10,
+					top: 50,
+					width: "90%",
+					height: "75%"
 				},
 
 				slices: {
@@ -3369,7 +3374,9 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 			var options = {
 
-				height: 480,
+				width: 640,
+
+				height: 600,
 
 				title: '<?php echo lang("cost-pie-chart-last12month-title") . ' - ' . $fullmontharray[$filters["previous_month"]] . ' ' . $filters["previous_year"]; ?>',
 
@@ -3381,19 +3388,22 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 					fontName: 'Arial',
 
-					fontSize: 22
+					fontSize: 16
 
 				},
 
 				legend: {
 					textStyle: {
 						fontName: 'Arial',
-						fontSize: 17
+						fontSize: 14
 					}
 				},
 
 				chartArea: {
-					width: "100%"
+					left: 10,
+					top: 50,
+					width: "90%",
+					height: "75%"
 				},
 
 				slices: {
@@ -4124,7 +4134,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 						<div class="col-sm-6">
 
-							<div id="kwh_pie_chart_previousmonth_<?php echo $id; ?>">
+							<div id="kwh_pie_chart_previousmonth_<?php echo $id; ?>" style="width:640px;height:600px;">
 
 								<?php if (empty($kwh_pie_chart_previousmonth)) { ?>
 
@@ -4150,7 +4160,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 						<div class="col-sm-6">
 
-							<div id="cost_pie_chart_previousmonth_<?php echo $id; ?>">
+							<div id="cost_pie_chart_previousmonth_<?php echo $id; ?>" style="width:640px;height:600px;">
 
 								<?php if (empty($cost_pie_chart_previousmonth)) { ?>
 
