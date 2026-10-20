@@ -1880,16 +1880,34 @@ class TCPDF_FONTS {
 	 * @public static
 	 */
 	public static function UTF8StringToArray($str, $isunicode=true, &$currentfont) {
+		if (!is_string($str)) {
+			$str = is_scalar($str) ? (string) $str : '';
+		}
 		if ($isunicode) {
 			// requires PCRE unicode support turned on
 			$chars = TCPDF_STATIC::pregSplit('//','u', $str, -1, PREG_SPLIT_NO_EMPTY);
+			if (!is_array($chars)) {
+				$chars = array();
+			}
 			$carr = array_map(array('TCPDF_FONTS', 'uniord'), $chars);
 		} else {
 			$chars = str_split($str);
 			$carr = array_map('ord', $chars);
 		}
-		$currentfont['subsetchars'] += array_fill_keys($carr, true);
-		return $carr;
+		if (!is_array($currentfont)) {
+			$currentfont = array();
+		}
+		if (!isset($currentfont['subsetchars']) || !is_array($currentfont['subsetchars'])) {
+			$currentfont['subsetchars'] = array();
+		}
+		if (is_array($carr)) {
+			foreach ($carr as $code) {
+				if (is_int($code) || (is_string($code) && $code !== '')) {
+					$currentfont['subsetchars'][$code] = true;
+				}
+			}
+		}
+		return is_array($carr) ? $carr : array();
 	}
 
 	/**

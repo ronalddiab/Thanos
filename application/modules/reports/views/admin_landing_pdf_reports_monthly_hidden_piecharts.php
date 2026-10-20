@@ -190,9 +190,9 @@ $kwh_pie_chart_previousmonth_cost_water_share = ($cost_pie_chart_previousmonth_t
 
                             <tr>
 
-                                <td width="50%"><img height="400" src="<?php echo $pieChartImgkwhMonthly; ?>" /></td>
+                                <td width="50%"><?php if (!empty($pieChartImgkwhMonthly)) { ?><img height="400" src="<?php echo $pieChartImgkwhMonthly; ?>" /><?php } ?></td>
 
-                                <td width="50%"><img height="400" src="<?php echo $pieChartImgcostMonthly; ?>" /></td>
+                                <td width="50%"><?php if (!empty($pieChartImgcostMonthly)) { ?><img height="400" src="<?php echo $pieChartImgcostMonthly; ?>" /><?php } ?></td>
 
                             </tr>
 

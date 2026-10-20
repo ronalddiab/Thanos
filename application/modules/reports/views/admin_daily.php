@@ -141,12 +141,12 @@ $utility_array = [
                                 $last_year_guest_percantage = 0;
 
                                 $last_year_guest_deference = $current_year_static_data['total_guests'] - $last_year_static_data['total_guests'];
-                                $last_year_percantage = ($current_year_static_data['total_guests'] != '') ? (($last_year_guest_deference * 100) / $last_year_static_data['total_guests']) : 0;
+                                $last_year_percantage = ($last_year_static_data['total_guests'] != '') ? (($last_year_guest_deference * 100) / $last_year_static_data['total_guests']) : 0;
                                 ?>
                                 <th class="table-border-right table-border-left" scope="row">Guest Nights</th>
                                 <td><?php echo number_format($current_year_static_data['total_guests']); ?></td>
                                 <td class="table-border-right"><?php echo number_format($last_year_static_data['total_guests']); ?></td>
-                                <td><?php echo number_format($last_year_deference); ?></td>
+                                <td><?php echo number_format($last_year_guest_deference); ?></td>
                                 <td class="table-border-right"><?php echo number_format($last_year_percantage); ?></td>
                             </tr>
                             <tr>
@@ -155,7 +155,7 @@ $utility_array = [
                                 $last_year_percantage = 0;
 
                                 $last_year_deference = $current_year_static_data['total_room_night'] - $last_year_static_data['total_room_night'];
-                                $last_year_percantage = ($current_year_static_data['total_room_night'] != '') ? (($last_year_deference * 100) / $last_year_static_data['total_room_night']) : 0;
+                                $last_year_percantage = ($last_year_static_data['total_room_night'] != '') ? (($last_year_deference * 100) / $last_year_static_data['total_room_night']) : 0;
                                 ?>
                                 <th class="table-border-right table-border-left" scope="row">Room Nights</th>
                                 <td><?php echo number_format($current_year_static_data['total_room_night']); ?></td>
@@ -169,7 +169,7 @@ $utility_array = [
                                 $last_year_percantage = 0;
 
                                 $last_year_deference = $current_year_static_data['cdd'] - $last_year_static_data['cdd'];
-                                $last_year_percantage = ($current_year_static_data['cdd'] != '') ? (($last_year_deference * 100) / $last_year_static_data['cdd']) : 0;
+                                $last_year_percantage = ($last_year_static_data['cdd'] != '') ? (($last_year_deference * 100) / $last_year_static_data['cdd']) : 0;
                                 ?>
                                 <th class="table-border-right table-border-left" scope="row">CDD</th>
                                 <td><?php echo number_format($current_year_static_data['cdd']); ?></td>
@@ -183,7 +183,7 @@ $utility_array = [
                                 $last_year_percantage = 0;
 
                                 $last_year_deference = $current_year_static_data['hdd'] - $last_year_static_data['hdd'];
-                                $last_year_percantage = ($current_year_static_data['hdd'] != '') ? (($last_year_deference * 100) / $current_year_static_data['hdd']) : 0;
+                                $last_year_percantage = ($last_year_static_data['hdd'] != '') ? (($last_year_deference * 100) / $last_year_static_data['hdd']) : 0;
                                 ?>
                                 <th class="table-border-right table-border-left" scope="row">HDD</th>
                                 <td><?php echo number_format($current_year_static_data['hdd']); ?></td>
@@ -217,7 +217,7 @@ $utility_array = [
                                         $last_year_percantage = 0;
 
                                         $last_year_deference = $submission['current_year_total'] - $submission['last_year_total'];
-                                        $last_year_percantage = ($submission['current_year_total'] != '') ? (($last_year_deference * 100) / $submission['current_year_total']) : 0;
+                                        $last_year_percantage = ($submission['last_year_total'] != '') ? (($last_year_deference * 100) / $submission['last_year_total']) : 0;
 
                                         $current_year_total += $submission['current_year_total'];
                                         $last_year_total += $submission['last_year_total'];

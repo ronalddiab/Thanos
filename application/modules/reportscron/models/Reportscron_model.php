@@ -706,8 +706,8 @@ class Reportscron_model extends Base_Model {
 			COALESCE(u.water_total_consumption_cost, 0) AS water,
 			COALESCE(u.water_total_consumption, 0) AS water_consumption,
 
-			COALESCE(u.total_fleet_petrol_cost, 0) AS fleet_petrol,
-			COALESCE(u.fleet_petrol, 0) AS fleet_petrol_consumption,
+			COALESCE(u.fleet_petrol, 0) AS fleet_petrol,
+			COALESCE(u.total_fleet_petrol_cost, 0) AS total_fleet_petrol_cost,
 
 			COALESCE(u.onsite_generators_quantity, 0) AS onsite_generator,
 			COALESCE(u.onsite_generators_fuel_oil_quantity, 0) AS onsite_generator_fuel_oil,
@@ -1620,6 +1620,8 @@ class Reportscron_model extends Base_Model {
 		COALESCE(u.district_cooling_total_budget, 0) as district_cooling_budget,
 
 		COALESCE(u.district_cooling_cost, 0) as district_cooling_cost_actual,
+
+		COALESCE(u.district_cooling_fixed_cost, 0) as district_cooling_fixed_cost,
 
 		COALESCE(u.district_cooling_total_budget_cost, 0) as district_cooling_cost_budget,
 

@@ -1997,6 +1997,12 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 			<?php } ?>
 
+			<?php if ($totalFleetPetrol || $totalFleetPetrolConsumption) { ?>
+
+				arrTitle.push('<?php echo lang("fleet_petrol"); ?>');
+
+			<?php } ?>
+
 			arrTitle.push('<?php echo lang("occupancy") . "-" . $last_year; ?>');
 
 			arrTitle.push('<?php echo lang("occupancy") . "-" . $current_year; ?>');
@@ -2018,6 +2024,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 				$total_sum_pre_data_heating_district = 0;
 
 				$total_sum_pre_data_cooling_district = 0;
+				$total_sum_pre_data_fleet_petrol = 0;
 
 				$total_sum_pre_data_water = 0;
 
@@ -2040,6 +2047,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 				$total_sum_data_heating_district = 0;
 
 				$total_sum_data_cooling_district = 0;
+				$total_sum_data_fleet_petrol = 0;
 
 				$total_sum_data_water = 0;
 
@@ -2053,6 +2061,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 
 				foreach ($resultkeys as $year => $value) {
+
 
 					foreach ($value as $key1 => $month) {
 
@@ -2073,6 +2082,8 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 						$pre_data_carbon_heating_district = (!empty($utility_cost_chart[$month][$prevYear]['heating_district_consumption'])) ? $utility_cost_chart[$month][$prevYear]['heating_district_consumption'] : 0;
 
 						$pre_data_carbon_cooling_district = (!empty($utility_cost_chart[$month][$prevYear]['cooling_district_consumption'])) ? $utility_cost_chart[$month][$prevYear]['cooling_district_consumption'] : 0;
+
+						$pre_data_carbon_fleet_petrol = (!empty($utility_cost_chart[$month][$prevYear]['fleet_petrol'])) ? $utility_cost_chart[$month][$prevYear]['fleet_petrol'] : 0;
 
 						$pre_data_carbon_water = (!empty($utility_cost_chart[$month][$prevYear]['water_consumption'])) ? $utility_cost_chart[$month][$prevYear]['water_consumption'] : 0;
 
@@ -2102,6 +2113,8 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 						$data_carbon_cooling_district = (!empty($utility_cost_chart[$month][$year]['cooling_district_consumption'])) ? $utility_cost_chart[$month][$year]['cooling_district_consumption'] : 0;
 
+						$data_carbon_fleet_petrol = (!empty($utility_cost_chart[$month][$year]['fleet_petrol'])) ? $utility_cost_chart[$month][$year]['fleet_petrol'] : 0;
+						
 						$data_carbon_water = (!empty($utility_cost_chart[$month][$year]['water_consumption'])) ? $utility_cost_chart[$month][$year]['water_consumption'] : 0;
 
 						$data_carbon_cdd = (!empty($utility_cost_chart[$month][$year]['cdd'])) ? $utility_cost_chart[$month][$year]['cdd'] : 0;
@@ -2136,7 +2149,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 						$pre_data_carbon_cooling_district = round($pre_data_carbon_cooling_district  * $dataFactor['district_cooling'] * $site_detail['district_cooling_emission_factor'], 2);
 
-
+						$pre_data_carbon_fleet_petrol = round($pre_data_carbon_fleet_petrol  * 2.3 * 1, 2);
 
 						$data_carbon_electricity = round($data_carbon_electricity  * $dataFactor['electricity'] * $site_detail['electricity_emission_factor'], 2);
 
@@ -2150,6 +2163,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 						$data_carbon_cooling_district = round($data_carbon_cooling_district  * $dataFactor['district_cooling'] * $site_detail['district_cooling_emission_factor'], 2);
 
+						$data_carbon_fleet_petrol = round($data_carbon_fleet_petrol  * 2.3 * 1, 2);
 
 						// if ($month <= $CURRENT_YEAR_MAX_MONTH_ID) { //commented cause of average issue(average is taken jan data by default)
 
@@ -2166,6 +2180,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 						$total_sum_pre_data_heating_district += $pre_data_carbon_heating_district;
 
 						$total_sum_pre_data_cooling_district += $pre_data_carbon_cooling_district;
+						$total_sum_pre_data_fleet_petrol += $pre_data_carbon_fleet_petrol;
 
 						$total_sum_pre_data_water += $pre_data_carbon_water;
 
@@ -2192,6 +2207,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 						$total_sum_data_heating_district += $data_carbon_heating_district;
 
 						$total_sum_data_cooling_district += $data_carbon_cooling_district;
+						$total_sum_data_fleet_petrol += $data_carbon_fleet_petrol;
 
 						$total_sum_data_water += $data_carbon_water;
 
@@ -2248,6 +2264,11 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 						arrValuesNull.push(null);
 
 					<?php } ?>
+					<?php if ($totalFleetPetrol || $totalFleetPetrolConsumption) { ?>
+
+						arrValuesNull.push(null);
+
+					<?php } ?>
 
 					arrValuesNull.push(null);
 
@@ -2273,6 +2294,9 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 					<?php if ($totalCoolingDistrict != 0) { ?>
 						arrValuesPre.push(<?php echo isset($pre_data_carbon_cooling_district) && is_finite($pre_data_carbon_cooling_district) ? $pre_data_carbon_cooling_district : 0; ?>);
 					<?php } ?>
+					<?php if ($totalFleetPetrol || $totalFleetPetrolConsumption) { ?>
+						arrValuesPre.push(<?php echo isset($pre_data_carbon_fleet_petrol) && is_finite($pre_data_carbon_fleet_petrol) ? $pre_data_carbon_fleet_petrol : 0; ?>);
+					<?php } ?>
 					arrValuesPre.push(<?php echo isset($pre_data_carbon_occupancy) && is_finite($pre_data_carbon_occupancy) ? $pre_data_carbon_occupancy : 0; ?>);
 					arrValuesPre.push(null);
 					var arrValues = ['<?php echo $monthdata; ?>'];
@@ -2293,6 +2317,9 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 					<?php } ?>
 					<?php if ($totalCoolingDistrict != 0) { ?>
 						arrValues.push(<?php echo isset($data_carbon_cooling_district) && is_finite($data_carbon_cooling_district) ? $data_carbon_cooling_district : 0; ?>);
+					<?php } ?>
+					<?php if ($totalFleetPetrol || $totalFleetPetrolConsumption) { ?>
+						arrValues.push(<?php echo isset($data_carbon_fleet_petrol) && is_finite($data_carbon_fleet_petrol) ? $data_carbon_fleet_petrol : 0; ?>);
 					<?php } ?>
 					arrValues.push(null);
 					arrValues.push(<?php echo isset($data_carbon_occupancy) && is_finite($data_carbon_occupancy) ? $data_carbon_occupancy : 0; ?>);
@@ -2317,6 +2344,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 				$AVG_pre_data_heating_district = ($total_sum_pre_data_heating_district / $total_months);
 
 				$AVG_pre_data_cooling_district = ($total_sum_pre_data_cooling_district / $total_months);
+				$AVG_pre_data_fleet_petrol = ($total_sum_pre_data_fleet_petrol / $total_months);
 
 				$AVG_pre_data_water = ($total_sum_pre_data_water / $total_months);
 
@@ -2347,6 +2375,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 				$AVG_data_heating_district = ($total_sum_data_heating_district / $YTD_total_months);
 
 				$AVG_data_cooling_district = ($total_sum_data_cooling_district / $YTD_total_months);
+				$AVG_data_fleet_petrol = ($total_sum_data_fleet_petrol / $YTD_total_months);
 
 				$AVG_data_water = ($total_sum_data_water / $YTD_total_months);
 
@@ -2410,6 +2439,12 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 			<?php } ?>
 
+			<?php if ($totalFleetPetrol || $totalFleetPetrolConsumption) { ?>
+
+				arrAvgNull.push(null);
+
+			<?php } ?>
+
 			arrAvgNull.push(null);
 
 			arrAvgNull.push(null);
@@ -2434,6 +2469,9 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 			<?php if ($totalCoolingDistrict != 0) { ?>
 				arrAvgPre.push(<?php echo (!empty($AVG_pre_data_cooling_district) && is_finite($AVG_pre_data_cooling_district)) ? $AVG_pre_data_cooling_district : 0; ?>);
 			<?php } ?>
+			<?php if ($totalFleetPetrol || $totalFleetPetrolConsumption) { ?>
+				arrAvgPre.push(<?php echo (!empty($AVG_pre_data_fleet_petrol) && is_finite($AVG_pre_data_fleet_petrol)) ? $AVG_pre_data_fleet_petrol : 0; ?>);
+			<?php } ?>
 			arrAvgPre.push(<?php echo (!empty($AVG_pre_data_occupancy) && is_finite($AVG_pre_data_occupancy)) ? $AVG_pre_data_occupancy : 0; ?>);
 			arrAvgPre.push(null);
 			var arrAvg = ['<?php echo ($year) . " " . lang("average"); ?>'];
@@ -2454,6 +2492,9 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 			<?php } ?>
 			<?php if ($totalCoolingDistrict != 0) { ?>
 				arrAvg.push(<?php echo (!empty($AVG_data_cooling_district) && is_finite($AVG_data_cooling_district)) ? $AVG_data_cooling_district : 0; ?>);
+			<?php } ?>
+			<?php if ($$totalFleetPetrol || $totalFleetPetrolConsumption) { ?>
+				arrAvg.push(<?php echo (!empty($AVG_data_fleet_petrol) && is_finite($AVG_data_fleet_petrol)) ? $AVG_data_fleet_petrol : 0; ?>);
 			<?php } ?>
 			arrAvg.push(null);
 			arrAvg.push(<?php echo (!empty($AVG_data_occupancy) && is_finite($AVG_data_occupancy)) ? $AVG_data_occupancy : 0; ?>);
@@ -2575,6 +2616,15 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 						<?php echo $i; ?>: {
 							targetAxisIndex: 0,
 							color: '<?php echo $colorCoolingDistrict; ?>'
+						},
+
+					<?php $i += 1;
+						} ?>
+
+					<?php if ($totalFleetPetrol || $totalFleetPetrolConsumption) { ?>
+					<?php echo $i; ?>: {
+							targetAxisIndex: 0,
+							color: '<?php echo $colorFleetPetrol; ?>'
 						},
 
 					<?php $i += 1;

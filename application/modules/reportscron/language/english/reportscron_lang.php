@@ -670,3 +670,48 @@ $lang['utilities-daily-export'] = 'Export to Month';
 $lang['utility-export-success'] = "Utilities exported successfully";
 $lang['utility-export-error'] = "Unable to export Utilities, please try again!";
 $lang['utility-export-no-data'] = "Utilities not found";
+
+$lang['fleet_petrol'] = 'Fleet Petrol';
+
+// Modern MTD PDF Report Keys
+// progress_table_new.php
+$lang['performance_overview'] = 'PERFORMANCE OVERVIEW';
+$lang['progress_reduction_targets'] = 'Progress on reduction targets';
+$lang['performance_ytd'] = 'Performance YTD';
+$lang['performance_ytd_desc'] = 'Performance YTD = how far the YTD intensity sits above the target intensity (red = above target).';
+$lang['base_year_ytd'] = 'BASE YEAR YTD';
+$lang['reduction_target'] = 'REDUCTION TARGET';
+$lang['ytd_intensity'] = 'YTD INTENSITY';
+$lang['vs_target'] = 'vs target';
+// carbon_footprint_new.php
+$lang['carbon_emissions'] = 'Carbon emissions';
+$lang['carbon_emissions_by_source'] = 'Carbon emissions by source (Scope 1 & 2)';
+$lang['total_emissions'] = 'TOTAL EMISSIONS';
+$lang['per_guest_night'] = 'PER GUEST NIGHT';
+$lang['total_scope_1'] = 'Total Scope 1';
+$lang['total_scope_2'] = 'Total Scope 2';
+$lang['unit_kgco2e'] = 'kgCO₂e';
+// admin_landing_pdf_reports_monthly_hidden_piecharts_new.php
+$lang['energy_cost_header'] = 'ENERGY & COST';
+$lang['energy_cost_split'] = 'Energy and cost split';
+$lang['consumption_kwh_label'] = 'Consumption (kWh)';
+$lang['energy_label_prefix'] = 'ENERGY';
+$lang['utilities_cost_prefix'] = 'UTILITIES COST';
+$lang['cost_per_room_night_label'] = 'COST PER ROOM NIGHT';
+$lang['cost_per_m2_label'] = 'COST PER M²';
+// admin_landing_pdf_reports_table_new.php
+$lang['monthly_utilities_report'] = 'Monthly utilities report';
+$lang['variance_legend'] = 'Green = lower than comparison (better), Red = higher (worse)';
+$lang['diff_vs_last_year'] = 'Difference v/s last year';
+$lang['diff_vs_budget'] = 'Difference v/s budget';
+$lang['cost_last_year_tariff_line1'] = 'Cost @ last';
+$lang['cost_last_year_tariff_line2'] = 'year tariff';
+// admin_landing_pdf_reports_waste_trends.php
+$lang['waste_trends_title'] = 'Waste trends';
+$lang['total_waste_by_destination'] = 'Total waste by destination';
+$lang['waste_per_room_night'] = 'Waste per room night';
+$lang['food_waste_per_room_night'] = 'Food waste per room night';
+$lang['recyclables_rate'] = 'Recyclables rate';
+$lang['recyclables_total_waste'] = 'Recyclables / total waste';
+$lang['waste_diverted_landfill'] = 'Waste diverted from landfill';
+$lang['waste_diverted_all_except_landfill'] = 'All except landfill';

@@ -109,6 +109,8 @@ if (!empty($utility_cost_chart_pre)) {
             $pre_data_hdd = (!empty($utility_cost_chart_pre[$month][$pre_year]['hdd'])) ? $utility_cost_chart_pre[$month][$pre_year]['hdd'] : 0;
 
             $pre_data_occupancy = (!empty($utility_cost_chart_pre[$month][$pre_year]['occupancy'])) ? $utility_cost_chart_pre[$month][$pre_year]['occupancy'] : 0;
+            $pre_data_fleet_petrol = (!empty($utility_cost_chart_pre[$month][$pre_year]['fleet_petrol'])) ? $utility_cost_chart_pre[$month][$pre_year]['fleet_petrol'] : 0;
+            $pre_data_total_fleet_petrol_cost = (!empty($utility_cost_chart_pre[$month][$pre_year]['total_fleet_petrol_cost'])) ? $utility_cost_chart_pre[$month][$pre_year]['total_fleet_petrol_cost'] : 0;
 
             $pre_data_room_night = (!empty($utility_cost_chart_pre[$month][$pre_year]['room_night'])) ? $utility_cost_chart_pre[$month][$pre_year]['room_night'] : 0;
             $pre_data_total_room_night_budget = (!empty($utility_cost_chart_pre[$month][$pre_year]['total_room_night_budget'])) ? $utility_cost_chart_pre[$month][$pre_year]['total_room_night_budget'] : 0;
@@ -156,6 +158,8 @@ if (!empty($utility_cost_chart_pre)) {
             $data_hdd = (!empty($utility_cost_chart_pre[$month][$year]['hdd'])) ? $utility_cost_chart_pre[$month][$year]['hdd'] : 0;
 
             $data_occupancy = (!empty($utility_cost_chart_pre[$month][$year]['occupancy'])) ? $utility_cost_chart_pre[$month][$year]['occupancy'] : 0;
+            $data_fleet_petrol = (!empty($utility_cost_chart_pre[$month][$year]['fleet_petrol'])) ? $utility_cost_chart_pre[$month][$year]['fleet_petrol'] : 0;
+            $data_total_fleet_petrol_cost = (!empty($utility_cost_chart_pre[$month][$year]['total_fleet_petrol_cost'])) ? $utility_cost_chart_pre[$month][$year]['total_fleet_petrol_cost'] : 0;
 
             $data_room_night = (!empty($utility_cost_chart_pre[$month][$year]['room_night'])) ? $utility_cost_chart_pre[$month][$year]['room_night'] : 0;
             $data_total_room_night_budget = (!empty($utility_cost_chart_pre[$month][$year]['total_room_night_budget'])) ? $utility_cost_chart_pre[$month][$year]['total_room_night_budget'] : 0;
@@ -209,6 +213,8 @@ if (!empty($utility_cost_chart_pre)) {
             $total_sum_pre_data_hdd += $pre_data_hdd;
 
             $total_sum_pre_data_occupancy += $pre_data_occupancy;
+            $total_sum_pre_data_fleet_petrol += $pre_data_fleet_petrol;
+            $total_sum_pre_data_total_fleet_petrol_cost += $pre_data_total_fleet_petrol_cost;
 
             $total_sum_pre_data_room_night += $pre_data_room_night;
             $total_sum_pre_data_total_room_night_budget += $pre_data_total_room_night_budget;
@@ -254,6 +260,8 @@ if (!empty($utility_cost_chart_pre)) {
             $total_sum_data_hdd += $data_hdd;
 
             $total_sum_data_occupancy += $data_occupancy;
+            $total_sum_data_fleet_petrol += $data_fleet_petrol;
+            $total_sum_data_total_fleet_petrol_cost += $data_total_fleet_petrol_cost;
 
             $total_sum_data_room_night += $data_room_night;
             $total_sum_data_total_room_night_budget += $data_total_room_night_budget;
@@ -646,7 +654,9 @@ if (!empty($utility_cost_chart_pre)) {
 
     $water_consumption_difference = $total_sum_data_water_consumption - $total_sum_pre_data_water_consumption;
 
+    $fleet_consumption_difference = $total_sum_data_fleet_petrol - $total_sum_pre_data_fleet_petrol;
 
+    $fleet_cost_difference = $total_sum_data_total_fleet_petrol_cost - $total_sum_pre_data_total_fleet_petrol_cost;
 
     if (!empty($total_sum_pre_data_electricity_kwh) && $total_sum_pre_data_electricity_kwh != 0) {
 
@@ -655,9 +665,37 @@ if (!empty($utility_cost_chart_pre)) {
     } else {
 
         $electricity_consumption_variation = 0;
+    }
+    
+    
 
+    if (!empty($total_sum_pre_data_fleet_petrol) && $total_sum_pre_data_fleet_petrol > 0) {
+
+        $fleet_consumption_variation = round(((($total_sum_data_fleet_petrol - $total_sum_pre_data_fleet_petrol) * 100) / $total_sum_pre_data_fleet_petrol), $percentage_decimal);
+    } else {
+
+        if ($total_sum_data_fleet_petrol == 0) {
+
+            $fleet_consumption_variation = 0;
+        } else {
+
+            $fleet_consumption_variation = 100;
+        }
     }
 
+    if (!empty($total_sum_pre_data_total_fleet_petrol_cost) && $total_sum_pre_data_total_fleet_petrol_cost > 0) {
+
+        $fleet_cost_variation = round(((($total_sum_data_total_fleet_petrol_cost - $total_sum_pre_data_total_fleet_petrol_cost) * 100) / $total_sum_pre_data_total_fleet_petrol_cost), $percentage_decimal);
+    } else {
+
+        if ($total_sum_data_total_fleet_petrol_cost == 0) {
+
+            $fleet_cost_variation = 0;
+        } else {
+
+            $fleet_cost_variation = 100;
+        }
+    }
 
 
     if (!empty($total_sum_pre_data_fuel_consumption)) {

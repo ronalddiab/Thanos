@@ -3399,7 +3399,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 			<?php if (in_array('fleet', $showUtilityArray)) { ?>
 
-			arrTitle.push('<?php echo lang("fleet-petrol"); ?>');
+			arrTitle.push('<?php echo lang("fleet_petrol"); ?>');
 
 			<?php } ?>
 
@@ -5847,7 +5847,7 @@ arrTitle.push('<?php echo lang("cooling-district"); ?>');
 
 <?php if (in_array('fleet', $showUtilityArray)) { ?>
 
-arrTitle.push('<?php echo lang("fleet-petrol"); ?>');
+arrTitle.push('<?php echo lang("fleet_petrol"); ?>');
 
 <?php } ?>
 
