@@ -1421,6 +1421,52 @@ class Sites_model extends Base_Model
 		return $result->result_array();
 	}
 
+	public function update_measure_reading($site_id = 0, $postdata=null)
+	{
+		if (!$site_id || empty($postdata)) {
+			return;
+		}
+
+		$columns = [
+			'low',
+			'lower_quartile',
+			'mean',
+			'median',
+			'upper_quartile',
+			'high',
+			'sd'
+		];
+
+		$measure_readings = $this->get_measure_readings($site_id);
+
+		foreach ($measure_readings as $measure) {
+
+			$measure_id = (int) $measure['measure_id'];
+
+			$data = [];
+
+			foreach ($columns as $column) {
+
+				$key = $column . $measure_id;
+
+				if (isset($postdata[$key]) && $postdata[$key] !== '') {
+					$data[$column] = (float) $postdata[$key];
+				}
+			}
+
+			if (!empty($data)) {
+
+				$this->db
+					->where('site_id', $site_id)
+					->where('measure_id', $measure_id)
+					->update(
+						$this->_tbl_site_measures_reading,
+						$data
+					);
+			}
+		}
+	}
+
 	// get_all_hourly_reading_settings
 	public function get_all_hourly_reading_settings()
 	{
@@ -2173,6 +2219,11 @@ class Sites_model extends Base_Model
 		}
 		$this->utilities_model->site_id = $site_id;
 		$getUtilities = $this->utilities_model->getUtility();
+		// Several fields used below (fixed-cost columns, total_electricity_cost, etc.) had no
+		// empty-string guard at all, causing "non-numeric value" warnings (and, worse, those
+		// warnings being echoed into the PDF output stream, corrupting it) whenever a row had
+		// unset columns. Normalize every field to a number up front instead of guarding one at a time.
+		$getUtilities = array_map('floatval', $getUtilities);
 		$getUtilities['total_electricity_kwh'] = ($getUtilities['total_electricity_kwh'] != '') ? $getUtilities['total_electricity_kwh'] : 0;
 		$getUtilities['total_lpg_cost'] = ($getUtilities['total_lpg_cost'] != '') ? $getUtilities['total_lpg_cost'] : 0;
 		$getUtilities['total_fuel_oil_cost'] = ($getUtilities['total_fuel_oil_cost'] != '') ? $getUtilities['total_fuel_oil_cost'] : 0;
@@ -2206,6 +2257,8 @@ class Sites_model extends Base_Model
 		$this->sites_model->year = $this->utilities_model->utilities_year;
 		$this->utilities_model->site_id = $site_id;
 		$utilitiesSameMonthPreviousYear = $this->utilities_model->getUtility();
+		if(!is_array($utilitiesSameMonthPreviousYear)) $utilitiesSameMonthPreviousYear = array('total_electricity_kwh'=>0, 'total_lpg'=>0, 'total_fuel_oil'=>0, 'total_natural_gas'=>0, 'district_heating'=>0, 'district_cooling'=>0, 'fleet_petrol'=>0, 'onsite_generators_quantity'=>0, 'total_renewable_energy_production'=>0);
+		$utilitiesSameMonthPreviousYear = array_map('floatval', $utilitiesSameMonthPreviousYear);
 
 		$utilitiesSameMonthPreviousYear['total_electricity_kwh'] = ($utilitiesSameMonthPreviousYear['total_electricity_kwh'] != '') ? $utilitiesSameMonthPreviousYear['total_electricity_kwh'] : 0;
 		$utilitiesSameMonthPreviousYear['total_lpg'] = ($utilitiesSameMonthPreviousYear['total_lpg'] != '') ? $utilitiesSameMonthPreviousYear['total_lpg'] : 0;
@@ -2309,6 +2362,7 @@ class Sites_model extends Base_Model
 			$this->utilities_model->utilities_year = $site_detials['baseline_regression_year'];
 
 			$getUtilities = $this->utilities_model->getUtility();
+			$getUtilities = array_map('floatval', $getUtilities);
 			$getUtilities['total_electricity_kwh'] = ($getUtilities['total_electricity_kwh'] != '') ? $getUtilities['total_electricity_kwh'] : 0;
 			$getUtilities['total_lpg'] = ($getUtilities['total_lpg'] != '') ? $getUtilities['total_lpg'] : 0;
 			$getUtilities['total_fuel_oil'] = ($getUtilities['total_fuel_oil'] != '') ? $getUtilities['total_fuel_oil'] : 0;
@@ -2344,6 +2398,8 @@ class Sites_model extends Base_Model
 			$this->utilities_model->utilities_year = date("Y") - 1;
 			$this->sites_model->year = $this->utilities_model->utilities_year;
 			$YtdUtilitiesPreviousYear = $this->utilities_model->getUtility();
+			if(!is_array($YtdUtilitiesPreviousYear)) $YtdUtilitiesPreviousYear = array('total_electricity_kwh'=>0, 'total_lpg'=>0, 'total_fuel_oil'=>0, 'total_natural_gas'=>0, 'district_heating'=>0, 'district_cooling'=>0, 'water_total_consumption'=>0, 'fleet_petrol'=>0, 'onsite_generators_quantity'=>0, 'total_renewable_energy_production'=>0);
+			$YtdUtilitiesPreviousYear = array_map('floatval', $YtdUtilitiesPreviousYear);
 
 			$YtdUtilitiesPreviousYear['total_electricity_kwh'] = ($YtdUtilitiesPreviousYear['total_electricity_kwh'] != '') ? $YtdUtilitiesPreviousYear['total_electricity_kwh'] : 0;
 			$YtdUtilitiesPreviousYear['total_lpg'] = ($YtdUtilitiesPreviousYear['total_lpg'] != '') ? $YtdUtilitiesPreviousYear['total_lpg'] : 0;
@@ -2733,11 +2789,14 @@ class Sites_model extends Base_Model
         ];
 	}
 
-	public function getMySitesWidgetData($site_details) {
+	public function getMySitesWidgetData($site_details,$isAnnual=null,$selectedMonth=null,$selectedYear=null) {
 		$this->load->model('sites/site_emission_model');
 		$this->load->model('utilities/utilities_model');
-		$baseline_year = $site_details['baseline_regression_year']; 
-		$baseDate = new DateTime('first day of this month');
+		$baseline_year = $site_details['baseline_regression_year'];
+		// Below, $prev1 = $baseDate minus 1 month is treated as "the report month" throughout this
+		// function - so when overriding, $baseDate must be set to the month AFTER the target month,
+		// not the target month itself, or everything comes out one month too early.
+		$baseDate = ($selectedMonth && $selectedYear) ? (new DateTime(sprintf('%04d-%02d-01', $selectedYear, $selectedMonth)))->modify('+1 month') : new DateTime('first day of this month');
 		$prev1 = (clone $baseDate)->modify('-1 month');
 		$prev2 = (clone $baseDate)->modify('-2 months');
 		$prev1LastYear = (clone $prev1)->modify('-1 year');
@@ -2922,9 +2981,17 @@ class Sites_model extends Base_Model
 		$query = $this->db->get();
 		$rawResult = $query->result_array();
 		$this->load->model('utilities/utilities_model');
-		$currentYearFromDate   = (int) $prev1->format('Y');   // YTD year = previous month year
-		$lastYearFromDate      = $currentYearFromDate - 1;
-		$currentMonthFromDate  = (int) $prev1->format('n');   // YTD up to previous month
+		if($isAnnual){
+			$currentYearFromDate   = (int) $prev1->format('Y')-1;   // YTD year = previous month year
+			$lastYearFromDate      = $currentYearFromDate - 2;
+			$currentMonthFromDate  = 12;//(int) $prev1->format('n');   // YTD up to previous month
+		}
+		else
+		{
+			$currentYearFromDate   = (int) $prev1->format('Y');   // YTD year = previous month year
+			$lastYearFromDate      = $currentYearFromDate - 1;
+			$currentMonthFromDate  = (int) $prev1->format('n');   // YTD up to previous month
+		}
 
 		$dataNewYtd = $this->getYtdCarbonFootprints(
 			$site_details['id'],

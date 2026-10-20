@@ -67,6 +67,8 @@ if (!empty($utility_cost_chart)) {
             $pre_data_hdd = (!empty($utility_cost_chart[$month][$year - 1]['hdd'])) ? $utility_cost_chart[$month][$year - 1]['hdd'] : 0;
 
             $pre_data_occupancy = (!empty($utility_cost_chart[$month][$year - 1]['occupancy'])) ? $utility_cost_chart[$month][$year - 1]['occupancy'] : 0;
+            $pre_data_fleet_petrol = (!empty($utility_cost_chart[$month][$year - 1]['fleet_petrol'])) ? $utility_cost_chart[$month][$year - 1]['fleet_petrol'] : 0;
+            $pre_data_total_fleet_petrol_cost = (!empty($utility_cost_chart[$month][$year - 1]['total_fleet_petrol_cost'])) ? $utility_cost_chart[$month][$year - 1]['total_fleet_petrol_cost'] : 0;
 
             $pre_data_room_night = (!empty($utility_cost_chart[$month][$year - 1]['room_night'])) ? $utility_cost_chart[$month][$year - 1]['room_night'] : 0;
             $pre_data_total_room_night_budget = (!empty($utility_cost_chart[$month][$year - 1]['total_room_night_budget'])) ? $utility_cost_chart[$month][$year - 1]['total_room_night_budget'] : 0;
@@ -114,6 +116,8 @@ if (!empty($utility_cost_chart)) {
             $data_hdd = (!empty($utility_cost_chart[$month][$year]['hdd'])) ? $utility_cost_chart[$month][$year]['hdd'] : 0;
 
             $data_occupancy = (!empty($utility_cost_chart[$month][$year]['occupancy'])) ? $utility_cost_chart[$month][$year]['occupancy'] : 0;
+            $data_fleet_petrol = (!empty($utility_cost_chart[$month][$year]['fleet_petrol'])) ? $utility_cost_chart[$month][$year]['fleet_petrol'] : 0;
+            $data_total_fleet_petrol_cost = (!empty($utility_cost_chart[$month][$year]['total_fleet_petrol_cost'])) ? $utility_cost_chart[$month][$year]['total_fleet_petrol_cost'] : 0;
 
             $data_room_night = (!empty($utility_cost_chart[$month][$year]['room_night'])) ? $utility_cost_chart[$month][$year]['room_night'] : 0;
             $data_total_room_night_budget = (!empty($utility_cost_chart[$month][$year]['total_room_night_budget'])) ? $utility_cost_chart[$month][$year]['total_room_night_budget'] : 0;
@@ -167,6 +171,8 @@ if (!empty($utility_cost_chart)) {
             $total_sum_pre_data_hdd += $pre_data_hdd;
 
             $total_sum_pre_data_occupancy += $pre_data_occupancy;
+            $total_sum_pre_data_fleet_petrol += $pre_data_fleet_petrol;
+            $total_sum_pre_data_total_fleet_petrol_cost += $pre_data_total_fleet_petrol_cost;
 
             $total_sum_pre_data_room_night += $pre_data_room_night;
             $total_sum_pre_data_total_room_night_budget += $pre_data_total_room_night_budget;
@@ -212,6 +218,8 @@ if (!empty($utility_cost_chart)) {
             $total_sum_data_hdd += $data_hdd;
 
             $total_sum_data_occupancy += $data_occupancy;
+            $total_sum_data_fleet_petrol += $data_fleet_petrol;
+            $total_sum_data_total_fleet_petrol_cost += $data_total_fleet_petrol_cost;
 
             $total_sum_data_room_night += $data_room_night;
             $total_sum_data_total_room_night_budget += $data_total_room_night_budget;
@@ -390,7 +398,9 @@ if (!empty($utility_cost_chart)) {
 
         $total_sum_pre_data_fuel_per_room_night = round($total_sum_pre_data_fuel_consumption / $total_sum_pre_data_room_night, $percentage_decimal);
 
-        $total_sum_pre_data_lpg_per_room_night = round($total_sum_pre_data_lpg_consumption / $total_sum_pre_data_room_night, $percentage_decimal);
+        // Rounded to $value_decimal (4dp), not $percentage_decimal - this feeds the "vs last year
+        // %"/"vs budget %" diffs below, which must use the fuller-precision value, not the display one.
+        $total_sum_pre_data_lpg_per_room_night = round($total_sum_pre_data_lpg_consumption / $total_sum_pre_data_room_night, $value_decimal);
 
         $total_sum_pre_data_natural_gas_per_room_night = round($total_sum_pre_data_natural_gas_consumption / $total_sum_pre_data_room_night, $percentage_decimal);
 
@@ -398,7 +408,7 @@ if (!empty($utility_cost_chart)) {
 
         $total_sum_pre_data_cooling_district_per_room_night = round($total_sum_pre_data_cooling_district_consumption / $total_sum_pre_data_room_night, $percentage_decimal);
 
-        $total_sum_pre_data_water_per_room_night = round($total_sum_pre_data_water_consumption / $total_sum_pre_data_room_night, $percentage_decimal);
+        $total_sum_pre_data_water_per_room_night = round($total_sum_pre_data_water_consumption / $total_sum_pre_data_room_night, $value_decimal);
 
         $total_sum_pre_data_electricity_per_room_night = round($total_sum_pre_data_electricity_kwh / $total_sum_pre_data_room_night, $percentage_decimal);
     } else {
@@ -424,7 +434,7 @@ if (!empty($utility_cost_chart)) {
 
         $total_sum_data_fuel_per_room_night = round($total_sum_data_fuel_consumption / $total_sum_data_room_night, $percentage_decimal);
 
-        $total_sum_data_lpg_per_room_night = round($total_sum_data_lpg_consumption / $total_sum_data_room_night, $percentage_decimal);
+        $total_sum_data_lpg_per_room_night = round($total_sum_data_lpg_consumption / $total_sum_data_room_night, $value_decimal);
 
         $total_sum_data_natural_gas_per_room_night = round($total_sum_data_natural_gas_consumption / $total_sum_data_room_night, $percentage_decimal);
 
@@ -432,7 +442,7 @@ if (!empty($utility_cost_chart)) {
 
         $total_sum_data_cooling_district_per_room_night = round($total_sum_data_cooling_district_consumption / $total_sum_data_room_night, $percentage_decimal);
 
-        $total_sum_data_water_per_room_night = round($total_sum_data_water_consumption / $total_sum_data_room_night, $percentage_decimal);
+        $total_sum_data_water_per_room_night = round($total_sum_data_water_consumption / $total_sum_data_room_night, $value_decimal);
 
         $total_sum_data_electricity_per_room_night = round($total_sum_data_electricity_kwh / $total_sum_data_room_night, $percentage_decimal);
     } else {
@@ -554,6 +564,9 @@ if (!empty($utility_cost_chart)) {
 
     $water_consumption_difference = $total_sum_data_water_consumption - $total_sum_pre_data_water_consumption;
 
+    $fleet_consumption_difference = $total_sum_data_fleet_petrol - $total_sum_pre_data_fleet_petrol;
+
+    $fleet_cost_difference = $total_sum_data_total_fleet_petrol_cost - $total_sum_pre_data_total_fleet_petrol_cost;
 
 
     if (!empty($total_sum_pre_data_electricity_kwh)) {
@@ -563,7 +576,36 @@ if (!empty($utility_cost_chart)) {
 
         $electricity_consumption_variation = 0;
     }
+    
+    
 
+    if (!empty($total_sum_pre_data_fleet_petrol) && $total_sum_pre_data_fleet_petrol > 0) {
+
+        $fleet_consumption_variation = ($total_sum_pre_data_fleet_petrol != 0) ? round((($total_sum_data_fleet_petrol - $total_sum_pre_data_fleet_petrol) * 100) / $total_sum_pre_data_fleet_petrol, $percentage_decimal) : 0;
+    } else {
+
+        if ($total_sum_data_fleet_petrol == 0) {
+
+            $fleet_consumption_variation = 0;
+        } else {
+
+            $fleet_consumption_variation = 100;
+        }
+    }
+
+    if (!empty($total_sum_pre_data_total_fleet_petrol_cost) && $total_sum_pre_data_total_fleet_petrol_cost > 0) {
+
+        $fleet_cost_variation = ($total_sum_pre_data_total_fleet_petrol_cost != 0) ? round((($total_sum_data_total_fleet_petrol_cost - $total_sum_pre_data_total_fleet_petrol_cost) * 100) / $total_sum_pre_data_total_fleet_petrol_cost, $percentage_decimal) : 0;
+    } else {
+
+        if ($total_sum_data_total_fleet_petrol_cost == 0) {
+
+            $fleet_cost_variation = 0;
+        } else {
+
+            $fleet_cost_variation = 100;
+        }
+    }
 
 
     if (!empty($total_sum_pre_data_fuel_consumption)) {
@@ -630,7 +672,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_electricity) && $total_sum_pre_data_electricity > 0) {
 
-        $total_sum_data_electricity_variation = round(((($total_sum_data_electricity - $total_sum_pre_data_electricity) * 100) / $total_sum_pre_data_electricity), $percentage_decimal);
+        $total_sum_data_electricity_variation = ($total_sum_pre_data_electricity != 0) ? round((($total_sum_data_electricity - $total_sum_pre_data_electricity) * 100) / $total_sum_pre_data_electricity, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_electricity == 0) {
@@ -644,7 +686,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_fuel) && $total_sum_pre_data_fuel > 0) {
 
-        $total_sum_data_fuel_variation = round(((($total_sum_data_fuel - $total_sum_pre_data_fuel) * 100) / $total_sum_pre_data_fuel), $percentage_decimal);
+        $total_sum_data_fuel_variation = ($total_sum_pre_data_fuel != 0) ? round((($total_sum_data_fuel - $total_sum_pre_data_fuel) * 100) / $total_sum_pre_data_fuel, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_fuel == 0) {
@@ -658,7 +700,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_lpg) && $total_sum_pre_data_lpg > 0) {
 
-        $total_sum_data_lpg_variation = round(((($total_sum_data_lpg - $total_sum_pre_data_lpg) * 100) / $total_sum_pre_data_lpg), $percentage_decimal);
+        $total_sum_data_lpg_variation = ($total_sum_pre_data_lpg != 0) ? round((($total_sum_data_lpg - $total_sum_pre_data_lpg) * 100) / $total_sum_pre_data_lpg, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_lpg == 0) {
@@ -672,7 +714,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_natural_gas) && $total_sum_pre_data_natural_gas > 0) {
 
-        $total_sum_data_natural_gas_variation = round(((($total_sum_data_natural_gas - $total_sum_pre_data_natural_gas) * 100) / $total_sum_pre_data_natural_gas), $percentage_decimal);
+        $total_sum_data_natural_gas_variation = ($total_sum_pre_data_natural_gas != 0) ? round((($total_sum_data_natural_gas - $total_sum_pre_data_natural_gas) * 100) / $total_sum_pre_data_natural_gas, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_natural_gas == 0) {
@@ -686,7 +728,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_heating_district) && $total_sum_pre_data_heating_district > 0) {
 
-        $total_sum_data_heating_district_variation = round(((($total_sum_data_heating_district - $total_sum_pre_data_heating_district) * 100) / $total_sum_pre_data_heating_district), $percentage_decimal);
+        $total_sum_data_heating_district_variation = ($total_sum_pre_data_heating_district != 0) ? round((($total_sum_data_heating_district - $total_sum_pre_data_heating_district) * 100) / $total_sum_pre_data_heating_district, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_heating_district == 0) {
@@ -700,7 +742,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_cooling_district) && $total_sum_pre_data_cooling_district > 0) {
 
-        $total_sum_data_cooling_district_variation = round(((($total_sum_data_cooling_district - $total_sum_pre_data_cooling_district) * 100) / $total_sum_pre_data_cooling_district), $percentage_decimal);
+        $total_sum_data_cooling_district_variation = ($total_sum_pre_data_cooling_district != 0) ? round((($total_sum_data_cooling_district - $total_sum_pre_data_cooling_district) * 100) / $total_sum_pre_data_cooling_district, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_cooling_district == 0) {
@@ -714,7 +756,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_water) && $total_sum_pre_data_water > 0) {
 
-        $total_sum_data_water_variation = round(((($total_sum_data_water - $total_sum_pre_data_water) * 100) / $total_sum_pre_data_water), $percentage_decimal);
+        $total_sum_data_water_variation = ($total_sum_pre_data_water != 0) ? round((($total_sum_data_water - $total_sum_pre_data_water) * 100) / $total_sum_pre_data_water, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_water == 0) {
@@ -728,7 +770,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_cdd) && $total_sum_pre_data_cdd > 0) {
 
-        $total_sum_data_cdd_variation = round(((($total_sum_data_cdd - $total_sum_pre_data_cdd) * 100) / $total_sum_pre_data_cdd), $percentage_decimal);
+        $total_sum_data_cdd_variation = ($total_sum_pre_data_cdd != 0) ? round((($total_sum_data_cdd - $total_sum_pre_data_cdd) * 100) / $total_sum_pre_data_cdd, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_cdd == 0) {
@@ -742,7 +784,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_hdd) && $total_sum_pre_data_hdd > 0) {
 
-        $total_sum_data_hdd_variation = round(((($total_sum_data_hdd - $total_sum_pre_data_hdd) * 100) / $total_sum_pre_data_hdd), $percentage_decimal);
+        $total_sum_data_hdd_variation = ($total_sum_pre_data_hdd != 0) ? round((($total_sum_data_hdd - $total_sum_pre_data_hdd) * 100) / $total_sum_pre_data_hdd, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_hdd == 0) {
@@ -756,7 +798,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_occupancy) && $total_sum_pre_data_occupancy > 0) {
 
-        $total_sum_data_occupancy_variation = round(((($total_sum_data_occupancy - $total_sum_pre_data_occupancy) * 100) / $total_sum_pre_data_occupancy), $percentage_decimal);
+        $total_sum_data_occupancy_variation = ($total_sum_pre_data_occupancy != 0) ? round((($total_sum_data_occupancy - $total_sum_pre_data_occupancy) * 100) / $total_sum_pre_data_occupancy, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_occupancy == 0) {
@@ -772,7 +814,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_room_night) && $total_sum_pre_data_room_night > 0) {
 
-        $total_sum_data_room_night_variation = round(((($total_sum_data_room_night - $total_sum_pre_data_room_night) * 100) / $total_sum_pre_data_room_night), $percentage_decimal);
+        $total_sum_data_room_night_variation = ($total_sum_pre_data_room_night != 0) ? round((($total_sum_data_room_night - $total_sum_pre_data_room_night) * 100) / $total_sum_pre_data_room_night, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_room_night == 0) {
@@ -786,7 +828,7 @@ if (!empty($utility_cost_chart)) {
 
 	if (!empty($total_sum_pre_data_guest_night) && $total_sum_pre_data_guest_night > 0) {
 
-        $total_sum_data_guest_night_variation = round(((($total_sum_data_guest_night - $total_sum_pre_data_guest_night) * 100) / $total_sum_pre_data_guest_night), $percentage_decimal);
+        $total_sum_data_guest_night_variation = ($total_sum_pre_data_guest_night != 0) ? round((($total_sum_data_guest_night - $total_sum_pre_data_guest_night) * 100) / $total_sum_pre_data_guest_night, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_guest_night == 0) {
@@ -804,7 +846,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_electricity_tariff) && $total_sum_pre_data_electricity_tariff > 0) {
 
-        $total_sum_data_electricity_tariff_variation = round(((($total_sum_data_electricity_tariff - $total_sum_pre_data_electricity_tariff) * 100) / $total_sum_pre_data_electricity_tariff), $percentage_decimal);
+        $total_sum_data_electricity_tariff_variation = ($total_sum_pre_data_electricity_tariff != 0) ? round((($total_sum_data_electricity_tariff - $total_sum_pre_data_electricity_tariff) * 100) / $total_sum_pre_data_electricity_tariff, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_electricity_tariff == 0) {
@@ -896,7 +938,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_sum) && $total_sum_pre_data_sum > 0) {
 
-        $total_sum_data_variation = round(((($total_sum_data_sum - $total_sum_pre_data_sum) * 100) / $total_sum_pre_data_sum), $percentage_decimal);
+        $total_sum_data_variation = ($total_sum_pre_data_sum != 0) ? round((($total_sum_data_sum - $total_sum_pre_data_sum) * 100) / $total_sum_pre_data_sum, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_sum == 0) {
@@ -958,19 +1000,20 @@ if (!empty($utility_cost_chart)) {
 
     $data_utility_cost_per_roomnight_difference = $total_sum_data_utility_cost_per_roomnight - $total_sum_pre_data_utility_cost_per_roomnight;
 
-    $data_utility_cost_per_roomnight_variation = round($data_utility_cost_per_roomnight_difference * 100 / $total_sum_data_utility_cost_per_roomnight, $percentage_decimal);
+    // "vs last year %" must be (current - previous) / previous, not divided by this year's value.
+    $data_utility_cost_per_roomnight_variation = ($total_sum_pre_data_utility_cost_per_roomnight != 0) ? round($data_utility_cost_per_roomnight_difference * 100 / $total_sum_pre_data_utility_cost_per_roomnight, $percentage_decimal) : 0;
 
 
 
     $data_utility_cost_per_m2_difference = $total_sum_data_utility_cost_per_m2 - $total_sum_pre_data_utility_cost_per_m2;
 
-    $data_utility_cost_per_m2_variation = ($total_sum_data_utility_cost_per_m2 != 0) ? round($data_utility_cost_per_m2_difference * 100 / $total_sum_data_utility_cost_per_m2, $percentage_decimal) : 0;
+    $data_utility_cost_per_m2_variation = ($total_sum_pre_data_utility_cost_per_m2 != 0) ? round($data_utility_cost_per_m2_difference * 100 / $total_sum_pre_data_utility_cost_per_m2, $percentage_decimal) : 0;
 
 
 
     if (!empty($total_sum_pre_data_electricity_kwh_per_roomnight) && $total_sum_pre_data_electricity_kwh_per_roomnight > 0) {
 
-        $total_sum_data_electricity_kwh_per_roomnight_variation = round(((($total_sum_data_electricity_kwh_per_roomnight - $total_sum_pre_data_electricity_kwh_per_roomnight) * 100) / $total_sum_pre_data_electricity_kwh_per_roomnight), $percentage_decimal);
+        $total_sum_data_electricity_kwh_per_roomnight_variation = ($total_sum_pre_data_electricity_kwh_per_roomnight != 0) ? round((($total_sum_data_electricity_kwh_per_roomnight - $total_sum_pre_data_electricity_kwh_per_roomnight) * 100) / $total_sum_pre_data_electricity_kwh_per_roomnight, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_electricity_kwh_per_roomnight == 0) {
@@ -986,7 +1029,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_electricity_kwh_per_m2) && $total_sum_pre_data_electricity_kwh_per_m2 > 0) {
 
-        $total_sum_data_electricity_per_m2_kwh_variation = round(((($total_sum_data_electricity_kwh_per_m2 - $total_sum_pre_data_electricity_kwh_per_m2) * 100) / $total_sum_pre_data_electricity_kwh_per_m2), $percentage_decimal);
+        $total_sum_data_electricity_per_m2_kwh_variation = ($total_sum_pre_data_electricity_kwh_per_m2 != 0) ? round((($total_sum_data_electricity_kwh_per_m2 - $total_sum_pre_data_electricity_kwh_per_m2) * 100) / $total_sum_pre_data_electricity_kwh_per_m2, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_sum == 0) {
@@ -1002,7 +1045,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_water_liter_per_roomnight) && $total_sum_pre_data_water_liter_per_roomnight > 0) {
 
-        $total_sum_data_water_liter_per_roomnight_variation = round(((($total_sum_data_water_liter_per_roomnight - $total_sum_pre_data_water_liter_per_roomnight) * 100) / $total_sum_pre_data_water_liter_per_roomnight), $percentage_decimal);
+        $total_sum_data_water_liter_per_roomnight_variation = ($total_sum_pre_data_water_liter_per_roomnight != 0) ? round((($total_sum_data_water_liter_per_roomnight - $total_sum_pre_data_water_liter_per_roomnight) * 100) / $total_sum_pre_data_water_liter_per_roomnight, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_sum == 0) {
@@ -1018,7 +1061,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_utility_cost_per_roomnight) && $total_sum_pre_data_utility_cost_per_roomnight > 0) {
 
-        $total_sum_data_utility_cost_per_roomnight_variation = round(((($total_sum_data_utility_cost_per_roomnight - $total_sum_pre_data_utility_cost_per_roomnight) * 100) / $total_sum_pre_data_utility_cost_per_roomnight), $percentage_decimal);
+        $total_sum_data_utility_cost_per_roomnight_variation = ($total_sum_pre_data_utility_cost_per_roomnight != 0) ? round((($total_sum_data_utility_cost_per_roomnight - $total_sum_pre_data_utility_cost_per_roomnight) * 100) / $total_sum_pre_data_utility_cost_per_roomnight, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_sum == 0) {
@@ -1034,7 +1077,7 @@ if (!empty($utility_cost_chart)) {
 
     if (!empty($total_sum_pre_data_utility_cost_per_m2) && $total_sum_pre_data_utility_cost_per_m2 > 0) {
 
-        $total_sum_data_utility_cost_per_m2_variation = round(((($total_sum_data_utility_cost_per_m2 - $total_sum_pre_data_utility_cost_per_m2) * 100) / $total_sum_pre_data_utility_cost_per_m2), $percentage_decimal);
+        $total_sum_data_utility_cost_per_m2_variation = ($total_sum_pre_data_utility_cost_per_m2 != 0) ? round((($total_sum_data_utility_cost_per_m2 - $total_sum_pre_data_utility_cost_per_m2) * 100) / $total_sum_pre_data_utility_cost_per_m2, $percentage_decimal) : 0;
     } else {
 
         if ($total_sum_data_sum == 0) {
@@ -1070,19 +1113,25 @@ if ($showCostBudgetVariance) {
 
 
 
-    $electricity_tariff_actual = round($currentBudgetActualData["total_electricity_cost_actual"] / $currentBudgetActualData["total_electricity_kwh_actual"], $value_decimal);
+    // "electricity_actual" (and "water_actual" below) don't exist in $currentBudgetActualData -
+    // the real keys are "total_electricity_kwh_actual"/"water_total_consumption_actual" - so this
+    // guard was always falsy and these always came out 0, regardless of real data.
+    $electricity_tariff_actual = ($currentBudgetActualData["total_electricity_kwh_actual"] != '' && $currentBudgetActualData["total_electricity_kwh_actual"] != 0) ? round($currentBudgetActualData["total_electricity_cost_actual"] / $currentBudgetActualData["total_electricity_kwh_actual"], $value_decimal) : 0;
 
-    $fuel_oil_tariff_actual = round($currentBudgetActualData["total_fuel_oil_cost_actual"] / $currentBudgetActualData["total_fuel_oil_actual"], $value_decimal);
+    $fuel_oil_tariff_actual = ($currentBudgetActualData["total_fuel_oil_actual"] != '' && $currentBudgetActualData["total_fuel_oil_actual"] != 0) ? round($currentBudgetActualData["total_fuel_oil_cost_actual"] / $currentBudgetActualData["total_fuel_oil_actual"], $value_decimal) : 0;
 
-    $lpg_tariff_actual = round($currentBudgetActualData["total_lpg_cost_actual"] / $currentBudgetActualData["total_lpg_actual"], $value_decimal);
+    $lpg_tariff_actual = ($currentBudgetActualData["total_lpg_actual"] != '' && $currentBudgetActualData["total_lpg_actual"] != 0) ? round($currentBudgetActualData["total_lpg_cost_actual"] / $currentBudgetActualData["total_lpg_actual"], $value_decimal) : 0;
 
-    $natural_gas_tariff_actual = round($currentBudgetActualData["total_natural_gas_cost_actual"] / $currentBudgetActualData["total_natural_gas_actual"], $value_decimal);
+    $natural_gas_tariff_actual = ($currentBudgetActualData["total_natural_gas_actual"] != '' && $currentBudgetActualData["total_natural_gas_actual"] != 0) ? round($currentBudgetActualData["total_natural_gas_cost_actual"] / $currentBudgetActualData["total_natural_gas_actual"], $value_decimal) : 0;
 
-    $water_tariff_actual = round($currentBudgetActualData["water_total_consumption_cost_actual"] / $currentBudgetActualData["water_total_consumption_actual"], $value_decimal);
+    $water_tariff_actual = ($currentBudgetActualData["water_total_consumption_actual"] != '' && $currentBudgetActualData["water_total_consumption_actual"] != 0) ? round($currentBudgetActualData["water_total_consumption_cost_actual"] / $currentBudgetActualData["water_total_consumption_actual"], $value_decimal) : 0;
 
-    $district_cooling_tariff_actual = round($currentBudgetActualData["district_cooling_cost_actual"] / $currentBudgetActualData["district_cooling_actual"], $value_decimal);
+    // district_cooling_cost_actual alone is the raw cost, missing district_cooling_fixed_cost - the
+    // "Average tariff" row's Current-year column elsewhere on this page includes the fixed cost, so
+    // without adding it here the actual tariff lands ~equal to budget, hiding the real variance.
+    $district_cooling_tariff_actual = $currentBudgetActualData["district_cooling_actual"] ? round(($currentBudgetActualData["district_cooling_cost_actual"] + $currentBudgetActualData["district_cooling_fixed_cost"]) / $currentBudgetActualData["district_cooling_actual"], $value_decimal) : 0;
 
-    $district_heating_tariff_actual = round($currentBudgetActualData["district_heating_cost_actual"] / $currentBudgetActualData["district_heating_actual"], $value_decimal);
+    $district_heating_tariff_actual = $currentBudgetActualData["district_heating_actual"] ? round($currentBudgetActualData["district_heating_cost_actual"] / $currentBudgetActualData["district_heating_actual"], $value_decimal) : 0;
 
 
 
@@ -1094,7 +1143,8 @@ if ($showCostBudgetVariance) {
 
     $natural_gas_per_room_night_actual = ($currentBudgetActualData["total_room_night"] != 0) ? round($currentBudgetActualData["total_natural_gas_actual"] / $currentBudgetActualData["total_room_night"], $percentage_decimal) : 0;
 
-    $water_per_room_night_actual = ($currentBudgetActualData["total_room_night"] != 0) ? round($currentBudgetActualData["water_total_consumption_actual"] / $currentBudgetActualData["total_room_night"], $percentage_decimal) : 0;
+    // Rounded to $value_decimal, not $percentage_decimal - feeds the budget variance % below, which needs the fuller-precision value.
+    $water_per_room_night_actual = ($currentBudgetActualData["total_room_night"] != 0) ? round($currentBudgetActualData["water_total_consumption_actual"] / $currentBudgetActualData["total_room_night"], $value_decimal) : 0;
 
     $district_cooling_per_room_night_actual = ($currentBudgetActualData["total_room_night"] != 0) ? round($currentBudgetActualData["district_cooling_actual"] / $currentBudgetActualData["total_room_night"], $percentage_decimal) : 0;
 
@@ -1110,7 +1160,7 @@ if ($showCostBudgetVariance) {
 
     $natural_gas_per_room_night_budget = ($currentBudgetActualData["total_room_night"] != 0) ? round($currentBudgetActualData["total_natural_gas_budget"] / $currentBudgetActualData["total_room_night"], $percentage_decimal) : 0;
 
-    $water_per_room_night_budget = ($currentBudgetActualData["total_room_night"] != 0) ? round($currentBudgetActualData["water_total_consumption_budget"] / $currentBudgetActualData["total_room_night"], $percentage_decimal) : 0;
+    $water_per_room_night_budget = ($currentBudgetActualData["total_room_night"] != 0) ? round($currentBudgetActualData["water_total_consumption_budget"] / $currentBudgetActualData["total_room_night"], $value_decimal) : 0;
 
     $district_cooling_per_room_night_budget = ($currentBudgetActualData["total_room_night"] != 0) ? round($currentBudgetActualData["district_cooling_budget"] / $currentBudgetActualData["total_room_night"], $percentage_decimal) : 0;
 
@@ -1118,19 +1168,19 @@ if ($showCostBudgetVariance) {
 
 
 
-    $electricity_tariff_variation = round((($electricity_tariff_actual - $electricity_tariff_budget) * 100) / $electricity_tariff_budget, $percentage_decimal);
+    $electricity_tariff_variation = ($electricity_tariff_budget != 0) ? round((($electricity_tariff_actual - $electricity_tariff_budget) * 100) / $electricity_tariff_budget, $percentage_decimal) : 0;
 
-    $fuel_oil_tariff_variation = round((($fuel_oil_tariff_actual - $fuel_oil_tariff_budget) * 100) / $fuel_oil_tariff_budget, $percentage_decimal);
+    $fuel_oil_tariff_variation = ($fuel_oil_tariff_budget != 0) ? round((($fuel_oil_tariff_actual - $fuel_oil_tariff_budget) * 100) / $fuel_oil_tariff_budget, $percentage_decimal) : 0;
 
-    $lpg_tariff_variation = round((($lpg_tariff_actual - $lpg_tariff_budget) * 100) / $lpg_tariff_budget, $percentage_decimal);
+    $lpg_tariff_variation = ($lpg_tariff_budget != 0) ? round((($lpg_tariff_actual - $lpg_tariff_budget) * 100) / $lpg_tariff_budget, $percentage_decimal) : 0;
 
-    $natural_gas_tariff_variation = round((($natural_gas_tariff_actual - $natural_gas_tariff_budget) * 100) / $natural_gas_tariff_budget, $percentage_decimal);
+    $natural_gas_tariff_variation = ($natural_gas_tariff_budget != 0) ? round((($natural_gas_tariff_actual - $natural_gas_tariff_budget) * 100) / $natural_gas_tariff_budget, $percentage_decimal) : 0;
 
-    $water_tariff_variation = round((($water_tariff_actual - $water_tariff_budget) * 100) / $water_tariff_budget, $percentage_decimal);
+    $water_tariff_variation = ($water_tariff_budget != 0) ? round((($water_tariff_actual - $water_tariff_budget) * 100) / $water_tariff_budget, $percentage_decimal) : 0;
 
-    $district_cooling_tariff_variation = round((($district_cooling_tariff_actual - $district_cooling_tariff_budget) * 100) / $district_cooling_tariff_budget, $percentage_decimal);
+    $district_cooling_tariff_variation = ($district_cooling_tariff_budget != 0) ? round((($district_cooling_tariff_actual - $district_cooling_tariff_budget) * 100) / $district_cooling_tariff_budget, $percentage_decimal) : 0;
 
-    $district_heating_tariff_variation = round((($district_heating_tariff_actual - $district_heating_tariff_budget) * 100) / $district_heating_tariff_budget, $percentage_decimal);
+    $district_heating_tariff_variation = ($district_heating_tariff_budget != 0) ? round((($district_heating_tariff_actual - $district_heating_tariff_budget) * 100) / $district_heating_tariff_budget, $percentage_decimal) : 0;
 
 
 
@@ -1201,10 +1251,7 @@ if ($showCostBudgetVariance) {
     //$total_cost_per_m2_variation_percentage = round($total_cost_per_m2_variation * 100 / $total_cost_actual_per_m2, $percentage_decimal);
 
 }
-echo '<?php $positive_number_style = "color:red;"; ?>
-<br><br><div style="border:2px solid  #f69546;padding:6px;">';
-echo '<br><br>';
-include('admin_landing_pdf_reports_progress_table.php');
-echo '<br><br>';
-include('admin_landing_pdf_reports_table.php');
-echo '</div>';
+$positive_number_style = "color:red;";
+include('admin_landing_pdf_reports_progress_table_new_mtd_ui.php');
+include('admin_landing_pdf_reports_table_new_mtd_ui.php');
+

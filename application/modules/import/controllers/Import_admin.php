@@ -1996,6 +1996,8 @@ class Import_admin extends Base_Admin_Controller
 	$columns["total_renewable_energy_exported_cost"] = 'Total Renewable Energy Exported Cost ($)';
 	$columns["total_electricity_cost"] = 'Total Electricity Cost';
 	$columns["total_electricity_kwh"] = 'Total Electricity '.$electricity_unit.'';
+	$columns["fleet_petrol"] = 'Total Fleet Fuel (Litres)';
+	$columns["total_fleet_petrol_cost"] = 'Fleet Fuel Cost';
 	$columns["fuel_oil_hot_water_boilers"] = 'Fuel Oil Hot-Water Boilers ('.$fuel_oil_unit.') '.$fuel_oil_unit.'';
 	$columns["fuel_oil_hot_water_boilers_rate"] = 'Fuel Oil Hot-Water Boilers ('.$fuel_oil_unit.') $/'.$fuel_oil_unit.'';
 	$columns["fuel_oil_steam_boilers"] = 'Fuel Oil Steam Boilers ('.$fuel_oil_unit.') '.$fuel_oil_unit.'';
@@ -2100,6 +2102,9 @@ class Import_admin extends Base_Admin_Controller
 		'show_utility_district_cooling' => array(
 		    'district_cooling', 'district_cooling_rate', 'district_cooling_total_budget',
 		    'district_cooling_total_budget_cost', 'district_cooling_fixed_cost',
+		),
+		'show_utility_fleet' => array(
+		    'fleet_petrol', 'total_fleet_petrol_cost'
 		),
 	    );
 	    foreach ($export_columns_by_site_utility_flag as $flag => $column_keys) {

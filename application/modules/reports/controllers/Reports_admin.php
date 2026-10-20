@@ -141,10 +141,17 @@ class Reports_admin extends Base_Admin_Controller
 	$utility_cost_chart_filter['end_year'] = (isset($utilityenddateexplode[1])) ? $utilityenddateexplode[1] : '';
 
 	if ($this->input->post('submit') == 'download_monthly_hidden') {
+	    // Query Jan..report-month (not just the single report month) so the monthly
+	    // trend charts (e.g. carbon emissions by source) can show the full YTD.
+	    // $filters_comparision_chart['start_month'] itself must stay as the report's
+	    // own month since other code uses it as "the selected report month".
+	    $ytd_filters_comparision_chart = $filters_comparision_chart;
+	    $ytd_filters_comparision_chart['startdate'] = '1/' . $filters_comparision_chart['start_year'];
+	    $ytd_filters_comparision_chart['start_month'] = 1;
 	    if ($data['currency'] == "base") {
-		$utility_cost_chart_results = $this->reports_forex_model->utilityCostBarChart($filters_comparision_chart);
+		$utility_cost_chart_results = $this->reports_forex_model->utilityCostBarChart($ytd_filters_comparision_chart);
 	    } else {
-		$utility_cost_chart_results = $this->reports_model->utilityCostBarChart($filters_comparision_chart);
+		$utility_cost_chart_results = $this->reports_model->utilityCostBarChart($ytd_filters_comparision_chart);
 	    }
 	} else {
 	    if ($data['currency'] == "base") {
@@ -176,7 +183,7 @@ class Reports_admin extends Base_Admin_Controller
 		if (isset($data['utility_cost_chart'][$value['month_id']][$value['year_id']]) && !empty($data['utility_cost_chart'][$value['month_id']][$value['year_id']])) {
 		    continue;
 		} else {
-		    $value = array_map('intval', $value);
+		    $value = array_map('floatval', $value);
 		    $value['cooling_district'] = $value['cooling_district'] + $value['district_cooling_fixed_cost'];
 		    $value['fleet_petrol'] = $value['fleet_petrol'];
 		    $value['heating_district'] = $value['heating_district'] + $value['district_heating_fixed_cost'];
@@ -522,6 +529,7 @@ class Reports_admin extends Base_Admin_Controller
 			$data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['total_room_night_budget'] = $value['total_room_night_budget'];
 		    $data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['guest_night'] = $value['total_guests'];
 		    $data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['total_guests_budget'] = $value['total_guests_budget'];
+		    $data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['fleet_petrol'] = (!empty($value['fleet_petrol'])) ? $value['fleet_petrol'] : 0;
 		    $data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['total_electricity_kwh'] = (!empty($value['total_electricity_kwh'])) ? $value['total_electricity_kwh'] : 0;
 		    $data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['onsite_generator'] = (!empty($value['onsite_generator'])) ? $value['onsite_generator'] : 0;
 		    $data['utility_cost_chart_pre'][$value['month_id']][$value['year_id']]['renewable_energy'] = (!empty($value['renewable_energy'])) ? $value['renewable_energy'] : 0;
@@ -588,15 +596,15 @@ class Reports_admin extends Base_Admin_Controller
 	    $kwh_report_results_pre = $this->reports_model->costBasedReportForCurrentYear($filters_pre);
 	}
 	if (!empty($kwh_report_results_pre)) {
-	    // $kwh_report_results_pre['cooling_district'] = $kwh_report_results_pre['cooling_district'] + $kwh_report_results_pre['district_cooling_fixed_cost'];
-	    // $kwh_report_results_pre['heating_district'] = $kwh_report_results_pre['heating_district'] + $kwh_report_results_pre['district_heating_fixed_cost'];
-	    $kwh_report_results_pre['cooling_district'] = $kwh_report_results_pre['cooling_district'];
-	    $kwh_report_results_pre['heating_district'] = $kwh_report_results_pre['heating_district'];
+	    $kwh_report_results_pre['cooling_district'] = $kwh_report_results_pre['cooling_district'] + $kwh_report_results_pre['district_cooling_fixed_cost'];
+	    $kwh_report_results_pre['heating_district'] = $kwh_report_results_pre['heating_district'] + $kwh_report_results_pre['district_heating_fixed_cost'];
+	    // $kwh_report_results_pre['cooling_district'] = $kwh_report_results_pre['cooling_district'];
+	    // $kwh_report_results_pre['heating_district'] = $kwh_report_results_pre['heating_district'];
 		if($site_details['show_utility_electricity']) {
 	    $data['cost_pie_chart_pre']['electricity'] = (!empty($kwh_report_results_pre['electricity'])) ? $kwh_report_results_pre['electricity'] : 0;
 		}
 		if($site_details['show_utility_fuel_oil']) {
-		    $data['cost_pie_chart_pre']['fuel'] = (!empty($kwh_report_results_pre['fuel'])) ? $kwh_report_results_pre['fuel_oil'] : 0;
+		    $data['cost_pie_chart_pre']['fuel'] = (!empty($kwh_report_results_pre['fuel'])) ? $kwh_report_results_pre['fuel'] : 0;
 		}
 		if($site_details['show_utility_lpg']) {
 		    $data['cost_pie_chart_pre']['lpg'] = (!empty($kwh_report_results_pre['lpg'])) ? $kwh_report_results_pre['lpg'] : 0;
@@ -722,12 +730,17 @@ class Reports_admin extends Base_Admin_Controller
 	    $kwh_report_results = $this->reports_model->kwhUnitBasedReportForCurrentYear($filters);
 	}
 	if (!empty($kwh_report_results)) {
-	    $kwh_report_results = array_map('intval', $kwh_report_results);
-	    $kwh_report_results['cooling_district'] = $kwh_report_results['cooling_district'] + $kwh_report_results['district_cooling_fixed_cost'];
-	    $kwh_report_results['heating_district'] = $kwh_report_results['heating_district'] + $kwh_report_results['district_heating_fixed_cost'];
-	    $kwh_report_results['lpg'] = $kwh_report_results['lpg'] + $kwh_report_results['lpg_fixed_cost'];
-	    $kwh_report_results['natural_gas'] = $kwh_report_results['natural_gas'] + $kwh_report_results['natural_gas_fixed_cost'];
-	    $kwh_report_results['water'] = $kwh_report_results['water'] + $kwh_report_results['water_fixed_cost'];
+	    $kwh_report_results = array_map('floatval', $kwh_report_results); // intval truncated fractional values
+	    // These *_fixed_cost columns are monetary (AED) figures, not consumption (kWh/RTH/L) -
+	    // adding them onto a consumption total mixes units and never belonged here (this page's
+	    // consumption totals must match the clean, fixed-cost-free consumption sums shown
+	    // elsewhere in the report, e.g. the "Current"/"Previous" columns in the utilities table).
+	    // Monthly's own query (kwhUnitBasedReportForCurrentYearPieCharts) never even selects
+	    // these columns, so this addition was already a silent no-op there; for the YTD/other
+	    // branch (kwhUnitBasedReportForCurrentYear), which does select them, it actively
+	    // corrupted the total because that query selects them without a SUM() wrapper alongside
+	    // other SUM()'d columns in a GROUP-less aggregate query, so MySQL returns an arbitrary
+	    // single month's value rather than a sum across the period.
 		if($site_details['show_utility_electricity']) {
 	    $data['kwh_pie_chart']['electricity'] = (!empty($kwh_report_results['electricity'])) ? ($kwh_report_results['electricity'] * $dataFactor['electricity']) : 0;
 		}
@@ -900,7 +913,7 @@ class Reports_admin extends Base_Admin_Controller
 	$current_budget_actual_data = [];
 	$current_budget_actual_data['months'] = 0;
 	foreach ($current_budget_actual_array as $key => $value) {
-	    $value = array_map('intval', $value);
+	    $value = array_map('floatval', $value); // intval truncated fractional values - see note above
 	    $current_budget_actual_data['months'] += 1;
 	    $current_budget_actual_data['total_room_night'] += $value['total_room_night'];
 	    $current_budget_actual_data['hdd'] += $value['hdd'];
@@ -908,10 +921,12 @@ class Reports_admin extends Base_Admin_Controller
 	    $current_budget_actual_data["district_cooling_actual"] += $value["district_cooling_actual"];
 	    $current_budget_actual_data["district_cooling_budget"] += $value["district_cooling_budget"];
 	    $current_budget_actual_data["district_cooling_cost_actual"] += $value["district_cooling_cost_actual"];
+		$current_budget_actual_data["district_cooling_fixed_cost"] += $value["district_cooling_fixed_cost"];
 	    $current_budget_actual_data["district_cooling_cost_budget"] += $value["district_cooling_cost_budget"];
 	    $current_budget_actual_data["district_heating_actual"] += $value["district_heating_actual"];
 	    $current_budget_actual_data["district_heating_budget"] += $value["district_heating_budget"];
 	    $current_budget_actual_data["district_heating_cost_actual"] += $value["district_heating_cost_actual"];
+		$current_budget_actual_data["district_heating_fixed_cost"] += $value["district_heating_fixed_cost"];
 	    $current_budget_actual_data["district_heating_cost_budget"] += $value["district_heating_cost_budget"];
 	    $current_budget_actual_data["total_electricity_kwh_actual"] += $value["total_electricity_kwh_actual"];
 	    $current_budget_actual_data["total_electricity_kwh_budget"] += $value["total_electricity_kwh_budget"];
@@ -1292,7 +1307,7 @@ class Reports_admin extends Base_Admin_Controller
 		$site_id = isset($this->session->userdata[$this->section_name]['site_id']) ? $this->session->userdata[$this->section_name]['site_id'] : 0;
 		$dataFactor = getMmbtuFactorConversionAllUtility($site_id);
 
-		$kwh_report_results = is_array($kwh_report_results) ? array_map('intval', $kwh_report_results) : array();
+		$kwh_report_results = is_array($kwh_report_results) ? array_map('floatval', $kwh_report_results) : array(); // intval truncated fractional values
 		$kwh_pie_chart['electricity'] = (!empty($kwh_report_results['electricity'])) ? ($kwh_report_results['electricity'] * $dataFactor['electricity']) : 0;
 		$kwh_pie_chart['fuel'] = (!empty($kwh_report_results['fuel'])) ? ($kwh_report_results['fuel'] * $dataFactor['fuel_oil']) : 0;
 		$kwh_pie_chart['lpg'] = (!empty($kwh_report_results['lpg'])) ? ($kwh_report_results['lpg'] * $dataFactor['lpg']) : 0;
@@ -6209,7 +6224,7 @@ class Reports_admin extends Base_Admin_Controller
 			'total_waste_target' => isset($totalWasteData['YTDTotal'][$running_year]) ? $totalWasteData['YTDTotal'][$running_year] : 0
 		];
 
-		$widgetData = $this->sites_model->getMySitesWidgetData($site_detials);
+		$widgetData = $this->sites_model->getMySitesWidgetData($site_detials,true);
 		$currentMonthData = $widgetData[0] ?? [];
 		$sameMonthLastYearData = $widgetData[2] ?? [];
 
@@ -6244,8 +6259,14 @@ class Reports_admin extends Base_Admin_Controller
 		$data['waste_diversion_numerator_YTD'] = $progressOnTargetResult['waste_diversion_numerator_YTD'];
 		$data['waste_diversion_numerator_Baseline_YTD'] = $progressOnTargetResult['waste_diversion_numerator_Baseline_YTD'];
 
-		$data['waste']['total_room_night'] = $data['utility_cost_chart'][$currMonthWid][$currYearWid]['room_night'];
-		$data['waste']['total_guests'] = $data['utility_cost_chart'][$currMonthWid][$currYearWid]['guest_night'];
+		for ($month = 1; $month <= $currMonthWid; $month++) {
+		    $currentUtility = $data['utility_cost_chart'][$month][$currYearWid] ?? array();
+		    $previousUtility = $data['utility_cost_chart_pre'][$month][$currYearWid-1] ?? array();
+		    $data['waste']['total_room_night'] += (float) ($currentUtility['room_night'] ?? 0);
+		    $data['waste']['previous_total_room_night'] += (float) ($previousUtility['room_night'] ?? 0);
+		    $data['waste']['total_guests'] += (float) ($currentUtility['guest_night'] ?? 0);
+		    $data['waste']['previous_total_guests'] += (float) ($previousUtility['guest_night'] ?? 0);
+		}
 		$data['WasteReport'] = $this->site_waste_model->getWasteReportData($site_id, $data['waste'], $currYearWid, $currMonthWid,false,true);
 		if(empty($data['WasteReport'])) {
 			$content_reports_waste_report = '';
@@ -6355,7 +6376,10 @@ class Reports_admin extends Base_Admin_Controller
 		$this->reports_model->site_id = $site_id;
 
 		$progressOnTargetMonthly = $this->reports_model->getProgressOnTargetWithBaseline($baselineYear, 'month');
-		$progressOnTarget = $this->reports_model->getProgressOnTargetWithBaseline($baselineYear);
+		// Must pass $current_month/$current_year (this report's own month) - without them this
+		// defaults to today's date internally, so progress_baseline_roomnight_YTD (and other
+		// baseline YTD figures) would always be Jan-to-latest-month regardless of the report month.
+		$progressOnTarget = $this->reports_model->getProgressOnTargetWithBaseline($baselineYear, '', $current_month, $current_year);
 		$wasteDiversionNumeratorData = $this->site_waste_model->getWasteYTDByDestinationAndCurrMonth($site_detials, 'recycling_wte', $current_year, $current_month);
 		$totalWasteData = $this->site_waste_model->getWasteYTDByDestinationAndCurrMonth($site_detials, '', $current_year, $current_month);
 
@@ -6370,7 +6394,9 @@ class Reports_admin extends Base_Admin_Controller
 		];
 		$postData['site']['progressOnTargetMonthly'] = isset($progressOnTargetMonthly) ? $progressOnTargetMonthly : [];
 		$dataNew = $currentMonth = $lastMonth = $sameMonthLastYear = [];
-		$dataNew = $this->sites_model->getMySitesWidgetData($site_detials);
+		// Pass this report's own month/year - otherwise the carbon YTD figures below always come
+		// out as "Jan to today's-month-minus-1" regardless of which month this report is for.
+		$dataNew = $this->sites_model->getMySitesWidgetData($site_detials, null, $current_month, $current_year);
 		$currentMonth = $dataNew[0] ?? [];
 		$lastMonth = $dataNew[1] ?? [];
 		$sameMonthLastYear = $dataNew[2] ?? [];
@@ -6401,16 +6427,91 @@ class Reports_admin extends Base_Admin_Controller
 		$data['progressOnTargetMonthly'] = isset($progressOnTargetMonthly) ? $progressOnTargetMonthly : [];
 
 		$data['site_detail']['data']['kpi'] = $this->sites_model->getCarbonRecords($site_id, $data['site_detail']);
+		$is_monthly_hidden_pdf = true;
 		$content_reports = $this->load->view('admin_landing_pdf_reports_monthly_hidden', $data, true);
 		$content_reports_piecharts = $this->load->view('admin_landing_pdf_reports_monthly_hidden_piecharts', $data, true);
 		$content_reports_carbon_footprint = $this->load->view('admin_landing_pdf_reports_carbon_footprint', $data, true);	
+		$content_reports_carbon_footprint = 'NATIVE_CARBON';
 		$data['waste']['total_room_night'] = $data['utility_cost_chart'][$currMonth][$currYear]['room_night'];
 		$data['waste']['total_guests'] = $data['utility_cost_chart'][$currMonth][$currYear]['guest_night'];
+		// Without these, getWasteReportData() falls back to the current month's own room/guest
+		// nights for "previous" too (since it only defaults when the key is unset), silently making
+		// every previous-year per-guest/per-room ratio wrong.
+		$data['waste']['previous_total_room_night'] = isset($data['utility_cost_chart'][$currMonth][$currYear - 1]['room_night']) ? $data['utility_cost_chart'][$currMonth][$currYear - 1]['room_night'] : 0;
+		$data['waste']['previous_total_guests'] = isset($data['utility_cost_chart'][$currMonth][$currYear - 1]['guest_night']) ? $data['utility_cost_chart'][$currMonth][$currYear - 1]['guest_night'] : 0;
 		$data['WasteReport'] = $this->site_waste_model->getWasteReportData($site_id, $data['waste'], $currYear, $currMonth);
 		if(empty($data['WasteReport'])) {
 			$content_reports_waste_report = '';
 		} else {
 			$content_reports_waste_report = $this->load->view('admin_landing_pdf_reports_waste', $data, true);
+		}
+		$data['WasteReportYTD'] = array();
+		$data['WasteTrendsMonthly'] = array();
+		if (!empty($data['WasteReport'])) {
+			// Fetch full year utility data just for room/guest nights.
+			// $filters_comparision_chart isn't in scope here, so build the filter from $currYear/$currMonth instead.
+			$ytd_filter = array(
+			    'start_month' => 1,
+			    'start_year'  => $currYear,
+			    'end_month'   => 12,
+			    'end_year'    => $currYear,
+			);
+			$ytd_cur = (isset($data['currency']) && $data['currency'] == "base") ? $this->reports_forex_model->utilityCostBarChart($ytd_filter) : $this->reports_model->utilityCostBarChart($ytd_filter);
+			$ytd_utility = array();
+			if (!empty($ytd_cur)) {
+				foreach ($ytd_cur as $v) {
+					$ytd_utility[$v['year_id']][$v['month_id']] = $v;
+					$data['utility_cost_chart'][$v['month_id']][$v['year_id']]['room_night'] = (float) $v['total_room_night'];
+					$data['utility_cost_chart'][$v['month_id']][$v['year_id']]['guest_night'] = (float) $v['total_guests'];
+				}
+			}
+
+			// YTD room/guest nights (Jan..currMonth sum, both years) for the Waste trends KPI/table ratios.
+			$ytdRoomNight = 0;
+			$ytdPrevRoomNight = 0;
+			$ytdGuests = 0;
+			$ytdPrevGuests = 0;
+			for ($ytdMonth = 1; $ytdMonth <= $currMonth; $ytdMonth++) {
+				$ytdRoomNight += isset($ytd_utility[$currYear][$ytdMonth]['total_room_night']) ? (float) $ytd_utility[$currYear][$ytdMonth]['total_room_night'] : 0;
+				$ytdPrevRoomNight += isset($ytd_utility[$currYear - 1][$ytdMonth]['total_room_night']) ? (float) $ytd_utility[$currYear - 1][$ytdMonth]['total_room_night'] : 0;
+				$ytdGuests += isset($ytd_utility[$currYear][$ytdMonth]['total_guests']) ? (float) $ytd_utility[$currYear][$ytdMonth]['total_guests'] : 0;
+				$ytdPrevGuests += isset($ytd_utility[$currYear - 1][$ytdMonth]['total_guests']) ? (float) $ytd_utility[$currYear - 1][$ytdMonth]['total_guests'] : 0;
+			}
+			$wasteDataYtd = array(
+			    'total_room_night' => $ytdRoomNight,
+			    'previous_total_room_night' => $ytdPrevRoomNight,
+			    'total_guests' => $ytdGuests,
+			    'previous_total_guests' => $ytdPrevGuests,
+			);
+			$data['WasteReportYTD'] = $this->site_waste_model->getWasteReportData($site_id, $wasteDataYtd, $currYear, $currMonth, true, false);
+
+		    // Loop the full year (not just Jan..currMonth) so last year's remaining
+		    // months can still be plotted as context on the trend charts.
+		    for ($wtm = 1; $wtm <= 12; $wtm++) {
+			$curRoomNight = isset($ytd_utility[$currYear][$wtm]['total_room_night']) ? (float) $ytd_utility[$currYear][$wtm]['total_room_night'] : 0;
+			$prevRoomNight = isset($ytd_utility[$currYear - 1][$wtm]['total_room_night']) ? (float) $ytd_utility[$currYear - 1][$wtm]['total_room_night'] : 0;
+			$curGuests = isset($ytd_utility[$currYear][$wtm]['total_guests']) ? (float) $ytd_utility[$currYear][$wtm]['total_guests'] : 0;
+			$prevGuests = isset($ytd_utility[$currYear - 1][$wtm]['total_guests']) ? (float) $ytd_utility[$currYear - 1][$wtm]['total_guests'] : 0;
+
+			$monthWasteData = array(
+			    'total_room_night' => $curRoomNight,
+			    'previous_total_room_night' => $prevRoomNight,
+			    'total_guests' => $curGuests,
+			    'previous_total_guests' => $prevGuests,
+			);
+			$data['WasteTrendsMonthly'][$wtm] = $this->site_waste_model->getWasteReportData($site_id, $monthWasteData, $currYear, $wtm);
+		    }
+		    $wasteTrendsResolved = $this->site_waste_model->getWasteTrendsData(
+			$site_id,
+			$currYear,
+			$currMonth,
+			isset($data['utility_cost_chart']) ? $data['utility_cost_chart'] : [],
+			$data['WasteTrendsMonthly'],
+			$data['WasteReportYTD'],
+			$site_detials
+		    );
+		    $data['WasteTrendsMonthly'] = $wasteTrendsResolved['WasteTrendsMonthly'];
+		    $data['WasteReportYTD'] = $wasteTrendsResolved['WasteReportYTD'];
 		}
 		if ($result['chsb_reporting'] == 1) {
 		    $postChartData = $this->input->post();
@@ -6437,8 +6538,11 @@ class Reports_admin extends Base_Admin_Controller
 		$cooling_district_value = 0;
 		$utility_kwh_total = 0;
 		$data['pdf_report_title'] = 'YTD Utilities report - ' . date('Y');
-		$data['previous_title'] = 'Previous Year - ' . (date('Y') - 1);
-		$data['current_title'] = 'Current Year - ' . date('Y');
+		// Shortened to "Previous"/"Current" (not "Previous Year"/"Current Year") so the two-line
+		// wrap in admin_landing_pdf_reports_table_new_mtd_ui.php's header fits its narrow columns
+		// without overflowing into the neighbouring column, same as the Budget column already does.
+		$data['previous_title'] = 'Previous - ' . (date('Y') - 1);
+		$data['current_title'] = 'Current - ' . date('Y');
 		$data['budget_title'] = 'Budget - ' . date('Y');
 		$data['table_title'] = 'Year To Date Report';
 		$data['type'] = 'ytd';
@@ -6502,6 +6606,80 @@ class Reports_admin extends Base_Admin_Controller
 		    $content_reports_waste_report = $this->load->view('admin_landing_pdf_reports_waste', $data, true);
 		}
 
+		// --- Modern (MYTD-style) UI for the YTD report: progress cards, modern table/pie/carbon
+		// pages, and the Waste Trends page - reusing the exact same data-building calls the
+		// Monthly report uses, just fed with this report's own YTD $currYear/$currMonth. ---
+		$data['is_monthly'] = false;
+
+		// Unlike the Monthly/Annual branches, this YTD branch never fetched the site's full
+		// detail row (baseline_regression_year, reduction targets, etc.) - without it,
+		// $baselineYear below silently resolves to null and the progress cards' "baseline
+		// year" column renders as a flat 0 for every metric.
+		$this->load->model('sites/sites_model');
+		$site_id = isset($this->session->userdata[$this->section_name]['site_id']) ? $this->session->userdata[$this->section_name]['site_id'] : 0;
+		$site_detials = $this->sites_model->get_site_detail_custom($site_id);
+
+		$dateParams = getProgressWidgetDateParams($currMonth, $currYear);
+		$current_month = $dateParams['month'];
+		$current_year = $dateParams['year'];
+		$running_year = $dateParams['running_year'];
+
+		$baselineYear = $site_detials['baseline_regression_year'];
+		$this->reports_model->site_id = $site_id;
+
+		$progressOnTargetMonthly = $this->reports_model->getProgressOnTargetWithBaseline($baselineYear, 'month');
+		$progressOnTarget = $this->reports_model->getProgressOnTargetWithBaseline($baselineYear, '', $current_month, $current_year);
+		$wasteDiversionNumeratorData = $this->site_waste_model->getWasteYTDByDestinationAndCurrMonth($site_detials, 'recycling_wte', $current_year, $current_month);
+		$totalWasteData = $this->site_waste_model->getWasteYTDByDestinationAndCurrMonth($site_detials, '', $current_year, $current_month);
+
+		$progressOnTarget[$baselineYear]['waste_diversion_numerator'] = isset($wasteDiversionNumeratorData['YTDTotal'][$baselineYear]) ? $wasteDiversionNumeratorData['YTDTotal'][$baselineYear] : 0;
+		$progressOnTarget[$baselineYear]['total_waste_target'] = isset($totalWasteData['YTDTotal'][$baselineYear]) ? $totalWasteData['YTDTotal'][$baselineYear] : 0;
+		$progressOnTarget[$running_year]['waste_diversion_numerator'] = isset($wasteDiversionNumeratorData['YTDTotal'][$running_year]) ? $wasteDiversionNumeratorData['YTDTotal'][$running_year] : 0;
+		$progressOnTarget[$running_year]['total_waste_target'] = isset($totalWasteData['YTDTotal'][$running_year]) ? $totalWasteData['YTDTotal'][$running_year] : 0;
+
+		$progressValueWasteYTD = [
+			'total_waste_baseline_target' => isset($totalWasteData['YTDTotal'][$baselineYear]) ? $totalWasteData['YTDTotal'][$baselineYear] : 0,
+			'total_waste_target' => isset($totalWasteData['YTDTotal'][$running_year]) ? $totalWasteData['YTDTotal'][$running_year] : 0
+		];
+		$dataNew = $this->sites_model->getMySitesWidgetData($site_detials, null, $current_month, $current_year);
+		$currentMonthCarbon = $dataNew[0] ?? [];
+		$sameMonthLastYearCarbon = $dataNew[2] ?? [];
+
+		$carbonData = [
+			'carbon_footprint_currentMonth' => $currentMonthCarbon['carbon_footprint'] ?? 0,
+			'carbon_footprint_SameMonthPreviousYear' => $sameMonthLastYearCarbon['carbon_footprint'] ?? 0,
+			'ytd_carbon_footprint_new' => $dataNew['ytd_carbon_footprint_new'] ?? 0,
+			'ytd_carbon_footprintPreviousYear' => $dataNew['ytd_carbon_footprintPreviousYear'] ?? 0,
+			'ytd_carbon_footprint_baseline_new' => $dataNew['ytd_carbon_footprint_baseline_new'] ?? 0
+		];
+		$progressOnTargetResult = calculateProgressOnTarget(
+			$progressOnTarget,
+			$current_month,
+			$current_year,
+			$site_detials,
+			$carbonData,
+			$progressValueWasteYTD
+		);
+		$data['progressOnTargetWasteYtd'] = $progressValueWasteYTD;
+		$data['progressOnTarget'] = $progressOnTarget;
+		$data['ProgressTargetPercentage'] = $progressOnTargetResult['ProgressTargetPercentage'];
+		$data['progressTarget'] = $progressOnTargetResult['progressTarget'] ?? [];
+		$data['progress_roomnight_YTD'] = $progressOnTargetResult['progress_roomnight_YTD'];
+		$data['progress_baseline_roomnight_YTD'] = $progressOnTargetResult['progress_baseline_roomnight_YTD'];
+		$data['progress_guestnight_YTD'] = $progressOnTargetResult['progress_guestnight_YTD'];
+		$data['progress_baseline_guestnight_YTD'] = $progressOnTargetResult['progress_baseline_guestnight_YTD'];
+		$data['progressOnTargetMonthly'] = isset($progressOnTargetMonthly) ? $progressOnTargetMonthly : [];
+
+		$data['site_detail']['data']['kpi'] = $this->sites_model->getCarbonRecords($site_id, $data['site_detail']);
+
+		// No Waste Trends page for YTD - the Waste report page above already covers waste for
+		// this report type. $data['WasteTrendsMonthly'] is left unset so the shared render
+		// tail's `!empty($data['WasteTrendsMonthly'])` gate stays false and skips that page.
+
+		$is_monthly_hidden_pdf = true;
+		$is_ytd_report = true;
+		$data['is_ytd_report'] = true;
+
 		// Calculation For CHSB report
 		$this->load->model('sites/sites_model');
 		$site_id = isset($this->session->userdata[$this->section_name]['site_id']) ? $this->session->userdata[$this->section_name]['site_id'] : 0;
@@ -6522,6 +6700,7 @@ class Reports_admin extends Base_Admin_Controller
 		$this->utilities_model->utilities_year = date("Y") - 3;
 		$getUtilityData_minus_three_year = $this->utilities_model->getSiteUtilityLastYear();
 		foreach ($getUtilityData as $getUtilities) {
+			$getUtilities = array_map('floatval', $getUtilities);
 		    $site_id = isset($this->session->userdata[$this->section_name]['site_id']) ? $this->session->userdata[$this->section_name]['site_id'] : 0;
 		    $this->sites_model->year = date("Y") - 1;
 		    $site_detials = $this->sites_model->get_site_detail_custom($site_id);
@@ -6537,6 +6716,7 @@ class Reports_admin extends Base_Admin_Controller
 		    $utility_kwh_total += ($electricity_value + $fuel_value + $lpg_value + $natural_gas_value + $heating_district_value + $cooling_district_value);
 		}
 		foreach ($getUtilityData_prev as $getUtilities) {
+			$getUtilities = array_map('floatval', $getUtilities);
 		    $site_id = isset($this->session->userdata[$this->section_name]['site_id']) ? $this->session->userdata[$this->section_name]['site_id'] : 0;
 		    $this->sites_model->year = date("Y") - 2;
 		    $site_detials = $this->sites_model->get_site_detail_custom($site_id);
@@ -6649,11 +6829,44 @@ class Reports_admin extends Base_Admin_Controller
 	    $pdf->AddPage();
 	    $pdf->writeHTML($content_site_detail, true, false, true, false, '');
 	}
+	// Modern PDF header (logo/site name/GENERATED date) is only for the monthly report - must be
+	// set before AddPage() below, since Header() fires immediately when AddPage() is called.
+	if (!empty($is_monthly_hidden_pdf)) {
+	    $pdf->mytd_report_subtitle = !empty($data['pdf_report_title']) ? $data['pdf_report_title'] : '';
+	    $pdf->mytd_page_header = true;
+	}
 	$pdf->AddPage();
-	$pdf->writeHTML($content_reports, true, false, true, false, '');
+	if (!empty($is_monthly_hidden_pdf)) {
+	    // The progress cards / utilities table are drawn natively on $pdf from inside
+	    // the parent template's own include() calls, so just pass $pdf into that same
+	    // parent template instead of writing HTML. YTD uses its own parent template
+	    // (admin_landing_pdf_reports.php) because its Jan-to-currMonth summed totals
+	    // (not Monthly's single-month lookup) are what the shared table/progress-card
+	    // includes need to render correctly for a YTD report.
+	    $data['pdf'] = $pdf;
+	    if (!empty($is_ytd_report)) {
+		$this->load->view('admin_landing_pdf_reports', $data, true);
+	    } else {
+		$this->load->view('admin_landing_pdf_reports_monthly_hidden', $data, true);
+	    }
+	    $pdf->mytd_page_header = false;
+	} else {
+	    $pdf->writeHTML($content_reports, true, false, true, false, '');
+	}
 	if ($show_piechart) {
-	    $pdf->AddPage();
-	    $pdf->writeHTML($content_reports_piecharts, true, false, true, false, '');
+	    if (!empty($is_monthly_hidden_pdf)) {
+		// Monthly report only; render_piecharts_new_pdf() adds its own page.
+		$pdf->mytd_report_subtitle = !empty($data['pdf_report_title']) ? $data['pdf_report_title'] : '';
+		$pdf->mytd_page_header = true;
+		require_once APPPATH . 'modules/reports/views/admin_landing_pdf_reports_monthly_hidden_piecharts_new_mtd_ui.php';
+		render_piecharts_new_pdf($pdf, $data);
+		$pdf->mytd_page_header = false;
+		$pdf->SetFont('helvetica', '', 9);
+	    } else {
+		// Other report types keep the original HTML piecharts view.
+		$pdf->AddPage();
+		$pdf->writeHTML($content_reports_piecharts, true, false, true, false, '');
+	    }
 	}
 	if ($show_actionplans) {
 	    $pdf->AddPage();
@@ -6663,36 +6876,107 @@ class Reports_admin extends Base_Admin_Controller
 	    /* if ($postdata['submit'] != 'download_monthly_hidden') {
 	      $pdf->AddPage();
 	      } */
+	    // Modern PDF header (logo/site name/GENERATED date) is only for the monthly report - must be
+	    // set before AddPage() below, since Header() fires immediately when AddPage() is called.
+	    if (!empty($is_monthly_hidden_pdf)) {
+	        $pdf->mytd_report_subtitle = !empty($data['pdf_report_title']) ? $data['pdf_report_title'] : '';
+	        $pdf->mytd_page_header = true;
+	    }
 	    $pdf->AddPage();
-	    $pdf->writeHTML($content_reports_carbon_footprint, true, false, true, false, '');
-	}
-	if ($result['chsb_reporting']) {
-	    $pdf->SetFont('helvetica', '', 7);
-	    if ($chsb_reporting != '') {
-		$pdf->AddPage();
-		$pdf->writeHTML($chsb_reporting, true, false, true, false, '');
+	    if (!empty($is_monthly_hidden_pdf)) {
+			$data_for_carbon = $data;
+			if ($postdata['submit'] == 'download_monthly_hidden' && isset($filters_comparision_chart)) {
+				$ytd_filter = $filters_comparision_chart;
+				$ytd_filter['start_month'] = 1;
+				
+				if (isset($data['currency']) && $data['currency'] == "base") {
+					$ytd_cur = $this->reports_forex_model->utilityCostBarChart($ytd_filter);
+				} else {
+					$ytd_cur = $this->reports_model->utilityCostBarChart($ytd_filter);
+				}
+				
+				$ytd_pre_filter = $ytd_filter;
+				$ytd_pre_filter['start_year'] = $filters_comparision_chart['start_year'] - 1;
+				$ytd_pre_filter['end_year'] = $filters_comparision_chart['start_year'] - 1;
+				
+				if (isset($data['currency']) && $data['currency'] == "base") {
+					$ytd_pre = $this->reports_forex_model->utilityCostBarChart($ytd_pre_filter);
+				} else {
+					$ytd_pre = $this->reports_model->utilityCostBarChart($ytd_pre_filter);
+				}
+
+				$data_for_carbon['utility_cost_chart'] = array();
+				$data_for_carbon['utility_cost_chart_pre'] = array();
+				
+				if (!empty($ytd_cur)) {
+					foreach ($ytd_cur as $v) {
+						$data_for_carbon['utility_cost_chart'][$v['month_id']][$v['year_id']] = $v;
+					}
+				}
+				if (!empty($ytd_pre)) {
+					foreach ($ytd_pre as $v) {
+						$data_for_carbon['utility_cost_chart_pre'][$v['month_id']][$v['year_id']] = $v;
+					}
+				}
+			}
+
+			require_once APPPATH . 'modules/reports/views/admin_landing_pdf_reports_carbon_footprint_new_mtd_ui.php';
+	        if (function_exists('render_carbon_footprint_new_pdf')) {
+	            render_carbon_footprint_new_pdf($pdf, $data_for_carbon);
+	        }
+	        $pdf->mytd_page_header = false;
+	    } else {
+	        $pdf->writeHTML($content_reports_carbon_footprint, true, false, true, false, '');
 	    }
 	}
-	if ($content_reports_waste_report != '') {
+	if ($result['chsb_reporting'] && !empty($data['measures']) && !empty($data['measure_readings'])) {
+	    require_once APPPATH . 'modules/reports/views/admin_landing_pdf_chsb_reporting_reports.php';
+	    $pdf->mytd_report_subtitle = !empty($data['pdf_report_title']) ? $data['pdf_report_title'] : '';
+	    $pdf->mytd_page_header = true;
 	    $pdf->AddPage();
-	    $pdf->writeHTML($content_reports_waste_report, true, false, true, false, '');
+	    render_chsb_reporting_pdf($pdf, $data);
+	    $pdf->mytd_page_header = false;
+	    $pdf->SetFont('helvetica', '', 9);
+	}
+	if (!empty($data['WasteReport']['wasteReport'])) {
+	    require_once APPPATH . 'modules/reports/views/admin_landing_pdf_reports_waste.php';
+	    $pdf->mytd_report_subtitle = !empty($data['pdf_report_title']) ? $data['pdf_report_title'] : '';
+	    $pdf->mytd_page_header = true;
+	    $pdf->AddPage();
+	    render_waste_report_pdf($pdf, $data);
+	    // Do NOT reset mytd_page_header here - Footer() for *this* page only actually fires
+	    // lazily, at the next AddPage()/Output() call, not here. For YTD (no Waste Trends page
+	    // follows), this is the last page, so resetting the flag before Output() made this
+	    // page's own footer silently fall back to the old style. Whatever runs next (Waste
+	    // Trends for Monthly, or a regression chart) already sets this flag itself before its
+	    // own AddPage(), so leaving it as `true` here is safe either way.
+	    $pdf->SetFont('helvetica', '', 9);
+	}
+	if (!empty($is_monthly_hidden_pdf) && !empty($data['WasteTrendsMonthly'])) {
+	    require_once APPPATH . 'modules/reports/views/admin_landing_pdf_reports_waste_trends_new_mtd_ui.php';
+	    $pdf->mytd_report_subtitle = !empty($data['pdf_report_title']) ? $data['pdf_report_title'] : '';
+	    $pdf->mytd_page_header = true;
+	    $pdf->AddPage();
+	    render_waste_trends_pdf($pdf, $data);
+	    $pdf->SetFont('helvetica', '', 9);
 	}
 	/* REGRESSION CHARTS POPULATE IN PDF */
-	if ($data['utility_regression_monthly_electricity_Img'] != '') {
+	if (!empty($data['utility_regression_monthly_electricity_Img']) || !empty($data['utility_regression_monthly_LY_electricity_Img'])) {
 
+		$pdf->mytd_page_header = false;
 		$pdf->AddPage();
 		$pdf->writeHtml('<div style="border:2px solid  #f69546;padding:10px;">
 			<h4 style="text-align: center; font-size: 16; color:#0400FF">'. $data['monthly']['regression']["utility_array"]["electricity"]["Label"].'</h4>
 			<table width="100%" cellpadding="4" cellspacing="4">
 				<tr>
 					<td width="100%">
-						<img src="'. $data['utility_regression_monthly_LY_electricity_Img'].'" />
+						'. (!empty($data['utility_regression_monthly_LY_electricity_Img']) ? '<img src="'. $data['utility_regression_monthly_LY_electricity_Img'].'" />' : '') .'
 					</td>
 				</tr>
 				<hr/>
 				<tr>
 					<td width="100%">
-						<img src="'. $data['utility_regression_monthly_electricity_Img'].'" />
+						'. (!empty($data['utility_regression_monthly_electricity_Img']) ? '<img src="'. $data['utility_regression_monthly_electricity_Img'].'" />' : '') .'
 					</td>
 				</tr>
 				</td>
@@ -6700,21 +6984,22 @@ class Reports_admin extends Base_Admin_Controller
 			</table>
 		</div>', true, false, true, false, '');
 	}
-	if ($data['utility_regression_monthly_lpg_Img'] != '') {
+	if (!empty($data['utility_regression_monthly_lpg_Img']) || !empty($data['utility_regression_monthly_LY_lpg_Img'])) {
 
+		$pdf->mytd_page_header = false;
 		$pdf->AddPage();
 		$pdf->writeHtml('<div style="border:2px solid  #f69546;padding:10px;">
 			<h4 style="text-align: center; font-size: 16; color:#0400FF">'. $data['monthly']['regression']["utility_array"]["lpg"]["Label"].'</h4>
 			<table width="100%" cellpadding="4" cellspacing="4">
 				<tr>
 						<td width="100%">
-							<img src="'. $data['utility_regression_monthly_LY_lpg_Img'].'" />
+							'. (!empty($data['utility_regression_monthly_LY_lpg_Img']) ? '<img src="'. $data['utility_regression_monthly_LY_lpg_Img'].'" />' : '') .'
 						</td>
 					</tr>
 					<hr/>
 				<tr>
 					<td width="100%">
-						<img src="'. $data['utility_regression_monthly_lpg_Img'].'" />
+						'. (!empty($data['utility_regression_monthly_lpg_Img']) ? '<img src="'. $data['utility_regression_monthly_lpg_Img'].'" />' : '') .'
 					</td>
 				</tr>
 				</td>
@@ -6722,21 +7007,22 @@ class Reports_admin extends Base_Admin_Controller
 			</table>
 		</div>', true, false, true, false, '');
 	}
-	if ($data['utility_regression_monthly_fuel_oil_Img'] != '') {
+	if (!empty($data['utility_regression_monthly_fuel_oil_Img']) || !empty($data['utility_regression_monthly_LY_fuel_oil_Img'])) {
 
+		$pdf->mytd_page_header = false;
 		$pdf->AddPage();
 		$pdf->writeHtml('<div style="border:2px solid  #f69546;padding:10px;">
 			<h4 style="text-align: center; font-size: 16; color:#0400FF">'. $data['monthly']['regression']["utility_array"]["fuel_oil"]["Label"].'</h4>
 			<table width="100%" cellpadding="4" cellspacing="4">
 				<tr>
 						<td width="100%">
-							<img src="'. $data['utility_regression_monthly_LY_fuel_oil_Img'].'" />
+							'. (!empty($data['utility_regression_monthly_LY_fuel_oil_Img']) ? '<img src="'. $data['utility_regression_monthly_LY_fuel_oil_Img'].'" />' : '') .'
 						</td>
 					</tr>
 					<hr/>
 				<tr>
 					<td width="100%">
-						<img src="'. $data['utility_regression_monthly_fuel_oil_Img'].'" />
+						'. (!empty($data['utility_regression_monthly_fuel_oil_Img']) ? '<img src="'. $data['utility_regression_monthly_fuel_oil_Img'].'" />' : '') .'
 					</td>
 				</tr>
 				</td>
@@ -6744,21 +7030,22 @@ class Reports_admin extends Base_Admin_Controller
 			</table>
 		</div>', true, false, true, false, '');
 	}
-	if ($data['utility_regression_monthly_natural_gas_Img'] != '') {
+	if (!empty($data['utility_regression_monthly_natural_gas_Img']) || !empty($data['utility_regression_monthly_LY_natural_gas_Img'])) {
 
+		$pdf->mytd_page_header = false;
 		$pdf->AddPage();
 		$pdf->writeHtml('<div style="border:2px solid  #f69546;padding:10px;">
 			<h4 style="text-align: center; font-size: 16; color:#0400FF">'. $data['monthly']['regression']["utility_array"]["natural_gas"]["Label"].'</h4>
 			<table width="100%" cellpadding="4" cellspacing="4">
 				<tr>
 						<td width="100%">
-							<img src="'. $data['utility_regression_monthly_LY_natural_gas_Img'].'" />
+							'. (!empty($data['utility_regression_monthly_LY_natural_gas_Img']) ? '<img src="'. $data['utility_regression_monthly_LY_natural_gas_Img'].'" />' : '') .'
 						</td>
 					</tr>
 					<hr/>
 				<tr>
 					<td width="100%">
-						<img src="'. $data['utility_regression_monthly_natural_gas_Img'].'" />
+						'. (!empty($data['utility_regression_monthly_natural_gas_Img']) ? '<img src="'. $data['utility_regression_monthly_natural_gas_Img'].'" />' : '') .'
 					</td>
 				</tr>
 				</td>
@@ -6766,21 +7053,22 @@ class Reports_admin extends Base_Admin_Controller
 			</table>
 		</div>', true, false, true, false, '');
 	}
-	if ($data['utility_regression_monthly_district_heating_Img'] != '') {
+	if (!empty($data['utility_regression_monthly_district_heating_Img']) || !empty($data['utility_regression_monthly_LY_district_heating_Img'])) {
 
+		$pdf->mytd_page_header = false;
 		$pdf->AddPage();
 		$pdf->writeHtml('<div style="border:2px solid  #f69546;padding:10px;">
 			<h4 style="text-align: center; font-size: 16; color:#0400FF">'. $data['monthly']['regression']["utility_array"]["district_heating"]["Label"].'</h4>
 			<table width="100%" cellpadding="4" cellspacing="4">
 				<tr>
 						<td width="100%">
-							<img src="'. $data['utility_regression_monthly_LY_district_heating_Img'].'" />
+							'. (!empty($data['utility_regression_monthly_LY_district_heating_Img']) ? '<img src="'. $data['utility_regression_monthly_LY_district_heating_Img'].'" />' : '') .'
 						</td>
 					</tr>
 					<hr/>
 				<tr>
 					<td width="100%">
-						<img src="'. $data['utility_regression_monthly_district_heating_Img'].'" />
+						'. (!empty($data['utility_regression_monthly_district_heating_Img']) ? '<img src="'. $data['utility_regression_monthly_district_heating_Img'].'" />' : '') .'
 					</td>
 				</tr>
 				</td>
@@ -6788,21 +7076,22 @@ class Reports_admin extends Base_Admin_Controller
 			</table>
 		</div>', true, false, true, false, '');
 	}
-	if ($data['utility_regression_monthly_district_cooling_Img'] != '') {
+	if (!empty($data['utility_regression_monthly_district_cooling_Img']) || !empty($data['utility_regression_monthly_LY_district_cooling_Img'])) {
 
+		$pdf->mytd_page_header = false;
 		$pdf->AddPage();
 		$pdf->writeHtml('<div style="border:2px solid  #f69546;padding:10px;">
 			<h4 style="text-align: center; font-size: 16; color:#0400FF">'. $data['monthly']['regression']["utility_array"]["district_cooling"]["Label"].'</h4>
 			<table width="100%" cellpadding="4" cellspacing="4">
 				<tr>
 						<td width="100%">
-							<img src="'. $data['utility_regression_monthly_LY_district_cooling_Img'].'" />
+							'. (!empty($data['utility_regression_monthly_LY_district_cooling_Img']) ? '<img src="'. $data['utility_regression_monthly_LY_district_cooling_Img'].'" />' : '') .'
 						</td>
 					</tr>
 					<hr/>
 				<tr>
 					<td width="100%">
-						<img src="'. $data['utility_regression_monthly_district_cooling_Img'].'" />
+						'. (!empty($data['utility_regression_monthly_district_cooling_Img']) ? '<img src="'. $data['utility_regression_monthly_district_cooling_Img'].'" />' : '') .'
 					</td>
 				</tr>
 				</td>
@@ -7189,6 +7478,8 @@ class Reports_admin extends Base_Admin_Controller
 		    $pre_data_occupancy = (!empty($utility_cost_chart[$month][$year - 1]['occupancy'])) ? $utility_cost_chart[$month][$year - 1]['occupancy'] : 0;
 		    $pre_data_room_night = (!empty($utility_cost_chart[$month][$year - 1]['room_night'])) ? $utility_cost_chart[$month][$year - 1]['room_night'] : 0;
 		    $pre_data_total_room_night_budget = (!empty($utility_cost_chart[$month][$year - 1]['total_room_night_budget'])) ? $utility_cost_chart[$month][$year - 1]['total_room_night_budget'] : 0;
+			$pre_data_fleet_petrol = (!empty($utility_cost_chart[$month][$year - 1]['fleet_petrol'])) ? $utility_cost_chart[$month][$year - 1]['fleet_petrol'] : 0;
+		    $pre_data_total_fleet_petrol_cost = (!empty($utility_cost_chart[$month][$year - 1]['total_fleet_petrol_cost'])) ? $utility_cost_chart[$month][$year - 1]['total_fleet_petrol_cost'] : 0;
 		    $pre_data_electricity_tariff = (!empty($utility_cost_chart[$month][$year - 1]['electricity_tariff'])) ? $utility_cost_chart[$month][$year - 1]['electricity_tariff'] : 0;
 		    $pre_data_electricity_kwh = (!empty($utility_cost_chart[$month][$year - 1]['total_electricity_kwh'])) ? $utility_cost_chart[$month][$year - 1]['total_electricity_kwh'] : 0;
 		    // Current year data
@@ -7213,6 +7504,8 @@ class Reports_admin extends Base_Admin_Controller
 		    $data_total_room_night_budget = (!empty($utility_cost_chart[$month][$year]['total_room_night_budget'])) ? $utility_cost_chart[$month][$year]['total_room_night_budget'] : 0;
 		    $data_electricity_tariff = (!empty($utility_cost_chart[$month][$year]['electricity_tariff'])) ? $utility_cost_chart[$month][$year]['electricity_tariff'] : 0;
 		    $data_electricity_kwh = (!empty($utility_cost_chart[$month][$year]['total_electricity_kwh'])) ? $utility_cost_chart[$month][$year]['total_electricity_kwh'] : 0;
+			$data_fleet_petrol = (!empty($utility_cost_chart[$month][$year]['fleet_petrol'])) ? $utility_cost_chart[$month][$year]['fleet_petrol'] : 0;
+		    $data_total_fleet_petrol_cost = (!empty($utility_cost_chart[$month][$year]['total_fleet_petrol_cost'])) ? $utility_cost_chart[$month][$year]['total_fleet_petrol_cost'] : 0;
 		    // Round values
 		    $pre_data_occupancy = round($pre_data_occupancy, 2);
 		    $data_occupancy = round($data_occupancy, 2);
@@ -7235,6 +7528,8 @@ class Reports_admin extends Base_Admin_Controller
 		    $return["total_sum_pre_data_occupancy"] += $pre_data_occupancy;
 		    $return["total_sum_pre_data_room_night"] += $pre_data_room_night;
 		    $return["total_sum_pre_data_total_room_night_budget"] += $pre_data_total_room_night_budget;
+			$return["total_sum_pre_data_fleet_petrol"] += $pre_data_fleet_petrol;
+		    $return["total_sum_pre_data_fleet_petrol_cose"] += $pre_data_total_fleet_petrol_cost;
 		    //$return["total_sum_pre_data_electricity_tariff"] += $pre_data_electricity_tariff;
 		    $return["total_sum_pre_data_electricity_kwh"] += $pre_data_electricity_kwh;
 		    // Total sum Current year data
@@ -7258,6 +7553,8 @@ class Reports_admin extends Base_Admin_Controller
 		    $return["total_sum_data_total_room_night_budget"] += $data_total_room_night_budget;
 		    //$return["total_sum_data_electricity_tariff"] += $data_electricity_tariff;
 		    $return["total_sum_data_electricity_kwh"] += $data_electricity_kwh;
+			$return["total_sum_data_fleet_petrol"] += $data_fleet_petrol;
+		    $return["total_sum_data_fleet_petrol_cost"] += $data_total_fleet_petrol_cost;
 		    $total_months++;
 		}
 	    }
@@ -7423,6 +7720,8 @@ class Reports_admin extends Base_Admin_Controller
 	    $return["heating_district_consumption_difference"] = $return["total_sum_data_heating_district_consumption"] - $return["total_sum_pre_data_heating_district_consumption"];
 	    $return["cooling_district_consumption_difference"] = $return["total_sum_data_cooling_district_consumption"] - $return["total_sum_pre_data_cooling_district_consumption"];
 	    $return["water_consumption_difference"] = $return["total_sum_data_water_consumption"] - $return["total_sum_pre_data_water_consumption"];
+		$return["fleet_petrol_difference"] = $return["total_sum_data_fleet_petrol"] - $return["total_sum_pre_data_fleet_petrol"];
+		$return["fleet_petrol_cost_difference"] = $return["total_sum_data_fleet_petrol_cost"] - $return["total_sum_pre_data_fleet_petrol_cost"];
 	    if (!empty($return["total_sum_pre_data_electricity_kwh"])) {
 		$return["electricity_consumption_variation"] = round($return["electricity_consumption_difference"] * 100 / $return["total_sum_pre_data_electricity_kwh"], $percentage_decimal);
 	    } else {
@@ -7457,6 +7756,16 @@ class Reports_admin extends Base_Admin_Controller
 		$return["water_consumption_variation"] = round($return["water_consumption_difference"] * 100 / $return["total_sum_pre_data_water_consumption"], $percentage_decimal);
 	    } else {
 		$return["water_consumption_variation"] = 0;
+	    }
+		if (!empty($return["total_sum_pre_data_fleet_petrol"])) {
+		$return["fleet_petrol_variation"] = round($return["fleet_petrol_difference"] * 100 / $return["total_sum_pre_data_fleet_petrol"], $percentage_decimal);
+	    } else {
+		$return["fleet_petrol_variation"] = 0;
+	    }
+		if (!empty($return["total_sum_pre_data_fleet_petrol_cost"])) {
+		$return["fleet_petrol_cost_variation"] = round($return["fleet_petrol_cost_difference"] * 100 / $return["total_sum_pre_data_fleet_petrol_cost"], $percentage_decimal);
+	    } else {
+		$return["fleet_petrol_cost_variation"] = 0;
 	    }
 	    if (!empty($return["total_sum_pre_data_electricity"]) && $return["total_sum_pre_data_electricity"] > 0) {
 		$return["total_sum_data_electricity_variation"] = round(((($return["total_sum_data_electricity"] - $return["total_sum_pre_data_electricity"]) * 100) / $return["total_sum_pre_data_electricity"]), $percentage_decimal);
@@ -7725,8 +8034,8 @@ class Reports_admin extends Base_Admin_Controller
 	    $return["lpg_cost_variation"] = ($currentBudgetActualData["total_lpg_cost_budget"] != 0) ? round(($currentBudgetActualData["total_lpg_cost_actual"] - $currentBudgetActualData["total_lpg_cost_budget"]) * 100 / $currentBudgetActualData["total_lpg_cost_budget"], $percentage_decimal) : 0;
 	    $return["natural_gas_cost_variation"] = ($currentBudgetActualData["total_natural_gas_cost_budget"] != 0) ? round(($currentBudgetActualData["total_natural_gas_cost_actual"] - $currentBudgetActualData["total_natural_gas_cost_budget"]) * 100 / $currentBudgetActualData["total_natural_gas_cost_budget"], $percentage_decimal) : 0;
 	    $return["water_cost_variation"] = ($currentBudgetActualData["water_total_consumption_cost_budget"] != 0) ? round(($currentBudgetActualData["water_total_consumption_cost_actual"] - $currentBudgetActualData["water_total_consumption_cost_budget"]) * 100 / $currentBudgetActualData["water_total_consumption_cost_budget"], $percentage_decimal) : 0;
-	    $return["district_cooling_cost_variation"] = ($currentBudgetActualData["district_cooling_cost_budget"] != '') ? round(($currentBudgetActualData["district_cooling_cost_actual"] - $currentBudgetActualData["district_cooling_cost_budget"]) * 100 / $currentBudgetActualData["district_cooling_cost_budget"], $percentage_decimal) : 0;
-	    $return["district_heating_cost_variation"] = ($currentBudgetActualData["district_heating_cost_budget"] != 0) ? round(($currentBudgetActualData["district_heating_cost_actual"] - $currentBudgetActualData["district_heating_cost_budget"]) * 100 / $currentBudgetActualData["district_heating_cost_budget"], $percentage_decimal) : 0;
+	    $return["district_cooling_cost_variation"] = ($currentBudgetActualData["district_cooling_cost_budget"] != '') ? round(($currentBudgetActualData["district_cooling_cost_actual"] + $currentBudgetActualData["district_cooling_fixed_cost"] - $currentBudgetActualData["district_cooling_cost_budget"]) * 100 / $currentBudgetActualData["district_cooling_cost_budget"], $percentage_decimal) : 0;
+	    $return["district_heating_cost_variation"] = ($currentBudgetActualData["district_heating_cost_budget"] != 0) ? round(($currentBudgetActualData["district_heating_cost_actual"] + $currentBudgetActualData["district_heating_fixed_cost"] - $currentBudgetActualData["district_heating_cost_budget"]) * 100 / $currentBudgetActualData["district_heating_cost_budget"], $percentage_decimal) : 0;
 	    $return["electricity_per_room_night_variation"] = ($return["electricity_per_room_night_budget"] != 0) ? round(($return["electricity_per_room_night_actual"] - $return["electricity_per_room_night_budget"]) * 100 / $return["electricity_per_room_night_budget"], $percentage_decimal) : 0;
 	    $return["fuel_oil_per_room_night_variation"] = ($return["fuel_oil_per_room_night_budget"] != 0) ? round(($return["fuel_oil_per_room_night_actual"] - $return["fuel_oil_per_room_night_budget"]) * 100 / $return["fuel_oil_per_room_night_budget"], $percentage_decimal) : 0;
 	    $return["lpg_per_room_night_variation"] = ($return["lpg_per_room_night_budget"] != 0) ? round(($return["lpg_per_room_night_actual"] - $return["lpg_per_room_night_budget"]) * 100 / $return["lpg_per_room_night_budget"], $percentage_decimal) : 0;
@@ -7735,7 +8044,7 @@ class Reports_admin extends Base_Admin_Controller
 	    $return["district_cooling_per_room_night_variation"] = ($return["district_cooling_per_room_night_budget"] != 0) ? round(($return["district_cooling_per_room_night_actual"] - $return["district_cooling_per_room_night_budget"]) * 100 / $return["district_cooling_per_room_night_budget"], $percentage_decimal) : 0;
 	    $return["district_heating_per_room_night_variation"] = ($return["district_heating_per_room_night_budget"] != 0) ? round(($return["district_heating_per_room_night_actual"] - $return["district_heating_per_room_night_budget"]) * 100 / $return["district_heating_per_room_night_budget"], $percentage_decimal) : 0;
 	    $return["total_cost_budget"] = $currentBudgetActualData["total_electricity_cost_budget"] + $currentBudgetActualData["total_fuel_oil_cost_budget"] + $currentBudgetActualData["total_lpg_cost_budget"] + $currentBudgetActualData["total_natural_gas_cost_budget"] + $currentBudgetActualData["water_total_consumption_cost_budget"] + $currentBudgetActualData["district_cooling_cost_budget"] + $currentBudgetActualData["district_heating_cost_budget"];
-	    $return["total_cost_actual"] = $currentBudgetActualData["total_electricity_cost_actual"] + $currentBudgetActualData["total_fuel_oil_cost_actual"] + $currentBudgetActualData["total_lpg_cost_actual"] + $currentBudgetActualData["total_natural_gas_cost_actual"] + $currentBudgetActualData["water_total_consumption_cost_actual"] + $currentBudgetActualData["district_cooling_cost_actual"] + $currentBudgetActualData["district_heating_cost_actual"];
+	    $return["total_cost_actual"] = $currentBudgetActualData["total_electricity_cost_actual"] + $currentBudgetActualData["total_fuel_oil_cost_actual"] + $currentBudgetActualData["total_lpg_cost_actual"] + $currentBudgetActualData["total_natural_gas_cost_actual"] + $currentBudgetActualData["water_total_consumption_cost_actual"] + $currentBudgetActualData["district_cooling_cost_actual"] + $currentBudgetActualData['district_cooling_fixed_cost'] + $currentBudgetActualData["district_heating_cost_actual"] + $currentBudgetActualData['district_heating_fixed_cost'];
 	    $return["total_cost_variation"] = $return["total_cost_actual"] - $return["total_cost_budget"];
 	    $return["total_cost_variation_percentage"] = ($return["total_cost_budget"] != 0) ? round($return["total_cost_variation"] * 100 / $return["total_cost_budget"], $percentage_decimal) : 0;
 	    $return["total_cost_actual_per_room_night"] = round($return["total_cost_actual"] / $currentBudgetActualData["total_room_night"], $value_decimal);
@@ -7952,6 +8261,50 @@ class Reports_admin extends Base_Admin_Controller
 	    ->setCellValue('F7', number_format($total_sum_data_cdd_variation, 2) . "%")
 	    ->setCellValue('F8', number_format($total_sum_data_hdd_variation, 2) . "%");
 	$header_row = 9;
+
+	if ($site_detail['show_utility_fleet']) {
+	    $row1 = $header_row + 1;
+	    $row2 = $header_row + 2;
+	    $row3 = $header_row + 3;
+	    $row4 = $header_row + 4;
+	    /*
+	     * ##################################################
+	     *          FLEET FUEL BLOCK STYLES
+	     * ##################################################
+	     */
+	    $objPHPExcel->getActiveSheet()->mergeCells('B' . $header_row . ':I' . $header_row);
+	    $objPHPExcel->getActiveSheet()->getStyle('A' . $header_row . ':I' . $header_row)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('d8e1f2');
+	    $objPHPExcel->getActiveSheet()->getStyle('A' . $header_row . ':I' . $header_row)->applyFromArray($box_display);
+	    $objPHPExcel->getActiveSheet()->getStyle('A' . $row1 . ':I' . $row4)->applyFromArray($box_display);
+	    $objPHPExcel->getActiveSheet()->getStyle('B' . $row1 . ':D' . $row4)->applyFromArray($style_border_right_left);
+	    $objPHPExcel->getActiveSheet()->getStyle('E' . $row1 . ':G' . $row4)->applyFromArray($style_border_right_left);
+	    $objPHPExcel->getActiveSheet()->getStyle('H' . $row1 . ':I' . $row4)->applyFromArray($style_border_right_left);
+	    if ($fleet_petrol_difference > 0) {
+		$objPHPExcel->getActiveSheet()->getStyle('E' . $row1 . ':F' . $row1)->applyFromArray($style_positive_number);
+	    }
+	    if ($fleet_petrol_cost_difference > 0) {
+		$objPHPExcel->getActiveSheet()->getStyle('E' . $row2 . ':F' . $row2)->applyFromArray($style_positive_number);
+	    }
+	    $objPHPExcel->setActiveSheetIndex(0)
+		->setCellValue('A' . $header_row, 'FLEET FUEL')
+		->setCellValue('B' . $header_row, '');
+	    $objPHPExcel->setActiveSheetIndex(0)
+		->setCellValue('A' . $row1, 'Consumption (Litres)')
+		->setCellValue('A' . $row2, 'Total Cost (' . currency_symbol($isLocal) . ')');
+	    $objPHPExcel->setActiveSheetIndex(0)
+		->setCellValue('B' . $row1, number_format($total_sum_data_fleet_petrol))
+		->setCellValue('B' . $row2, num_format($total_sum_data_fleet_petrol_cost, 0, $isLocal));
+	    $objPHPExcel->setActiveSheetIndex(0)
+		->setCellValue('C' . $row1, number_format($total_sum_pre_data_fleet_petrol))
+		->setCellValue('C' . $row2, num_format($total_sum_pre_data_fleet_petrol_cost, 0, $isLocal));
+	    $objPHPExcel->setActiveSheetIndex(0)
+		->setCellValue('E' . $row1, number_format($fleet_petrol_difference))
+		->setCellValue('E' . $row2, num_format($fleet_petrol_cost_difference, 0, $isLocal));
+	    $objPHPExcel->setActiveSheetIndex(0)
+		->setCellValue('F' . $row1, number_format($fleet_petrol_variation, $percentage_decimal) . "%")
+		->setCellValue('F' . $row2, number_format($fleet_petrol_cost_variation, $percentage_decimal) . "%");
+	    $header_row += 3;
+	}
 	//electricity data
 	if ($site_detail['show_utility_electricity']) {
 	    $row1 = $header_row + 1;
@@ -8451,7 +8804,7 @@ class Reports_admin extends Base_Admin_Controller
 	    $objPHPExcel->getActiveSheet()->getStyle('H' . $row1 . ':I' . $row4)->applyFromArray($style_border_right_left);
 	    $district_cooling_act_bud_diff = $currentBudgetActualData["district_cooling_actual"] - $currentBudgetActualData["district_cooling_budget"];
 	    $district_cooling_act_bud_tariff_diff = $district_cooling_tariff_actual - $district_cooling_tariff_budget;
-	    $district_cooling_act_bud_cost_diff = $currentBudgetActualData["district_cooling_cost_actual"] - $currentBudgetActualData["district_cooling_cost_budget"];
+	    $district_cooling_act_bud_cost_diff = $total_sum_data_cooling_district - $currentBudgetActualData["district_cooling_cost_budget"];
 	    $district_cooling_act_bud_pr_rn_diff = $district_cooling_per_room_night_actual - $district_cooling_per_room_night_budget;
 	    if ($cooling_district_consumption_difference > 0) {
 		$objPHPExcel->getActiveSheet()->getStyle('E' . $row1 . ':F' . $row1)->applyFromArray($style_positive_number);
@@ -10806,6 +11159,7 @@ class Reports_admin extends Base_Admin_Controller
 	$this->utilities_model->utilities_year = $currYear - 3;
 	$getUtilityData_minus_three_year = $this->utilities_model->getSiteUtilityLastYear();
 	foreach ($getUtilityData as $getUtilities) {
+		$getUtilities = array_map('floatval', $getUtilities);
 	    $totalElectricyKwhValue = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production'];
 	    $totalFuelOilCostValue = $getUtilities['total_fuel_oil_cost'] - $getUtilities['onsite_generators_fuel_oil_quantity'];
 	    $totalNaturalGasValue = $getUtilities['total_natural_gas_cost'] - $getUtilities['onsite_generators_natural_gas_quantity'];
@@ -10821,6 +11175,7 @@ class Reports_admin extends Base_Admin_Controller
 	    $utility_kwh_total += ($electricity_value + $fuel_value + $lpg_value + $natural_gas_value + $heating_district_value + $cooling_district_value);
 	}
 	foreach ($getUtilityData_prev as $getUtilities) {
+		$getUtilities = array_map('floatval', $getUtilities);
 	    $totalElectricyKwhValue_prev = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production'];
 	    $totalFuelOilCostValue_prev = $getUtilities['total_fuel_oil_cost'] - $getUtilities['onsite_generators_fuel_oil_quantity'];
 	    $totalNaturalGasValue_prev = $getUtilities['total_natural_gas_cost'] - $getUtilities['onsite_generators_natural_gas_quantity'];
@@ -10836,6 +11191,7 @@ class Reports_admin extends Base_Admin_Controller
 	    $utility_kwh_total_prev += ($electricity_value + $fuel_value + $lpg_value + $natural_gas_value + $heating_district_value + $cooling_district_value);
 	}
 	foreach ($getUtilityData_minus_two_year as $getUtilities) {
+		$getUtilities = array_map('floatval', $getUtilities);
 	    $totalElectricyKwhValue_minus_two_year = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production'];
 	    $totalFuelOilCostValue_minus_two_year = $getUtilities['total_fuel_oil_cost'] - $getUtilities['onsite_generators_fuel_oil_quantity'];
 	    $totalNaturalGasValue_minus_two_year = $getUtilities['total_natural_gas_cost'] - $getUtilities['onsite_generators_natural_gas_quantity'];
@@ -10851,6 +11207,7 @@ class Reports_admin extends Base_Admin_Controller
 	    $utility_kwh_total_minus_two_year += ($electricity_value + $fuel_value + $lpg_value + $natural_gas_value + $heating_district_value + $cooling_district_value);
 	}
 	foreach ($getUtilityData_minus_three_year as $getUtilities) {
+		$getUtilities = array_map('floatval', $getUtilities);
 	    $totalElectricyKwhValue_minus_three_year = $getUtilities['total_electricity_kwh'] - $getUtilities['onsite_generators_quantity'] - $getUtilities['total_renewable_energy_production'];
 	    $totalFuelOilCostValue_minus_three_year = $getUtilities['total_fuel_oil_cost'] - $getUtilities['onsite_generators_fuel_oil_quantity'];
 	    $totalNaturalGasValue_minus_three_year = $getUtilities['total_natural_gas_cost'] - $getUtilities['onsite_generators_natural_gas_quantity'];
@@ -12246,6 +12603,26 @@ define('K_PATH_IMAGES', BASE_PATH_CUSTOM);
 require_once BASE_PATH_CUSTOM . '/application/libraries/tcpdf/tcpdf.php';
 class MYPDF extends TCPDF
 {
+    public $mytd_page_header = false;
+    public $mytd_report_subtitle = '';
+
+    public function setInterFont($style, $size)
+    {
+	$flags = strtoupper($style);
+	$suffix = '';
+	if (strpos($flags, 'B') !== false && strpos($flags, 'I') !== false) {
+	    $suffix = 'bi';
+	} elseif (strpos($flags, 'B') !== false) {
+	    $suffix = 'b';
+	} elseif (strpos($flags, 'I') !== false) {
+	    $suffix = 'i';
+	}
+	$file = K_PATH_FONTS . 'inter' . $suffix . '.php';
+	if (!is_file($file)) {
+	    $file = APPPATH . 'libraries/tcpdf/fonts/inter' . $suffix . '.php';
+	}
+	$this->SetFont('inter', $style, $size, str_replace('\\', '/', $file));
+    }
 
     public function writeHTML($html, $ln = true, $fill = false, $reseth = false, $cell = false, $align = '')
     {
@@ -12255,7 +12632,33 @@ class MYPDF extends TCPDF
     public function Header()
     {
 	$image_file = K_PATH_IMAGES . SITE_PDF_HEADER_LOGO;
-	if (file_exists($image_file)) {
+	if ($this->mytd_page_header) {
+	    if (is_file($image_file) && @getimagesize($image_file)) {
+		$this->Image($image_file, 10, 6, 32, 12, '', '', 'T', false, 300, '', false, false, 0, false, false, false);
+	    }
+	    $this->setInterFont('B', 11);
+	    $this->SetTextColor(17, 24, 39);
+	    $this->SetXY(46, 6);
+	    $this->Cell(108, 6, PDF_HEADER_SITE_NAME, 0, 0, 'C');
+	    $this->setInterFont('', 8);
+	    $this->SetTextColor(107, 119, 133);
+	    $this->SetXY(46, 12);
+	    $this->Cell(108, 5, $this->mytd_report_subtitle, 0, 0, 'C');
+	    $this->setInterFont('', 6.5);
+	    $this->SetTextColor(107, 119, 133);
+	    $this->SetXY(158, 6);
+	    $this->Cell(42, 4, 'GENERATED', 0, 0, 'R');
+	    $this->setInterFont('B', 9);
+	    $this->SetTextColor(17, 24, 39);
+	    $this->SetXY(158, 11);
+	    $this->Cell(42, 5, date('d-M-Y'), 0, 0, 'R');
+	    $this->SetDrawColor(213, 223, 233);
+	    $this->SetLineWidth(0.2);
+	    $this->Line(10, 22, 200, 22);
+	    $this->SetTextColor(0, 0, 0);
+	    return;
+	}
+	if (is_file($image_file) && @getimagesize($image_file)) {
 	    $this->Image($image_file, 10, 2, 30, 18, '', '', 'T', false, 300, '', false, false, 0, false, false, false);
 	}
 	$this->Line(10, 24, '202', 24);
@@ -12267,6 +12670,21 @@ class MYPDF extends TCPDF
 
     public function Footer()
     {
+	if ($this->mytd_page_header) {
+	    $this->SetY(-12);
+	    $this->SetDrawColor(213, 223, 233);
+	    $this->SetLineWidth(0.2);
+	    $this->Line(10, $this->GetY(), 200, $this->GetY());
+	    $this->setInterFont('', 6.5);
+	    $this->SetTextColor(107, 119, 133);
+	    $this->SetXY(10, -9.5);
+	    $this->Cell(150, 5, 'HEP - Hotel Energy Portal | Copyright © ' . date('Y') . ' EEG - Energy Efficiency Group. All rights reserved.', 0, 0, 'L');
+	    $this->setInterFont('B', 7);
+	    $this->SetTextColor(23, 55, 94);
+	    $this->SetXY(160, -9.5);
+	    $this->Cell(40, 5, 'Page ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(), 0, 0, 'R');
+	    return;
+	}
 	$this->SetY(-15);
 	$this->SetFont('helvetica', 'I', 8);
 	$footText = "Page " . $this->getAliasNumPage() . "/" . $this->getAliasNbPages();
