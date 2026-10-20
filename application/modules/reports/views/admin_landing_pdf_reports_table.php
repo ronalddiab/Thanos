@@ -327,8 +327,8 @@
 											</tr>
 											<?php $electricity_actual_budget_tariff_diff = $electricity_tariff_actual - $electricity_tariff_budget; ?>
 											<tr style="<?php echo $electricity_actual_budget_tariff_diff > 0 ? $positive_number_style : ''; ?>">
-												<td style="text-align: center;"><?php echo num_format_without_currency(floatval((string) $electricity_actual_budget_tariff_diff, $value_decimal), $isLocal); ?></td>
-												<td style="text-align: center;"><?php echo number_format(floatval((string) $electricity_tariff_variation, $percentage_decimal)) . "%"; ?></td>
+												<td style="text-align: center;"><?php echo num_format_without_currency(floatval((string) $electricity_actual_budget_tariff_diff), $value_decimal, $isLocal); ?></td>
+												<td style="text-align: center;"><?php echo number_format(floatval((string) $electricity_tariff_variation), $percentage_decimal) . "%"; ?></td>
 											</tr>
 											<?php $elecricity_act_bud_cost_diff = $currentBudgetActualData["total_electricity_cost_actual"] - $currentBudgetActualData["total_electricity_cost_budget"]; ?>
 											<tr style="text-align: center;<?php echo $elecricity_act_bud_cost_diff > 0 ? $positive_number_style : ''; ?>">
@@ -745,7 +745,7 @@
 											</tr>
 											<?php $water_act_bud_tariff_diff = $water_tariff_actual - $water_tariff_budget; ?>
 											<tr style="<?php echo $water_act_bud_tariff_diff > 0 ? $positive_number_style : ''; ?>">
-												<td style="text-align: center;"><?php echo num_format_without_currency(floatval((string) $water_act_bud_tariff_diff, $value_decimal), $isLocal); ?></td>
+												<td style="text-align: center;"><?php echo num_format_without_currency(floatval((string) $water_act_bud_tariff_diff), $value_decimal, $isLocal); ?></td>
 												<td style="text-align: center;"><?php echo number_format(floatval((string) $water_tariff_variation), $percentage_decimal) . "%"; ?></td>
 											</tr>
 											<?php $water_act_bud_cost_diff = $currentBudgetActualData["water_total_consumption_cost_actual"] - $currentBudgetActualData["water_total_consumption_cost_budget"]; ?>
@@ -849,7 +849,7 @@
 											<?php $district_cooling_act_bud_tariff_diff = $district_cooling_tariff_actual - $district_cooling_tariff_budget; ?>
 											<tr style="<?php echo $district_cooling_act_bud_tariff_diff > 0 ? $positive_number_style : ''; ?>">
 												<td style="text-align: center;"><?php echo num_format_without_currency($district_cooling_act_bud_tariff_diff, $value_decimal, $isLocal); ?></td>
-												<td style="text-align: center;"><?php echo number_format(floatval((string) $district_cooling_tariff_variation, $percentage_decimal)) . "%"; ?></td>
+												<td style="text-align: center;"><?php echo number_format(floatval((string) $district_cooling_tariff_variation), $percentage_decimal) . "%"; ?></td>
 											</tr>
 											<?php
 													$district_cooling_act_bud_cost_diff = $total_sum_data_cooling_district - $currentBudgetActualData["district_cooling_cost_budget"];

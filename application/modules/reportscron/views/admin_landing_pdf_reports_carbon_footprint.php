@@ -121,6 +121,7 @@ if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_com
 				    $pre_data_heating_district   = (!empty($utility_cost_chart[$month][$prevYear]['heating_district_consumption'])) ? $utility_cost_chart[$month][$prevYear]['heating_district_consumption'] : 0;
 
 				    $pre_data_cooling_district   = (!empty($utility_cost_chart[$month][$prevYear]['cooling_district_consumption'])) ? $utility_cost_chart[$month][$prevYear]['cooling_district_consumption'] : 0;
+					$pre_data_fleet_petrol       = (!empty($utility_cost_chart[$month][$prevYear]['fleet_petrol'])) ? $utility_cost_chart[$month][$prevYear]['fleet_petrol'] : 0;
 
 				    $pre_data_water              = (!empty($utility_cost_chart[$month][$prevYear]['water_consumption'])) ? $utility_cost_chart[$month][$prevYear]['water_consumption'] : 0;
 
@@ -154,6 +155,7 @@ if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_com
 				    $data_heating_district   = (!empty($utility_cost_chart[$month][$year]['heating_district_consumption'])) ? $utility_cost_chart[$month][$year]['heating_district_consumption'] : 0;
 
 				    $data_cooling_district   = (!empty($utility_cost_chart[$month][$year]['cooling_district_consumption'])) ? $utility_cost_chart[$month][$year]['cooling_district_consumption'] : 0;
+					$data_fleet_petrol       = (!empty($utility_cost_chart[$month][$year]['fleet_petrol'])) ? $utility_cost_chart[$month][$year]['fleet_petrol'] : 0;
 
 				    $data_water              = (!empty($utility_cost_chart[$month][$year]['water_consumption'])) ? $utility_cost_chart[$month][$year]['water_consumption'] : 0;
 
@@ -185,6 +187,7 @@ if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_com
 				    $pre_data_heating_district = round($pre_data_heating_district * $dataFactor['district_heating'] * $site_detail['district_heating_emission_factor'], 2);
 
 				    $pre_data_cooling_district = round($pre_data_cooling_district * $dataFactor['district_cooling'] * $site_detail['district_cooling_emission_factor'], 2);
+					$pre_data_fleet_petrol = round($pre_data_fleet_petrol * 2.3, 2);
 
 				    $pre_data_water            = 0; // There is no calculation for water data
 
@@ -201,6 +204,7 @@ if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_com
 				    $data_heating_district = round($data_heating_district * $dataFactor['district_heating'] * $site_detail['district_heating_emission_factor'], 2);
 
 				    $data_cooling_district = round($data_cooling_district * $dataFactor['district_cooling'] * $site_detail['district_cooling_emission_factor'], 2);
+					$data_fleet_petrol = round($data_fleet_petrol * 2.3, 2);
 
 				    $data_water            = 0; // There is no calculation for water data
 
@@ -227,7 +231,7 @@ if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_com
 				    $total_sum_pre_data_heating_district += $pre_data_heating_district;
 
 				    $total_sum_pre_data_cooling_district += $pre_data_cooling_district;
-
+					$total_sum_pre_data_fleet_petrol += $pre_data_fleet_petrol;
 				    $total_sum_pre_data_water += $pre_data_water;
 
 				    $total_sum_pre_data_cdd += $pre_data_cdd;
@@ -258,7 +262,7 @@ if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_com
 				    $total_sum_data_heating_district += $data_heating_district;
 
 				    $total_sum_data_cooling_district += $data_cooling_district;
-
+					$total_sum_data_fleet_petrol += $data_fleet_petrol;
 				    $total_sum_data_water += $data_water;
 
 				    $total_sum_data_cdd += $data_cdd;
@@ -329,6 +333,10 @@ if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_com
 				if (!empty($site_detail['show_utility_district_cooling'])) {
 					$total_sum_pre_data_sum += $total_sum_pre_data_cooling_district;
 					$total_sum_data_sum += $total_sum_data_cooling_district;
+				}
+				if (!empty($site_detail['show_utility_fleet'])) {
+					$total_sum_pre_data_sum += $total_sum_pre_data_fleet_petrol;
+					$total_sum_data_sum += $total_sum_data_fleet_petrol;
 				}
 
 
@@ -442,6 +450,16 @@ if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_com
 				}
 
 			    }
+
+			    if (!empty($total_sum_pre_data_fleet_petrol) && $total_sum_pre_data_fleet_petrol > 0) {
+					$total_sum_data_fleet_petrol_variation = round(((($total_sum_data_fleet_petrol - $total_sum_pre_data_fleet_petrol) * 100) / $total_sum_pre_data_fleet_petrol), 2);
+				} else {
+					if ($total_sum_data_fleet_petrol == 0) {
+						$total_sum_data_fleet_petrol_variation = 0;
+					} else {
+						$total_sum_data_fleet_petrol_variation = 100;
+					}
+				}
 
 			    if (!empty($total_sum_pre_data_water) && $total_sum_pre_data_water > 0) {
 
@@ -814,7 +832,12 @@ if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_com
 
 						    <?php }?>
 
-
+							<?php if (($totalFleetPetrol || $totalFleetPetrolConsumption) && $site_detail['show_utility_fleet']) {?>
+							<tr>
+								<td>Fleet Petrol</td>
+								<td><?php echo number_format($total_sum_pre_data_fleet_petrol); ?></td>
+							</tr>
+							<?php }?>
 
 						</tbody>
 
@@ -910,7 +933,12 @@ if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_com
 
 						    <?php }?>
 
-
+							<?php if (($totalFleetPetrol || $totalFleetPetrolConsumption) && $site_detail['show_utility_fleet']) {?>
+							<tr>
+								<td>Fleet Petrol</td>
+								<td><?php echo number_format($total_sum_data_fleet_petrol); ?></td>
+							</tr>
+							<?php }?>
 
 						</tbody>
 
@@ -994,7 +1022,11 @@ if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_com
 
 						    <?php }?>
 
-
+							<?php if (($totalFleetPetrol || $totalFleetPetrolConsumption) && $site_detail['show_utility_fleet']) {?>
+							<tr>
+								<td><?php echo $total_sum_data_fleet_petrol_variation; ?>%</td>
+							</tr>
+							<?php }?>
 
 						</tbody>
 
@@ -1003,6 +1035,70 @@ if ($filters['filters_comparision_chart']["start_year"] == $filters['filters_com
 					</td>
 
 				    </tr>
+					<?php if($is_monthly) { 
+						$scope1 = $total_sum_data_fuel + $total_sum_data_lpg + $total_sum_data_natural_gas + $total_sum_data_fleet_petrol;
+						$scope2 = $total_sum_data_electricity + $total_sum_data_cooling_district + $total_sum_data_heating_district;
+						$scope1_pre = $total_sum_pre_data_fuel + $total_sum_pre_data_lpg + $total_sum_pre_data_natural_gas + $total_sum_pre_data_fleet_petrol;
+						$scope2_pre = $total_sum_pre_data_electricity + $total_sum_pre_data_cooling_district + $total_sum_pre_data_heating_district;
+						$scope1_variation = (($scope1 - $scope1_pre) * 100) / $scope1_pre;
+						$scope2_variation = (($scope2 - $scope2_pre) * 100) / $scope2_pre;
+						
+						?>
+						<tr>
+							<td width="38%">
+								<table width="100%" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="70%"><strong>Total Scope 1</strong></td>
+										<td width="30%"><strong><?php echo number_format($scope1_pre); ?></strong></td>
+									</tr>
+								</table>
+							</td>
+							<td width="38%">
+								<table width="100%" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="70%"></td>
+										<td width="30%"><strong><?php echo number_format($scope1); ?></strong></td>
+									</tr>
+								</table>
+							</td>
+							<td width="24%" align="center">
+								<table width="100%" cellpadding="0" cellspacing="0">
+									<tr>
+										<td>
+											<strong><?php echo number_format($scope1_variation,2); ?>%</strong>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td width="38%">
+								<table width="100%" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="70%"><strong>Total Scope 2</strong></td>
+										<td width="30%"><strong><?php echo number_format($scope2_pre); ?></strong></td>
+									</tr>
+								</table>
+							</td>
+							<td width="38%">
+								<table width="100%" cellpadding="0" cellspacing="0">
+									<tr>
+										<td width="70%"></td>
+										<td width="30%"><strong><?php echo number_format($scope2); ?></strong></td>
+									</tr>
+								</table>
+							</td>
+							<td width="24%" align="center">
+								<table width="100%" cellpadding="0" cellspacing="0">
+									<tr>
+										<td>
+											<strong><?php echo number_format($scope2_variation,2); ?>%</strong>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					<?php } ?>
 
 				    <tr>
 

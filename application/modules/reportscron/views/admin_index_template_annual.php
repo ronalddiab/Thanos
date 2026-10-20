@@ -1524,7 +1524,12 @@ var chart_data = [];
 	    ]);
 	    var options = {
 	    height:480,
-		    title: '<?php echo lang("kWh-pie-chart-last12month-title-monthly") . ' - ' . $fullmontharray[$filters["previous_month"]] . ' ' . $filters["previous_year"]; ?>',
+		    title: '<?php
+		    $pieMonth = isset($filters["filters_comparision_chart"]["start_month"]) ? (int) $filters["filters_comparision_chart"]["start_month"] : (int) $filters["previous_month"];
+		    $pieYear = isset($filters["filters_comparision_chart"]["start_year"]) ? $filters["filters_comparision_chart"]["start_year"] : $filters["previous_year"];
+		    $pieMonthName = isset($fullmontharray[$pieMonth]) ? $fullmontharray[$pieMonth] : "";
+		    echo lang("kWh-pie-chart-last12month-title-monthly") . " - " . $pieMonthName . " " . $pieYear;
+		    ?>',
 		    sliceVisibilityThreshold: .0,
 		    pieHole: 0.4,
 		    titleTextStyle: {

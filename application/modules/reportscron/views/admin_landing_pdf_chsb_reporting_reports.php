@@ -1,607 +1,307 @@
 <?php
-
-if((!empty($measures)) && (!empty($measure_readings)))
-
-{
-    ?>
-
-<html style="text-align: left;">
-    <body width="100%">
-
-        <div style="border:2px solid  #f69546;">
-
-          
-
-                <table width="100%" cellpadding="0" cellspacing="4"  >
-
-                <tr>
-
-                    <td>
-
-                        <table>
-
-                            <tr colspan="2" style="font-size:14px;">
-
-                                <td align="center" >
-
-                                    <strong><center>Cornell Hotel Sustainability Benchmarking Report</center> </strong>
-
-                                </td>
-
-                            </tr>
-
-                        </table> 
-
-                    </td>
-
-                </tr>
-
-                <tr>
-
-                    <td>
-
-                        <table width="100%" cellpadding="5" border="1" cellspacing="0">
-
-                            <tr>
-
-                                <td width="30%" style="background-color:#d8e1f2;" align="center"><strong>Measures</strong></td>
-
-                                <!-- <td width="8%"  style="background-color:#d8e1f2;" align="center"><strong>Count</strong></td> -->
-
-                                <td width="8%"  style="background-color:#d8e1f2;" align="center"><strong>Low</strong></td>
-
-                                <td width="8%"  style="background-color:#d8e1f2;" align="center"><strong>Lower Quartile</strong></td>
-
-                                <td width="8%"  style="background-color:#d8e1f2;" align="center"><strong>Mean</strong></td>
-
-                                <td width="8%"  style="background-color:#d8e1f2;" align="center"><strong>Median</strong></td>
-
-                                <td width="8%"  style="background-color:#d8e1f2;" align="center"><strong>Upper Quartile</strong></td>
-
-                                <td width="8%"  style="background-color:#d8e1f2;" align="center"><strong>High</strong></td>
-
-                                <!-- <td width="8%"  style="background-color:#d8e1f2;" align="center"><strong>SD</strong></td> -->
-
-                                <td width="14%" style="background-color:#d8e1f2;" align="center"><strong><?php echo $site_detail['site_location_name']; ?></strong></td>
-
-                            </tr>
-
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['HCMIRoomsFootprintPerOccupiedRoom']['chsb_value'],
-                                    $measure_readings[1]
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[1]['measure_name']; ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[1]['count']; ?></td> -->
-
-                                <td align="center"><?php echo number_format($measure_readings[1]['low']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[1]['lower_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[1]['mean']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[1]['median']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[1]['upper_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[1]['high']); ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[1]['sd']; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo $measures['HCMIRoomsFootprintPerOccupiedRoom']['chsb_value']?number_format($measures['HCMIRoomsFootprintPerOccupiedRoom']['chsb_value']):'' ?></td>
-
-                            </tr>
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['HotelCarbonFootprintPerRoom']['chsb_value'],
-                                    $measure_readings[2]
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[2]['measure_name']; ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[2]['count']; ?></td> -->
-
-                                <td align="center"><?php echo number_format($measure_readings[2]['low']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[2]['lower_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[2]['mean']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[2]['median']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[2]['upper_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[2]['high']); ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[2]['sd']; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo $measures['HotelCarbonFootprintPerRoom']['chsb_value']?number_format($measures['HotelCarbonFootprintPerRoom']['chsb_value']):''; ?></td>
-
-                            </tr>
-
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['HotelCarbonFootprintPerOccupiedRoom']['chsb_value'],
-                                    $measure_readings[3]
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[3]['measure_name']; ?></td>
-                                <!-- <td align="center"><?php echo $measure_readings[3]['count']; ?></td> -->
-
-                                <td align="center"><?php echo number_format($measure_readings[3]['low']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[3]['lower_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[3]['mean']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[3]['median']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[3]['upper_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[3]['high']); ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[3]['sd']; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo $measures['HotelCarbonFootprintPerOccupiedRoom']['chsb_value']?number_format($measures['HotelCarbonFootprintPerOccupiedRoom']['chsb_value']):''; ?></td>
-
-                            </tr>
-
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['HotelCarbonFootprintPerSquareMeter']['chsb_value'],
-                                    $measure_readings[4]
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[4]['measure_name']; ?></td>
-                                <!-- <td align="center"><?php echo $measure_readings[4]['count']; ?></td> -->
-
-                                <td align="center"><?php echo number_format($measure_readings[4]['low']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[4]['lower_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[4]['mean']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[4]['median']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[4]['upper_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[4]['high']); ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[4]['sd']; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo $measures['HotelCarbonFootprintPerSquareMeter']['chsb_value']?$measures['HotelCarbonFootprintPerSquareMeter']['chsb_value']?number_format($measures['HotelCarbonFootprintPerSquareMeter']['chsb_value']):'':''; ?></td>
-
-                            </tr>
-
-                            <!-- <tr>
-                                <?php
-                                // $chsb_color = getChsbColor(
-                                //     $measures['HotelCarbonFootprintPerSquareFoot']['chsb_value'],
-                                //     $measure_readings[5]
-                                // );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[5]['measure_name']; ?> </td>
-                                <td align="center"><?php echo $measure_readings[5]['count']; ?></td>
-                                <td align="center"><?php echo $measure_readings[5]['low']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[5]['lower_quartile']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[5]['mean']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[5]['median']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[5]['upper_quartile']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[5]['high']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[5]['sd']; ?></td>
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo $measures['HotelCarbonFootprintPerSquareFoot']['chsb_value']?number_format($measures['HotelCarbonFootprintPerSquareFoot']['chsb_value']):''; ?></td>
-
-                            </tr> -->
-
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['HotelEnergyUsagePerOccupiedRoom']['chsb_value'],
-                                    $measure_readings[6]
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[6]['measure_name']; ?> </td>
-                                <!-- <td align="center"><?php echo $measure_readings[6]['count']; ?></td> -->
-                                <td align="center"><?php echo number_format($measure_readings[6]['low']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[6]['lower_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[6]['mean']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[6]['median']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[6]['upper_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[6]['high']); ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[6]['sd']; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo $measures['HotelEnergyUsagePerOccupiedRoom']['chsb_value']?number_format($measures['HotelEnergyUsagePerOccupiedRoom']['chsb_value']):''; ?></td>
-
-                            </tr>
-
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['HotelEnergyUsagePerSquareMeter']['chsb_value'],
-                                    $measure_readings[7]
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[7]['measure_name']; ?> </td>
-                                <!-- <td align="center"><?php echo $measure_readings[7]['count']; ?></td> -->
-                                <td align="center"><?php echo number_format($measure_readings[7]['low']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[7]['lower_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[7]['mean']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[7]['median']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[7]['upper_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[7]['high']); ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[7]['sd']; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo $measures['HotelEnergyUsagePerSquareMeter']['chsb_value']?$measures['HotelEnergyUsagePerSquareMeter']['chsb_value']?number_format($measures['HotelEnergyUsagePerSquareMeter']['chsb_value']):'':'';  ?></td>
-
-                            </tr>
-
-                            <!-- <tr>
-                                <?php
-                                // $chsb_color = getChsbColor(
-                                //     $measures['HotelEnergyUsagePerSquareFoot']['chsb_value'],
-                                //     $measure_readings[8]
-                                // );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[8]['measure_name']; ?></td>
-                                <td align="center"><?php echo $measure_readings[8]['count']; ?></td>
-                                <td align="center"><?php echo $measure_readings[8]['low']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[8]['lower_quartile']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[8]['mean']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[8]['median']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[8]['upper_quartile']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[8]['high']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[8]['sd']; ?></td>
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo $measures['HotelEnergyUsagePerSquareFoot']['chsb_value']?number_format($measures['HotelEnergyUsagePerSquareFoot']['chsb_value']):'';  ?></td>
-
-                            </tr> -->
-
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['HCMIMeetingFootprintPerMeetingHour']['chsb_value'],
-                                    $measure_readings[9]
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[9]['measure_name']; ?></td>
-                                <!-- <td align="center"><?php echo $measure_readings[9]['count']; ?></td> -->
-                                <td align="center"><?php echo number_format($measure_readings[9]['low']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[9]['lower_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[9]['mean']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[9]['median']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[9]['upper_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[9]['high']); ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[9]['sd']; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo $measures['HCMIMeetingFootprintPerMeetingHour']['chsb_value']?number_format($measures['HCMIMeetingFootprintPerMeetingHour']['chsb_value']):'';  ?></td>
-
-                            </tr>
-
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['HotelWaterUsagePerOccupiedRoom']['chsb_value'],
-                                    $measure_readings[10]
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[10]['measure_name']; ?></td>
-                                <!-- <td align="center"><?php echo $measure_readings[10]['count']; ?></td> -->
-                                <td align="center"><?php echo number_format($measure_readings[10]['low']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[10]['lower_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[10]['mean']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[10]['median']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[10]['upper_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[10]['high']); ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[10]['sd']; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo $measures['HotelWaterUsagePerOccupiedRoom']['chsb_value']?number_format($measures['HotelWaterUsagePerOccupiedRoom']['chsb_value']):'';  ?></td>
-
-                            </tr>
-
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['HotelWaterUsagePerSquareMeter']['chsb_value'],
-                                    $measure_readings[11]
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[11]['measure_name']; ?></td>
-                                <!-- <td align="center"><?php echo $measure_readings[11]['count']; ?></td> -->
-                                <td align="center"><?php echo number_format($measure_readings[11]['low']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[11]['lower_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[11]['mean']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[11]['median']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[11]['upper_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[11]['high']); ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[11]['sd']; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo $measures['HotelWaterUsagePerSquareMeter']['chsb_value']?number_format($measures['HotelWaterUsagePerSquareMeter']['chsb_value']):'';  ?></td>
-
-                            </tr>
-
-                            <!-- <tr>
-                                <?php
-                                // $chsb_color = getChsbColor(
-                                //     $measures['HotelWaterUsagePerSquareFoot']['chsb_value'],
-                                //     $measure_readings[12]
-                                // );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[12]['measure_name']; ?></td>
-                                <td align="center"><?php echo $measure_readings[12]['count']; ?></td>
-                                <td align="center"><?php echo $measure_readings[12]['low']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[12]['lower_quartile']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[12]['mean']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[12]['median']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[12]['upper_quartile']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[12]['high']; ?></td>
-
-                                <td align="center"><?php echo $measure_readings[12]['sd']; ?></td>
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo ($measures['HotelWaterUsagePerSquareFoot']['chsb_value']?:'');  ?></td>
-
-                            </tr> -->
-
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['HWMIRoomsWaterUsagePerOccupiedRoom']['chsb_value'],
-                                    $measure_readings[13]
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[13]['measure_name']; ?></td>
-                                <!-- <td align="center"><?php echo $measure_readings[13]['count']; ?></td> -->
-                                <td align="center"><?php echo number_format($measure_readings[13]['low']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[13]['lower_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[13]['mean']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[13]['median']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[13]['upper_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[13]['high']); ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[13]['sd']; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo $measures['HWMIRoomsWaterUsagePerOccupiedRoom']['chsb_value']?number_format($measures['HWMIRoomsWaterUsagePerOccupiedRoom']['chsb_value']):'';  ?></td>
-
-                            </tr>
-
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['HWMIMeetingWaterUsagePerMeetingHour']['chsb_value'],
-                                    $measure_readings[14]
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[14]['measure_name']; ?></td>
-                                <!-- <td align="center"><?php echo $measure_readings[14]['count']; ?></td> -->
-                                <td align="center"><?php echo number_format($measure_readings[14]['low']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[14]['lower_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[14]['mean']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[14]['median']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[14]['upper_quartile']); ?></td>
-
-                                <td align="center"><?php echo number_format($measure_readings[14]['high']); ?></td>
-
-                                <!-- <td align="center"><?php echo $measure_readings[14]['sd']; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;"><?php echo $measures['HWMIMeetingWaterUsagePerMeetingHour']['chsb_value']?number_format($measures['HWMIMeetingWaterUsagePerMeetingHour']['chsb_value']):'';  ?></td>
-
-                            </tr>
-
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['RenewableEnergyPercentage']['chsb_value'],
-                                    $measure_readings[15],
-                                    true
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[15]['measure_name']; ?> </td>
-                                <!-- <td align="center"><?php echo $measure_readings[15]['count']; ?></td> -->
-                                <td align="center"><?php echo number_format(($measure_readings[15]['low']*100)).'%'; ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[15]['lower_quartile']*100)).'%'; ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[15]['mean']*100)).'%'; ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[15]['median']*100)).'%'; ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[15]['upper_quartile']*100)).'%'; ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[15]['high']*100)).'%'; ?></td>
-
-                                <!-- <td align="center"><?php echo number_format(($measure_readings[15]['sd']*100)).'%'; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;" ><?php echo ($measures['RenewableEnergyPercentage']['chsb_value']*100).'%'; ?></td>
-
-                            </tr>
-
-                            <tr>
-                                <?php
-                                $chsb_color = getChsbColor(
-                                    $measures['RenewableElectricityPercentage']['chsb_value'],
-                                    $measure_readings[16],
-                                    true
-                                );
-                                ?>
-                                <td align="left"><?php echo $measure_readings[16]['measure_name']; ?> </td>
-                                <!-- <td align="center"><?php echo $measure_readings[16]['count']; ?></td> -->
-                                <td align="center"><?php echo number_format(($measure_readings[16]['low']*100)).'%'; ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[16]['lower_quartile']*100)).'%'; ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[16]['mean']*100)).'%'; ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[16]['median']*100)).'%'; ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[16]['upper_quartile']*100)).'%'; ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[16]['high']*100)).'%'; ?></td>
-
-                                <!-- <td align="center"><?php echo number_format(($measure_readings[16]['sd']*100)).'%'; ?></td> -->
-
-                                <td align="center" style="background-color: <?php echo $chsb_color['background']; ?>;
-           color: <?php echo $chsb_color['font']; ?>;"><?php echo number_format(($measures['RenewableElectricityPercentage']['chsb_value']*100)).'%'; ?></td>
-
-                            </tr>
-
-                            <tr>
-                                <td align="left"><?php echo $measure_readings[17]['measure_name']; ?> </td>
-                                <!-- <td align="center"><?php echo $measure_readings[17]['count']; ?></td> -->
-                                <td align="center"><?php echo number_format(($measure_readings[17]['low']),2); ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[17]['lower_quartile']),2); ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[17]['mean']),2); ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[17]['median']),2); ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[17]['upper_quartile']),2); ?></td>
-
-                                <td align="center"><?php echo number_format(($measure_readings[17]['high']),2); ?></td>
-
-                                <!-- <td align="center"><?php echo number_format(($measure_readings[17]['sd'])); ?></td> -->
-
-                                <td align="center" ><?php echo $measures['ElectricityToNonElectricEnergy']['chsb_value']?number_format(($measures['ElectricityToNonElectricEnergy']['chsb_value']),2):''; ?></td>
-
-                            </tr>
-
-                        </table>
-
-                    </td>
-
-                </tr>
-
-                
-
-            </table>  
-
-           
-
-        </div>
-
-        <div style="font-size: 11px; line-height: 20px;">
-
-            <span style="background-color:#008000; padding:5px 5px;">&nbsp;&nbsp;&nbsp;</span>
-            Better than every hotel in the peer group
-
-            &nbsp;&nbsp;&nbsp;
-
-            <span style="background-color:#90EE90; padding:5px 5px;">&nbsp;&nbsp;&nbsp;</span>
-            Top quartile � among the best 25%
-
-            <br>
-
-            <span style="background-color:#C6E0B4; padding:5px 5px;">&nbsp;&nbsp;&nbsp;</span>
-            Second quartile � better than the peer median
-
-            &nbsp;&nbsp;&nbsp;
-
-            <span style="background-color:#BDD7EE; padding:5px 5px;">&nbsp;&nbsp;&nbsp;</span>
-            Exactly at the peer median
-
-            <br>
-
-            <span style="background-color:#FFFF00; padding:5px 5px;">&nbsp;&nbsp;&nbsp;</span>
-            Third quartile � worse than the peer median
-
-            &nbsp;&nbsp;&nbsp;
-
-            <span style="background-color:#FFA500; padding:5px 5px;">&nbsp;&nbsp;&nbsp;</span>
-            Bottom quartile � among the worst 25%
-
-            <br>
-
-            <span style="background-color:#FF0000; padding:5px 5px;">&nbsp;&nbsp;&nbsp;</span>
-            Worse than every hotel in the peer group
-
-            &nbsp;&nbsp;&nbsp;
-
-            <span style="background-color:#D3D3D3; padding:5px 5px;">&nbsp;&nbsp;&nbsp;</span>
-            Not enough data to calculate
-
-        </div>
-
-    </body>
-
-</html>
-
-<?php
-
+if (!function_exists('render_chsb_reporting_pdf')) {
+    function chsb_pdf_rgb($hex)
+    {
+        $hex = ltrim($hex, '#');
+        return array(hexdec(substr($hex, 0, 2)), hexdec(substr($hex, 2, 2)), hexdec(substr($hex, 4, 2)));
+    }
+
+    function chsb_pdf_spark($pdf, $x, $y, $w, $reading, $value, $dotHex)
+    {
+        $low = isset($reading['low']) ? (float) $reading['low'] : 0;
+        $high = isset($reading['high']) ? (float) $reading['high'] : 0;
+        $span = $high - $low;
+        if ($span == 0 || $w <= 0) {
+            return;
+        }
+        $map = function ($n) use ($x, $w, $low, $span) {
+            $p = ((float) $n - $low) / $span;
+            if ($p < 0) {
+                $p = 0;
+            }
+            if ($p > 1) {
+                $p = 1;
+            }
+            return $x + ($p * $w);
+        };
+        $mid = $y + 3.2;
+        $pdf->SetDrawColor(213, 223, 233);
+        $pdf->SetLineWidth(0.45);
+        $pdf->Line($x + 1.2, $mid, $x + $w - 1.2, $mid);
+        $x1 = $map($reading['lower_quartile']);
+        $x2 = $map($reading['upper_quartile']);
+        if ($x2 < $x1) {
+            $swap = $x1;
+            $x1 = $x2;
+            $x2 = $swap;
+        }
+        $bw = max(1.6, $x2 - $x1);
+        $pdf->SetFillColor(220, 230, 240);
+        $pdf->RoundedRect($x1, $mid - 1.35, $bw, 2.7, 0.7, '1111', 'F');
+        $mx = $map($reading['median']);
+        $pdf->SetDrawColor(74, 90, 108);
+        $pdf->SetLineWidth(0.3);
+        $pdf->Line($mx, $mid - 2.3, $mx, $mid + 2.3);
+        if ($value !== null && $value !== '') {
+            $dx = $map($value);
+            $rgb = chsb_pdf_rgb($dotHex);
+            $pdf->SetFillColor($rgb[0], $rgb[1], $rgb[2]);
+            $pdf->SetDrawColor(23, 55, 94);
+            $pdf->SetLineWidth(0.25);
+            $pdf->Circle($dx, $mid, 1.35, 0, 360, 'DF');
+        }
+    }
+
+    function render_chsb_reporting_pdf($pdf, $data)
+    {
+        $measures = isset($data['measures']) ? $data['measures'] : array();
+        $measure_readings = isset($data['measure_readings']) ? $data['measure_readings'] : array();
+        if (empty($measures) || empty($measure_readings)) {
+            return;
+        }
+        $site_detail = isset($data['site_detail']) ? $data['site_detail'] : array();
+        $hotel_name = !empty($site_detail['site_location_name']) ? $site_detail['site_location_name'] : 'This hotel';
+        $period = !empty($data['current_title']) ? $data['current_title'] : '';
+
+        $chsb_stat_keys = array('low', 'lower_quartile', 'mean', 'median', 'upper_quartile', 'high');
+        $chsb_stat_labels = array(
+            'low' => "Low",
+            'lower_quartile' => "Lower\nquartile",
+            'mean' => 'Mean',
+            'median' => 'Median',
+            'upper_quartile' => "Upper\nquartile",
+            'high' => 'High',
+        );
+        $chsb_rows = array(
+            array('key' => 'HCMIRoomsFootprintPerOccupiedRoom', 'reading' => 1, 'decimals' => 0, 'unit' => 'kgCO₂e'),
+            array('key' => 'HotelCarbonFootprintPerRoom', 'reading' => 2, 'decimals' => 0, 'unit' => 'kgCO₂e'),
+            array('key' => 'HotelCarbonFootprintPerOccupiedRoom', 'reading' => 3, 'decimals' => 0, 'unit' => 'kgCO₂e'),
+            array('key' => 'HotelCarbonFootprintPerSquareMeter', 'reading' => 4, 'decimals' => 0, 'unit' => 'kgCO₂e'),
+            array('key' => 'HotelEnergyUsagePerOccupiedRoom', 'reading' => 6, 'decimals' => 0, 'unit' => 'kWh'),
+            array('key' => 'HotelEnergyUsagePerSquareMeter', 'reading' => 7, 'decimals' => 0, 'unit' => 'kWh'),
+            array('key' => 'HCMIMeetingFootprintPerMeetingHour', 'reading' => 9, 'decimals' => 2, 'unit' => 'kgCO₂e'),
+            array('key' => 'HotelWaterUsagePerOccupiedRoom', 'reading' => 10, 'decimals' => 0, 'unit' => 'L'),
+            array('key' => 'HotelWaterUsagePerSquareMeter', 'reading' => 11, 'decimals' => 0, 'unit' => 'L'),
+            array('key' => 'HWMIRoomsWaterUsagePerOccupiedRoom', 'reading' => 13, 'decimals' => 0, 'unit' => 'L'),
+            array('key' => 'HWMIMeetingWaterUsagePerMeetingHour', 'reading' => 14, 'decimals' => 2, 'unit' => 'L'),
+            array('key' => 'RenewableEnergyPercentage', 'reading' => 15, 'decimals' => 2, 'unit' => '%', 'percent' => true, 'higher_better' => true),
+            array('key' => 'RenewableElectricityPercentage', 'reading' => 16, 'decimals' => 2, 'unit' => '%', 'percent' => true, 'higher_better' => true),
+            array('key' => 'ElectricityToNonElectricEnergy', 'reading' => 17, 'decimals' => 2, 'unit' => 'ratio', 'no_color' => true),
+        );
+
+        $left = 10;
+        $pageW = 190;
+        $y = 26;
+
+        $pdf->SetXY($left, $y);
+        $pdf->setInterFont( 'B', 8);
+        $pdf->SetTextColor(240, 160, 75);
+        $pdf->Cell($pageW, 4, 'BENCHMARKING', 0, 1, 'L');
+        $pdf->SetX($left);
+        $pdf->setInterFont( 'B', 14);
+        $pdf->SetTextColor(23, 55, 94);
+        $pdf->Cell($pageW, 7, 'Cornell Hotel Sustainability Benchmarking', 0, 1, 'L');
+        $pdf->SetX($left);
+        $pdf->setInterFont( '', 8);
+        $pdf->SetTextColor(74, 90, 108);
+        $pdf->Cell($pageW, 4, "Peer group statistics and this hotel's position. Lower is better except Measures 12-13.", 0, 1, 'L');
+        $y = $pdf->GetY() + 2;
+
+        // $period comes from $data['current_title'], which only parses as a clean "Month Year"
+        // for the Monthly report ("Oct 2026"). YTD uses a "Current - 2026"-style title that
+        // isn't a real date - rebuild a proper "Month Year" string from the report's own filters
+        // instead, so the 12-month range below can still be computed (not just the bare year).
+        if (!empty($data['is_ytd_report']) && !empty($data['filters']['max_month_id']) && !empty($data['filters']['current_year'])) {
+            $chsbMonthNames = array(1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April', 5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August', 9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December');
+            $period = $chsbMonthNames[(int) $data['filters']['max_month_id']] . ' ' . $data['filters']['current_year'];
+        } elseif (preg_match('/^[A-Za-z]+\s*-\s*(\d{4})$/', trim($period), $periodMatch)) {
+            // 5-Year/Annual use the same "<word> - 2026" style title but have no equivalent
+            // filters wired up here - fall back to just the year rather than the raw title.
+            $period = $periodMatch[1];
+        }
+        $period_label = ($period !== '' ? $period : 'the report month');
+        $range_label = '';
+        $period_date = DateTime::createFromFormat('!F Y', $period_label);
+        if ($period_date !== false) {
+            $range_start = clone $period_date;
+            $range_start->modify('-11 months');
+            $range_label = ' (' . $range_start->format('M Y') . ' – ' . $period_date->format('M Y') . ')';
+        }
+        $note = '<span style="color:#17375E;font-weight:bold;">CHSB figures cover the 12 months ending ' . htmlspecialchars($period_label . $range_label) . '.</span> <span style="color:#4A5A6C;">They will not match the single-month figures on the earlier pages.</span>';
+        $noteH = 9;
+        $pdf->SetFillColor(255, 246, 234);
+        $pdf->SetDrawColor(245, 211, 166);
+        $pdf->SetLineWidth(0.25);
+        $pdf->RoundedRect($left, $y, $pageW, $noteH, 1.8, '1111', 'DF');
+        $pdf->Image(site_url() . 'themes/default/images/waste/icon-calendar-navy.png', $left + 3, $y + 2.5, 4, 4, '', '', '', false, 300, '', false, false, 0);
+        $pdf->writeHTMLCell($pageW - 11, $noteH - 2, $left + 9, $y + 1.6, $note, 0, 0, false, true, 'L');
+        $y += $noteH + 2.5;
+
+        $colW = array(48, 13, 16, 12, 13, 16, 12, 28, 32);
+        $rowH = 9.2;
+        $headH = 8;
+
+        $pdf->SetFillColor(244, 247, 250);
+        $pdf->Rect($left, $y, array_sum(array_slice($colW, 0, 7)) + $colW[8], $headH, 'F');
+        $pdf->SetFillColor(227, 237, 247);
+        $hx = $left;
+        for ($i = 0; $i < 7; $i++) {
+            $hx += $colW[$i];
+        }
+        $pdf->Rect($hx, $y, $colW[7], $headH, 'F');
+        $pdf->SetDrawColor(213, 223, 233);
+        $pdf->Line($left, $y + $headH, $left + $pageW, $y + $headH);
+
+        $heads = array('Measure', 'Low', "Lower\nquartile", 'Mean', 'Median', "Upper\nquartile", 'High', $hotel_name, 'Position in peer range');
+        $x = $left;
+        foreach ($heads as $i => $label) {
+            $pdf->SetXY($x, $y + 0.6);
+            $pdf->setInterFont( 'B', 6.5);
+            $pdf->SetTextColor($i === 7 ? 23 : 74, $i === 7 ? 55 : 90, $i === 7 ? 94 : 108);
+            $align = ($i === 0) ? 'L' : (($i >= 7) ? 'C' : 'R');
+            $pdf->MultiCell($colW[$i], 3.2, $label, 0, $align, false, 0);
+            $x += $colW[$i];
+        }
+        $y += $headH;
+
+        $measure_no = 0;
+        foreach ($chsb_rows as $chsb_row) {
+            $reading_id = $chsb_row['reading'];
+            if (empty($measure_readings[$reading_id])) {
+                continue;
+            }
+            $measure_no++;
+            $reading = $measure_readings[$reading_id];
+            $decimals = $chsb_row['decimals'];
+            $is_percent = !empty($chsb_row['percent']);
+            $site_value = isset($measures[$chsb_row['key']]['chsb_value']) ? $measures[$chsb_row['key']]['chsb_value'] : null;
+            $has_value = ($site_value !== null && $site_value !== '');
+            if (empty($chsb_row['no_color'])) {
+                $chsb_color = getChsbColor($has_value ? $site_value : null, $reading, !empty($chsb_row['higher_better']));
+            } else {
+                $chsb_color = array('background' => '#FFFFFF', 'font' => '#17375E');
+            }
+            $dotHex = !empty($chsb_row['no_color']) ? '#17375E' : $chsb_color['background'];
+            if ($is_percent && $has_value) {
+                $site_label = number_format(((float) $site_value) * 100, 2) . '%';
+            } elseif ($has_value) {
+                $site_label = number_format((float) $site_value, $decimals);
+            } else {
+                $site_label = 'Not enough data';
+            }
+
+            if ($measure_no % 2 === 0) {
+                $pdf->SetFillColor(250, 252, 253);
+                $pdf->Rect($left, $y, $pageW, $rowH, 'F');
+            }
+            $pdf->SetFillColor(247, 250, 253);
+            $hotelX = $left + array_sum(array_slice($colW, 0, 7));
+            $pdf->Rect($hotelX, $y, $colW[7], $rowH, 'F');
+            $pdf->SetDrawColor(238, 242, 246);
+            $pdf->SetLineWidth(0.15);
+            $pdf->Line($left, $y + $rowH, $left + $pageW, $y + $rowH);
+
+            $pdf->SetFillColor(23, 55, 94);
+            $pdf->RoundedRect($left + 0.6, $y + 2.3, 4.6, 4.6, 1.0, '1111', 'F');
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->setInterFont( 'B', 7);
+            $pdf->SetXY($left + 0.6, $y + 2.3);
+            $pdf->Cell(4.6, 4.6, (string) $measure_no, 0, 0, 'C', false);
+
+            $pdf->SetTextColor(23, 55, 94);
+            $pdf->setInterFont( '', 6.2);
+            $pdf->SetXY($left + 6, $y + 1.2);
+            $measure_name = trim($reading['measure_name']);
+            if (preg_match('/^(.*?)\s*(\([^)]+\))\s*$/u', $measure_name, $measure_parts)) {
+                // Stored name already ends in "(unit)" - use that instead of appending another.
+                $measure_name = trim($measure_parts[1]);
+                $measure_unit = $measure_parts[2];
+            } elseif (preg_match('/^(.*?)\s*(%)\s*$/u', $measure_name, $measure_parts)) {
+                // Stored name ends in a bare "%" (e.g. "Renewable Electricity %") instead of
+                // "(unit)" - strip it and format consistently with every other measure's
+                // "(unit)" style, instead of appending "(%)" again on top of it.
+                $measure_name = trim($measure_parts[1]);
+                $measure_unit = '(' . $measure_parts[2] . ')';
+            } else {
+                $measure_unit = '(' . $chsb_row['unit'] . ')';
+            }
+            $measure_label = '<span style="color:#17375E;">' . htmlspecialchars($measure_name) . '</span> '
+                . '<span style="color:#6B7785;font-size:5.5pt;">' . htmlspecialchars($measure_unit) . '</span>';
+            $pdf->writeHTMLCell($colW[0] - 6.5, 6.5, $left + 6, $y + 1.2, $measure_label, 0, 0, false, true, 'L');
+
+            $x = $left + $colW[0];
+            $pdf->setInterFont( '', 6.5);
+            $pdf->SetTextColor(23, 55, 94);
+            foreach ($chsb_stat_keys as $si => $stat_key) {
+                $cell_value = isset($reading[$stat_key]) ? $reading[$stat_key] : 0;
+                $formatted = $is_percent
+                    ? number_format($cell_value * 100, 2) . '%'
+                    : number_format($cell_value, $decimals);
+                $pdf->SetXY($x, $y + 2.6);
+                $pdf->Cell($colW[$si + 1] - 0.4, 4, $formatted, 0, 0, 'R');
+                $x += $colW[$si + 1];
+            }
+
+            $pdf->setInterFont( 'B', 6.5);
+            $pillW = min($colW[7] - 1.5, $pdf->GetStringWidth($site_label) + 3.2);
+            $pillH = 4.6;
+            $pillX = $hotelX + (($colW[7] - $pillW) / 2);
+            $pillY = $y + (($rowH - $pillH) / 2);
+            $bg = chsb_pdf_rgb($chsb_color['background']);
+            $fg = chsb_pdf_rgb($chsb_color['font']);
+            $pdf->SetFillColor($bg[0], $bg[1], $bg[2]);
+            if (!empty($chsb_row['no_color'])) {
+                $pdf->SetDrawColor(213, 223, 233);
+                $pdf->SetLineWidth(0.2);
+                $pdf->RoundedRect($pillX, $pillY, $pillW, $pillH, 1.1, '1111', 'DF');
+            } else {
+                $pdf->RoundedRect($pillX, $pillY, $pillW, $pillH, 1.1, '1111', 'F');
+            }
+            $pdf->SetTextColor($fg[0], $fg[1], $fg[2]);
+            $pdf->SetXY($pillX, $pillY);
+            $pdf->Cell($pillW, $pillH, $site_label, 0, 0, 'C', false);
+
+            $posX = $hotelX + $colW[7];
+            chsb_pdf_spark($pdf, $posX + 1, $y + 1.2, $colW[8] - 2, $reading, $has_value ? $site_value : null, $dotHex);
+            $y += $rowH;
+        }
+
+        $y += 2;
+        $keyX = $left;
+        chsb_pdf_spark($pdf, $keyX, $y, 36, array(
+            'low' => 0, 'high' => 100, 'lower_quartile' => 28, 'upper_quartile' => 72, 'median' => 48,
+        ), null, '#17375E');
+        $pdf->SetXY($keyX + 38, $y + 1.4);
+        $pdf->setInterFont( '', 7);
+        $pdf->SetTextColor(107, 119, 133);
+        $pdf->Cell(150, 4, 'Peer range from low to high. Shaded box = lower to upper quartile. Tick = median. Dot = this hotel, coloured by band.', 0, 1, 'L');
+        $y = $pdf->GetY() + 2;
+
+        $legend = array(
+            array('#006100', 'Better than every hotel in the peer group', '#63be7b', 'Top quartile — among the best 25%'),
+            array('#c6e0b4', 'Second quartile — better than the peer median', '#bdd7ee', 'Exactly at the peer median'),
+            array('#ffd966', 'Third quartile — worse than the peer median', '#f4b183', 'Bottom quartile — among the worst 25%'),
+            array('#c00000', 'Worse than every hotel in the peer group', '#d9d9d9', 'Not enough data to calculate'),
+        );
+        $boxH = 22;
+        $pdf->SetDrawColor(213, 223, 233);
+        $pdf->SetLineWidth(0.25);
+        $pdf->RoundedRect($left, $y, $pageW, $boxH, 1.8, '1111', 'D');
+        $ly = $y + 2;
+        foreach ($legend as $pair) {
+            $sw = 3.4;
+            foreach (array(0, 2) as $side => $colorIndex) {
+                $sx = $left + 3 + ($side * 96);
+                $rgb = chsb_pdf_rgb($pair[$colorIndex]);
+                $pdf->SetFillColor($rgb[0], $rgb[1], $rgb[2]);
+                $pdf->RoundedRect($sx, $ly, $sw, $sw, 0.7, '1111', 'F');
+                $pdf->SetXY($sx + $sw + 1.5, $ly - 0.2);
+                $pdf->setInterFont( '', 7);
+                $pdf->SetTextColor(74, 90, 108);
+                $pdf->Cell(86, $sw + 0.4, $pair[$colorIndex + 1], 0, 0, 'L');
+            }
+            $ly += 4.6;
+        }
+        $pdf->SetTextColor(0, 0, 0);
+    }
 }

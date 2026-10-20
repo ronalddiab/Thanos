@@ -416,7 +416,7 @@ if ($filters_notification['cmonth'] == 1) {
 						}
 						$baseRoomnightValue = number_format($actualIntensity, 2);
 						$baseRoomnightBaselineValue = number_format($targetIntensity, 2);
-						// Performance YTD = (actual - target) / target  (always divide by target)
+						// Performance YTD = (actual − target) / target  (always divide by target)
 						$value['YTD_Variance'] = ($targetIntensity != 0)
 							? (($actualIntensity - $targetIntensity) / $targetIntensity) * 100
 							: 0;

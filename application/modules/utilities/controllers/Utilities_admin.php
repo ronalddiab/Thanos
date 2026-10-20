@@ -1732,6 +1732,22 @@ class Utilities_admin extends Base_Admin_Controller
             }
         }
         $i = 0;
+        $hasTariff = $hasTotalCost = [];
+
+        foreach ($checkWasteSettings as $label => $name) {
+            $hasTariff[$name] = false;
+            $hasTotalCost[$name] = false;
+
+            foreach ($wasteDataArray as $waste) {
+                if (!empty($waste['s']['disposal_cost_'.$name])) {
+                    $hasTariff[$name] = true;
+                }
+
+                if (!empty($waste['s']['total_'.$name])) {
+                    $hasTotalCost[$name] = true;
+                }
+            }
+        }
         foreach ($wasteDataArray as $key => $value) {
             $wasteArray[$i]['Year'] = $value['s']['year_id'];
             $columns['Year'] = 'Year';
@@ -1740,10 +1756,15 @@ class Utilities_admin extends Base_Admin_Controller
             foreach ($checkWasteSettings as $label => $name) {
                 $wasteArray[$i]['Total Volume/Weight '.$label] = $value['s']['unit_measure_'.$name];
                 $columns['Total Volume/Weight '.$label] = 'Total Volume/Weight '.$label;
-                $wasteArray[$i]['Tariff '.$label] = $value['s']['disposal_cost_'.$name];
-                $columns['Tariff '.$label] = 'Tariff '.$label;
-                $wasteArray[$i]['Total Cost '.$label] = $value['s']['total_'.$name];
-                $columns['Total Cost '.$label] = 'Total Cost '.$label;
+                if ($hasTariff[$name]) {
+                    $wasteArray[$i]['Tariff '.$label] = $value['s']['disposal_cost_'.$name];
+                    $columns['Tariff '.$label] = 'Tariff '.$label;
+                }
+
+                if ($hasTotalCost[$name]) {
+                    $wasteArray[$i]['Total Cost '.$label] = $value['s']['total_'.$name];
+                    $columns['Total Cost '.$label] = 'Total Cost '.$label;
+                }
             }
             $wasteArray[$i]['Rebates'] = $value['s']['rebates'];
             $columns['Rebates'] = 'Rebates';

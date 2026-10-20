@@ -227,7 +227,7 @@ $kwh_pie_chart_previousmonth_cost_water_share = ($cost_pie_chart_previousmonth_t
                                                             <?php if ($totalElectricity) { ?>
                                                                 <tr>
                                                                     <td width="45%">Electricity</td>
-                                                                    <td width="35%"><?php number_format($cost_pie_chart['electricity']); ?></td>
+                                                                    <td width="35%"><?php echo number_format($cost_pie_chart['electricity']); ?></td>
                                                                     <td width="20%"><?php echo $kwh_pie_chart_cmonth_electricity_share; ?>%</td>
                                                                 </tr>
                                                             <?php } ?>

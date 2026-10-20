@@ -113,13 +113,18 @@ $cost_share = ($kwh_pie_chart_previousmonth_cost_water_share+
                                     <table border="1" width="100%" cellpadding="2" cellspacing="0">
                                         <thead>
                                             <tr>
-                                                <th style="background-color:#d8e1f2;" align="center"><strong>
+                                                <th style="background-color:#d8e1f2;" align="center">
+                                                    <?php
+                                                    $pieMonth = isset($filters['filters_comparision_chart']['start_month']) ? (int) $filters['filters_comparision_chart']['start_month'] : (int) $filters['previous_month'];
+                                                    $pieYear = isset($filters['filters_comparision_chart']['start_year']) ? $filters['filters_comparision_chart']['start_year'] : $filters['previous_year'];
+                                                    $pieMonthName = isset($fullmontharray[$pieMonth]) ? $fullmontharray[$pieMonth] : '';
+                                                    ?>
                                                     <?php if ($type == "monthly"): ?>
-														<strong><?php echo 'Energy Consumption (kWh)' . ' - ' . $fullmontharray[$filters["previous_month"]] . ' ' . $filters["previous_year"]; ?></strong>
+														<strong><?php echo 'Energy Consumption (kWh)' . ' - ' . $pieMonthName . ' ' . $pieYear; ?></strong>
                                                     <?php else: ?>
-														<strong><?php echo 'Energy Consumption (% Share Of Total kWh)' . ' - ' . $fullmontharray[$filters["previous_month"]] . ' ' . $filters["previous_year"]; ?></strong>
+														<strong><?php echo 'Energy Consumption (% Share Of Total kWh)' . ' - ' . $pieMonthName . ' ' . $pieYear; ?></strong>
                                                     <?php endif ?>
-                                                </strong></th>
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>

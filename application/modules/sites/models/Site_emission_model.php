@@ -87,6 +87,39 @@ class Site_Emission_model extends Base_Model
             $data_array['district_heating_emission_factor'] = $this->district_heating_emission_factor;
         }
 
+        if(isset($this->waste_general_waste_to_landfill_emission_factor)) {
+            $data_array['waste_general_waste_to_landfill_emission_factor'] = $this->waste_general_waste_to_landfill_emission_factor;
+        }
+
+        if(isset($this->waste_recycling_streams_emission_factor)) {
+            $data_array['waste_recycling_streams_emission_factor'] = $this->waste_recycling_streams_emission_factor;
+        }
+
+        if(isset($this->business_travel_flights_emission_factor)) {
+            $data_array['business_travel_flights_emission_factor'] = $this->business_travel_flights_emission_factor;
+        }
+
+        if(isset($this->business_travel_car_taxi_emission_factor)) {
+            $data_array['business_travel_car_taxi_emission_factor'] = $this->business_travel_car_taxi_emission_factor;
+        }
+
+        if(isset($this->employee_commuting_car_emission_factor)) {
+            $data_array['employee_commuting_car_emission_factor'] = $this->employee_commuting_car_emission_factor;
+        }
+
+        if(isset($this->employee_commuting_bus_emission_factor)) {
+            $data_array['employee_commuting_bus_emission_factor'] = $this->employee_commuting_bus_emission_factor;
+        }
+
+        if(isset($this->outsourced_laundry_emission_factor)) {
+            $data_array['outsourced_laundry_emission_factor'] = $this->outsourced_laundry_emission_factor;
+        }
+
+        if(isset($this->purchased_goods_emission_factor)) {
+            $data_array['purchased_goods_emission_factor'] = $this->purchased_goods_emission_factor;
+        }
+
+        
         if(isset($this->status)) {
             $data_array['status'] = $this->status;
         }

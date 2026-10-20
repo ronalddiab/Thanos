@@ -177,6 +177,8 @@ class Reportscron_forex_model extends Base_Model {
                             u.total_purchased_electricity_cost,
 
                             u.total_electricity_kwh,
+                            COALESCE(u.fleet_petrol, 0) as fleet_petrol,
+                            COALESCE(u.total_fleet_petrol_cost, 0) as total_fleet_petrol_cost,
 
                         month_id,year_id,total_room_night,s.rooms_keys,u.forex
 
@@ -232,7 +234,7 @@ class Reportscron_forex_model extends Base_Model {
 
 
 
-        $query = "SELECT SUM(total_electricity_cost) as electricity, SUM(total_fuel_oil_cost) as fuel, SUM(total_lpg_cost) as lpg, SUM(total_natural_gas_cost) as natural_gas, SUM(district_heating_cost) as heating_district, SUM(district_heating_fixed_cost) as district_heating_fixed_cost, SUM(district_cooling_fixed_cost) as district_cooling_fixed_cost, SUM(district_cooling_cost) as cooling_district, SUM(water_total_consumption_cost) as water, forex
+        $query = "SELECT SUM(total_electricity_cost) as electricity, SUM(total_fuel_oil_cost) as fuel, SUM(total_lpg_cost) as lpg, SUM(total_natural_gas_cost) as natural_gas, SUM(district_heating_cost) as heating_district, SUM(district_heating_fixed_cost) as district_heating_fixed_cost, SUM(district_cooling_fixed_cost) as district_cooling_fixed_cost, SUM(district_cooling_cost) as cooling_district, SUM(water_total_consumption_cost) as water, ROUND(AVG(forex),4) as forex
 
                     FROM {$this->_tbl_utilities}
 
@@ -240,7 +242,7 @@ class Reportscron_forex_model extends Base_Model {
 
                     AND site_id={$this->site_id}
                     
-                    ORDER BY year_id ASC,month_id ASC,u.id ASC";
+                    ORDER BY year_id ASC,month_id ASC";
 
 
 
@@ -302,7 +304,7 @@ class Reportscron_forex_model extends Base_Model {
 
                     WHERE site_id={$this->site_id} AND (year_id='$year' AND month_id='$month')
                     
-                    ORDER BY year_id ASC,month_id ASC,u.id ASC";
+                    ORDER BY year_id ASC,month_id ASC";
 
 
 
@@ -456,6 +458,8 @@ class Reportscron_forex_model extends Base_Model {
 
             "district_cooling_cost_budget",
 
+            "district_cooling_fixed_cost",
+
             "district_heating_cost_actual",
 
             "district_heating_cost_budget",
@@ -527,6 +531,8 @@ class Reportscron_forex_model extends Base_Model {
                         u.district_cooling_total_budget as district_cooling_budget,
 
                         u.district_cooling_cost as district_cooling_cost_actual,
+
+                        u.district_cooling_fixed_cost as district_cooling_fixed_cost,
 
                         u.district_cooling_total_budget_cost as district_cooling_cost_budget,
 

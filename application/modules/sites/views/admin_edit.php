@@ -1841,6 +1841,7 @@ $popupInfoArray = [
 		</div>
 	    </li>
 	</ul>
+	</div>
 	<br/>
 	<!-- <div class="form-group-label">
 	    <h5><strong><?php echo lang('ghg_emissions_factor'); ?></strong></h5>
@@ -2564,25 +2565,25 @@ $popupInfoArray = [
 		    <label style="font-weight: 500; left: 17px; " ><?php echo $measure_reading['title']; ?></label>
 		</div>
 		<div class="form-col-1">
-		    <input name="<?php echo 'low'.$key; ?>" class='input-control' value="<?php echo $measure_reading['low']; ?>" disabled="disabled" style="margin-bottom: 10px;padding: 6px 8px;width: 139%; font-size: 10px;">
+		    <input name="<?php echo 'low'.$measure_reading['measure_id']; ?>" class='input-control' value="<?php echo $measure_reading['low']; ?>"  style="margin-bottom: 10px;padding: 6px 8px;width: 139%; font-size: 10px;">
 		</div>
 		<div class="form-col-1">
-		    <input name="<?php echo 'lower_quartile'.$key; ?>" class='input-control' value="<?php echo $measure_reading['lower_quartile']; ?>" disabled="disabled" style="margin-bottom: 10px;padding: 6px 8px; width: 139%; font-size: 10px;">
+		    <input name="<?php echo 'lower_quartile'.$measure_reading['measure_id']; ?>" class='input-control' value="<?php echo $measure_reading['lower_quartile']; ?>" style="margin-bottom: 10px;padding: 6px 8px; width: 139%; font-size: 10px;">
 		</div>
 		<div class="form-col-1">
-		    <input name="<?php echo 'mean'.$key; ?>" class='input-control' value="<?php echo $measure_reading['mean']; ?>" disabled="disabled" style="margin-bottom: 10px;padding: 6px 8px; width: 139%; font-size: 10px;">
+		    <input name="<?php echo 'mean'.$measure_reading['measure_id']; ?>" class='input-control' value="<?php echo $measure_reading['mean']; ?>"  style="margin-bottom: 10px;padding: 6px 8px; width: 139%; font-size: 10px;">
 		</div>
 		<div class="form-col-1">
-		    <input name="<?php echo 'median'.$key; ?>" class='input-control' value="<?php echo $measure_reading['median']; ?>" disabled="disabled" style="margin-bottom: 10px;padding: 6px 8px; width: 139%; font-size: 10px;">
+		    <input name="<?php echo 'median'.$measure_reading['measure_id']; ?>" class='input-control' value="<?php echo $measure_reading['median']; ?>"  style="margin-bottom: 10px;padding: 6px 8px; width: 139%; font-size: 10px;">
 		</div>
 		<div class="form-col-1">
-		    <input name="<?php echo 'upper_quartile'.$key; ?>" class='input-control' value="<?php echo $measure_reading['upper_quartile']; ?>" disabled="disabled" style="margin-bottom: 10px;padding: 6px 8px; width: 139%; font-size: 10px;">
+		    <input name="<?php echo 'upper_quartile'.$measure_reading['measure_id']; ?>" class='input-control' value="<?php echo $measure_reading['upper_quartile']; ?>"  style="margin-bottom: 10px;padding: 6px 8px; width: 139%; font-size: 10px;">
 		</div>
 		<div class="form-col-1">
-		    <input name="<?php echo 'high'.$key; ?>" class='input-control' value="<?php echo $measure_reading['high']; ?>" disabled="disabled" style="margin-bottom: 10px;padding: 6px 8px; width: 139%; font-size: 10px;">
+		    <input name="<?php echo 'high'.$measure_reading['measure_id']; ?>" class='input-control' value="<?php echo $measure_reading['high']; ?>"  style="margin-bottom: 10px;padding: 6px 8px; width: 139%; font-size: 10px;">
 		</div>
 		<div class="form-col-1">
-		    <input name="<?php echo 'sd'.$key; ?>" class='input-control' value="<?php echo $measure_reading['sd']; ?>" disabled="disabled" style="margin-bottom: 10px;padding: 6px 8px; width: 139%; font-size: 10px;">
+		    <input name="<?php echo 'sd'.$measure_reading['measure_id']; ?>" class='input-control' value="<?php echo $measure_reading['sd']; ?>"  style="margin-bottom: 10px;padding: 6px 8px; width: 139%; font-size: 10px;">
 		</div>
 	    </div>
 	    <?php

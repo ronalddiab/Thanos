@@ -714,6 +714,7 @@ class Sites_admin extends Base_Admin_Controller
 				$colmuns['Site Name']         = "site_id";
 
 				$colmuns['Measure']           = "measure_id";
+				$colmuns['Count']             = "count";
 
 				$colmuns['Low']               = "low";
 
@@ -797,6 +798,8 @@ class Sites_admin extends Base_Admin_Controller
 
 
 					$measure_name = trim($data->sheets[0]['cells'][$i][2]);
+					$dataInsert['measure_name'] = $measure_name;
+					$dataInsert['measure_code'] = explode(':',$measure_name)[0];
 
 					$measure_id = $this->import_model->get_measureId($measure_name);
 
@@ -2666,6 +2669,7 @@ class Sites_admin extends Base_Admin_Controller
 				$this->sites_model->save_renewable_energy($site_id, $data['renewable_energy'], $is_renewable_energy);
 				$this->sites_model->save_daily_reading_settings($site_id, $data['daily_reading'], $data['daily_reading']);
 				$this->sites_model->save_daily_reading_utilites_setting($site_id, $data['daily_reading_utlities']);
+				$this->sites_model->update_measure_reading($site_id,$data);
 
 				if (empty($data_array['id'])) {
 					$site_notification_lists = getNotificationStaticList($site_id);

@@ -962,7 +962,11 @@ function GetUtilityDropdownFromConstant($utility)
 function getUtilityUnitFactorForConversion($id = 0, $utility)
 {
     if(!empty($id) && !empty($utility)) {
-	$utility_name = GetSiteUtilityUnitName($id, $utility);
+	if(!in_array((string)$utility, ['fleet', 'uplift_factor'])) {
+		$utility_name = GetSiteUtilityUnitName($id, $utility);
+	} else {
+		$utility_name = '';
+	}
 	$factor = 1;
 	switch ($utility) {
 	    case 'electricity':
@@ -1035,6 +1039,12 @@ function getUtilityUnitFactorForConversion($id = 0, $utility)
 		} else if ($utility_name == 'mmBTU') {
 		    $factor = 293.083235638921;
 		}
+		break;
+		case 'fleet':
+		    $factor = 2.30;
+		break;
+		case 'uplift_factor':
+		    $factor = 1.01;
 		break;
 	    default:
 		$factor = 1;
@@ -1213,13 +1223,38 @@ function getUtilityPanelColor() {
     return $utility_colors;
 }
 
+if (!function_exists('getUtilityPanelColorNewMYTDUi')) {
+    /**
+     * RGB triples for the "new" native-TCPDF monthly report redesign
+     * (admin_landing_pdf_reports_carbon_footprint_new.php, admin_landing_pdf_reports_monthly_hidden_piecharts_new.php, etc.).
+     * This is a different, approved modern-mockup palette from the legacy CSS-string palette returned by
+     * getUtilityPanelColor() above, so do NOT merge the two. Values are taken from
+     * admin_landing_pdf_reports_carbon_footprint_new.php's table-row colors (the most complete per-utility set found across
+     * the "_new" PDF templates); 'water' is taken from admin_landing_pdf_reports_monthly_hidden_piecharts_new.php, the only
+     * "new" template that defines it.
+     */
+    function getUtilityPanelColorNewMYTDUi() {
+        $utility_colors_new = [
+            'electricity' => array(102, 163, 255),
+            'fuel_oil' => array(255, 100, 100),
+            'lpg' => array(255, 163, 71),
+            'natural_gas' => array(100, 200, 100),
+            'district_heating' => array(200, 100, 100),
+            'district_cooling' => array(45, 85, 166),
+            'fleet_petrol' => array(178, 153, 230),
+            'water' => array(112, 173, 71),
+        ];
+        return $utility_colors_new;
+    }
+}
+
 function getChsbColor($chsb_value, $chsb_reading, $chsb_higher_better = false)
 {
     // Not computable / missing input
     if ($chsb_value === null || $chsb_value === '') {
         return array(
             'background' => '#D9D9D9',
-            'font'       => '#808080'
+            'font'       => '#6B7785'
         );
     }
 
@@ -1235,7 +1270,7 @@ function getChsbColor($chsb_value, $chsb_reading, $chsb_higher_better = false)
     if ($value == $median) {
         return array(
             'background' => '#BDD7EE',
-            'font'       => '#000000'
+            'font'       => '#17375E'
         );
     }
 
@@ -1254,7 +1289,7 @@ function getChsbColor($chsb_value, $chsb_reading, $chsb_higher_better = false)
         if ($value > $upper_quartile && $value <= $high) {
             return array(
                 'background' => '#63BE7B',
-                'font'       => '#000000'
+                'font'       => '#040404'
             );
         }
 
@@ -1262,7 +1297,7 @@ function getChsbColor($chsb_value, $chsb_reading, $chsb_higher_better = false)
         if ($value > $median && $value <= $upper_quartile) {
             return array(
                 'background' => '#C6E0B4',
-                'font'       => '#000000'
+                'font'       => '#17375E'
             );
         }
 
@@ -1270,7 +1305,7 @@ function getChsbColor($chsb_value, $chsb_reading, $chsb_higher_better = false)
         if ($value >= $lower_quartile && $value < $median) {
             return array(
                 'background' => '#FFD966',
-                'font'       => '#000000'
+                'font'       => '#17375E'
             );
         }
 
@@ -1278,7 +1313,7 @@ function getChsbColor($chsb_value, $chsb_reading, $chsb_higher_better = false)
         if ($value >= $low && $value < $lower_quartile) {
             return array(
                 'background' => '#F4B183',
-                'font'       => '#000000'
+                'font'       => '#17375E'
             );
         }
 
@@ -1303,7 +1338,7 @@ function getChsbColor($chsb_value, $chsb_reading, $chsb_higher_better = false)
     if ($value >= $low && $value < $lower_quartile) {
         return array(
             'background' => '#63BE7B',
-            'font'       => '#000000'
+            'font'       => '#17375E'
         );
     }
 
@@ -1311,29 +1346,29 @@ function getChsbColor($chsb_value, $chsb_reading, $chsb_higher_better = false)
     if ($value >= $lower_quartile && $value < $median) {
         return array(
             'background' => '#C6E0B4',
-            'font'       => '#000000'
+            'font'       => '#17375E'
         );
     }
 
     // Third quartile
     if ($value > $median && $value < $upper_quartile) {
         return array(
-            'background' => '#FFD966',
-            'font'       => '#000000'
+            'background' => '#ffd966',
+            'font'       => '#17375E'
         );
     }
 
     // Bottom quartile
     if ($value >= $upper_quartile && $value <= $high) {
         return array(
-            'background' => '#F4B183',
-            'font'       => '#000000'
+            'background' => '#f4b183',
+            'font'       => '#17375E'
         );
     }
 
     // Worse than peer maximum
     return array(
-        'background' => '#C00000',
+        'background' => '#c00000',
         'font'       => '#FFFFFF'
     );
 }
@@ -2398,7 +2433,7 @@ function calculateCHSBMeasures($currYear, $currMonth, $site_id, $site_detials, $
     $chsb_emission_water = 0;
 
     foreach ($chsb_getUtilities as $chsb_utility) {
-
+		$chsb_utility = array_map('floatval', $chsb_utility);
         $chsb_utilities_month = $chsb_utility['month_id'];
         $chsb_utilities_year = $chsb_utility['year_id'];
 
@@ -2425,6 +2460,7 @@ function calculateCHSBMeasures($currYear, $currMonth, $site_id, $site_detials, $
         $chsb_heating_district = $chsb_heatingDistrict * getUtilityUnitFactorForConversion($site_id, 'district_heating');
 
         $chsb_cooling_district = $chsb_coolingDistrict * getUtilityUnitFactorForConversion($site_id, 'district_cooling');
+		$chsb_fleet = isset($chsb_utility['fleet_petrol']) ? $chsb_utility['fleet_petrol'] * getUtilityUnitFactorForConversion($site_id, 'fleet') : 0;
 
         $chsb_utility_kwh_total += $chsb_electricity_value + $chsb_fuel + $chsb_lpg + $chsb_natural_gas + $chsb_heating_district + $chsb_cooling_district;
 
@@ -2436,7 +2472,7 @@ function calculateCHSBMeasures($currYear, $currMonth, $site_id, $site_detials, $
 
         $chsb_renewable_energy += isset($chsb_utility['total_renewable_energy_production']) ? $chsb_utility['total_renewable_energy_production'] : 0;
 
-        $chsb_non_electric_energy += $chsb_fuel + $chsb_lpg + $chsb_natural_gas + $chsb_heating_district + $chsb_cooling_district + $chsb_water_total_consumption;
+        $chsb_non_electric_energy += $chsb_fuel + $chsb_lpg + $chsb_natural_gas + $chsb_heating_district + $chsb_cooling_district;
 
         $chsb_emission_electricity += $chsb_electricity_value * $site_detials['electricity_emission_factor'];
         $chsb_emission_lpg += $chsb_lpg * $site_detials['lpg_emission_factor'];
@@ -2445,8 +2481,9 @@ function calculateCHSBMeasures($currYear, $currMonth, $site_id, $site_detials, $
         $chsb_emission_heating += $chsb_heating_district * $site_detials['district_heating_emission_factor'];
         $chsb_emission_cooling += $chsb_cooling_district * $site_detials['district_cooling_emission_factor'];
         $chsb_emission_water += $chsb_water_total_consumption * $site_detials['water_emission_factor'];
+		$chsb_emission_fleet += $chsb_fleet;
 
-        $chsb_carbon_footPrint = $chsb_emission_electricity + $chsb_emission_lpg + $chsb_emission_fuel + $chsb_emission_natural_gas + $chsb_emission_heating + $chsb_emission_cooling + $chsb_emission_water;
+        $chsb_carbon_footPrint = $chsb_emission_electricity + $chsb_emission_lpg + $chsb_emission_fuel + $chsb_emission_natural_gas + $chsb_emission_heating + $chsb_emission_cooling + $chsb_emission_water + $chsb_emission_fleet;
 
         $chsb_days += cal_days_in_month(CAL_GREGORIAN, $chsb_utilities_month, $chsb_utilities_year);
     }
@@ -2458,6 +2495,7 @@ function calculateCHSBMeasures($currYear, $currMonth, $site_id, $site_detials, $
     $chsb_hotel_rooms_area = !empty($result['hotel_rooms_area']) ? (float)$result['hotel_rooms_area'] : 0;
 
     $chsb_meeting_area = !empty($result['total_meeting_area']) ? (float)$result['total_meeting_area'] : 0;
+	$chsb_uplift_carbon_footprint = $chsb_carbon_footPrint * getUtilityUnitFactorForConversion($site_id, 'uplift_factor');
 
     $chsb_rooms_percentage = 0;
     $chsb_carbon_footPrint_rooms = 0;
@@ -2470,9 +2508,9 @@ function calculateCHSBMeasures($currYear, $currMonth, $site_id, $site_detials, $
 
         $chsb_rooms_percentage = $chsb_hotel_rooms_area / ($chsb_hotel_rooms_area + $chsb_meeting_area);
 
-        $chsb_carbon_footPrint_rooms = $chsb_carbon_footPrint * $chsb_rooms_percentage;
+        $chsb_carbon_footPrint_rooms = $chsb_uplift_carbon_footprint * $chsb_rooms_percentage;
 
-        $chsb_carbon_footPrint_meeting = $chsb_carbon_footPrint * (1 - $chsb_rooms_percentage);
+        $chsb_carbon_footPrint_meeting = $chsb_uplift_carbon_footprint * (1 - $chsb_rooms_percentage);
 
         $chsb_water_total_consumption_rooms = ($chsb_water_total_consumption / 3) + (($chsb_water_total_consumption * 2 / 3) * $chsb_rooms_percentage);
 
