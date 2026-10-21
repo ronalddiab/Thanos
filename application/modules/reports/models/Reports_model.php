@@ -483,7 +483,7 @@ class Reports_model extends Base_Model
 
 	$current_month = $filters['max_month_id'];
 
-	$query = "SELECT SUM(COALESCE(total_electricity_kwh, 0) - COALESCE(onsite_generators_quantity, 0) - COALESCE(total_renewable_energy_production, 0)) as electricity, SUM(COALESCE(district_heating, 0)) as heating_district, SUM(COALESCE(district_cooling, 0)) as cooling_district, COALESCE(district_cooling_fixed_cost, 0) as district_cooling_fixed_cost, COALESCE(district_heating_fixed_cost, 0) as district_heating_fixed_cost, COALESCE(lpg_fixed_cost, 0) as lpg_fixed_cost, COALESCE(natural_gas_fixed_cost, 0) as natural_gas_fixed_cost, COALESCE(water_fixed_cost, 0) as water_fixed_cost,
+	$query = "SELECT SUM(COALESCE(total_electricity_kwh, 0) - COALESCE(onsite_generators_quantity, 0)) as electricity, SUM(COALESCE(district_heating, 0)) as heating_district, SUM(COALESCE(district_cooling, 0)) as cooling_district, COALESCE(district_cooling_fixed_cost, 0) as district_cooling_fixed_cost, COALESCE(district_heating_fixed_cost, 0) as district_heating_fixed_cost, COALESCE(lpg_fixed_cost, 0) as lpg_fixed_cost, COALESCE(natural_gas_fixed_cost, 0) as natural_gas_fixed_cost, COALESCE(water_fixed_cost, 0) as water_fixed_cost,
 
 			SUM(COALESCE(total_fuel_oil, 0)) as fuel, SUM(COALESCE(total_lpg, 0)) as lpg, SUM(COALESCE(total_natural_gas, 0)) as natural_gas
 
@@ -2321,7 +2321,7 @@ class Reports_model extends Base_Model
 
 
 
-	$query = "SELECT SUM(COALESCE(total_electricity_kwh, 0) - COALESCE(onsite_generators_quantity, 0) - COALESCE(total_renewable_energy_production, 0)) as electricity, SUM(COALESCE(district_heating, 0)) as heating_district, SUM(COALESCE(district_cooling, 0)) as cooling_district,
+	$query = "SELECT SUM(COALESCE(total_electricity_kwh, 0) - COALESCE(onsite_generators_quantity, 0)) as electricity, SUM(COALESCE(district_heating, 0)) as heating_district, SUM(COALESCE(district_cooling, 0)) as cooling_district,
 
 			SUM(COALESCE(total_fuel_oil, 0)) as fuel,SUM(COALESCE(total_lpg, 0)) as lpg,SUM(COALESCE(total_natural_gas, 0)) as natural_gas
 
@@ -2803,7 +2803,7 @@ class Reports_model extends Base_Model
 				COALESCE(u.total_fuel_oil,0) * {$dataFactor['fuel_oil']} +
 				COALESCE(u.total_lpg,0) * {$dataFactor['lpg']} +
 				COALESCE(u.total_natural_gas,0) * {$dataFactor['natural_gas']}
-			) - SUM(COALESCE(u.onsite_generators_quantity,0)) - SUM(COALESCE(u.total_renewable_energy_production,0)) AS energy,
+			) - SUM(COALESCE(u.onsite_generators_quantity,0)) AS energy,
 
 			SUM(COALESCE(u.total_renewable_energy_production,0)) AS onsite_energy_generator_quantity,
 			SUM(COALESCE(u.water_total_consumption,0) * {$dataFactor['water']}) AS water,

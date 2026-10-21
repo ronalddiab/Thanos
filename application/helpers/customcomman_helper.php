@@ -1235,12 +1235,12 @@ if (!function_exists('getUtilityPanelColorNewMYTDUi')) {
      */
     function getUtilityPanelColorNewMYTDUi() {
         $utility_colors_new = [
-            'electricity' => array(102, 163, 255),
-            'fuel_oil' => array(255, 100, 100),
-            'lpg' => array(255, 163, 71),
-            'natural_gas' => array(100, 200, 100),
-            'district_heating' => array(200, 100, 100),
-            'district_cooling' => array(45, 85, 166),
+            'electricity' => array(91, 155, 213),
+            'fuel_oil' => array(237, 125, 49),
+            'lpg' => array(255, 192, 0),
+            'natural_gas' => array(68, 114, 196),
+            'district_heating' => array(255, 105, 180),
+            'district_cooling' => array(37, 94, 145),
             'fleet_petrol' => array(178, 153, 230),
             'water' => array(112, 173, 71),
         ];
