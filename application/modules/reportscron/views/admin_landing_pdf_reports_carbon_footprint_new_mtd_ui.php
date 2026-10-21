@@ -383,22 +383,32 @@ if (!function_exists('render_carbon_footprint_new_pdf')) {
 
         // Draw Bars
         $barCount = count($chartData);
+        // Utility -> [show_utility flag, color key, legend label], in the same order
+        // and gated by the same site_detail flags as the table below, so the chart/
+        // legend only ever show a utility the table itself would also show.
+        $utilitySeriesDefs = array(
+            'electricity' => array('show_utility_electricity', 'electricity', lang('electricity')),
+            'fuel' => array('show_utility_fuel_oil', 'fuel_oil', lang('fuel')),
+            'lpg' => array('show_utility_lpg', 'lpg', lang('lpg')),
+            'natural_gas' => array('show_utility_natural_gas', 'natural_gas', lang('natural_gas')),
+            'district_heating' => array('show_utility_district_heating', 'district_heating', lang('heating_district')),
+            'district_cooling' => array('show_utility_district_cooling', 'district_cooling', 'District cooling'),
+            'fleet_petrol' => array('show_utility_fleet', 'fleet_petrol', 'Fleet petrol'),
+        );
         if($barCount > 0) {
             $slotW = $cw / $barCount;
             $barW = min(7, ($slotW / 2) - 1);
             $gap = 1;
-            $series = array(
-                'electricity' => $utilityColorsNew['electricity'],
-                'lpg' => $utilityColorsNew['lpg'],
-                'district_cooling' => $utilityColorsNew['district_cooling'],
-                'fleet_petrol' => $utilityColorsNew['fleet_petrol']
-            );
-            $seriesFaded = array(
-                'electricity' => $lightenColor($series['electricity']),
-                'lpg' => $lightenColor($series['lpg']),
-                'district_cooling' => $lightenColor($series['district_cooling']),
-                'fleet_petrol' => $lightenColor($series['fleet_petrol'])
-            );
+            $series = array();
+            foreach ($utilitySeriesDefs as $chartKey => $def) {
+                if (!empty($site_detail[$def[0]])) {
+                    $series[$chartKey] = $utilityColorsNew[$def[1]];
+                }
+            }
+            $seriesFaded = array();
+            foreach ($series as $k => $col) {
+                $seriesFaded[$k] = $lightenColor($col);
+            }
 
             foreach($chartData as $i => $cd) {
                 $bx = $cx + ($i * $slotW) + ($slotW/2) - $barW - ($gap/2);
@@ -461,16 +471,16 @@ if (!function_exists('render_carbon_footprint_new_pdf')) {
             }
         }
 
-        // Legend Bottom
+        // Legend Bottom - same utilities/order/gating as the bar chart series above
         $legY = $y + $chartH - 5;
         $legX = $left + 5;
-        $legends = array(
-            lang('electricity') => $utilityColorsNew['electricity'],
-            lang('lpg') => $utilityColorsNew['lpg'],
-            'District cooling' => $utilityColorsNew['district_cooling'],
-            'Fleet petrol' => $utilityColorsNew['fleet_petrol'],
-            $last_year . ' shown faded' => array(200, 200, 200) // faded gray
-        );
+        $legends = array();
+        foreach ($utilitySeriesDefs as $chartKey => $def) {
+            if (!empty($site_detail[$def[0]])) {
+                $legends[$def[2]] = $utilityColorsNew[$def[1]];
+            }
+        }
+        $legends[$last_year . ' shown faded'] = array(200, 200, 200); // faded gray
         foreach($legends as $k => $c) {
             $pdf->SetFillColor($c[0], $c[1], $c[2]);
             $pdf->RoundedRect($legX, $legY+1, 2.5, 2.5, 0.5, '1111', 'F');

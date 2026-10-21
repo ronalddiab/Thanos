@@ -6924,7 +6924,6 @@ class Reports_admin extends Base_Admin_Controller
 	        if (function_exists('render_carbon_footprint_new_pdf')) {
 	            render_carbon_footprint_new_pdf($pdf, $data_for_carbon);
 	        }
-	        $pdf->mytd_page_header = false;
 	    } else {
 	        $pdf->writeHTML($content_reports_carbon_footprint, true, false, true, false, '');
 	    }
@@ -6935,7 +6934,6 @@ class Reports_admin extends Base_Admin_Controller
 	    $pdf->mytd_page_header = true;
 	    $pdf->AddPage();
 	    render_chsb_reporting_pdf($pdf, $data);
-	    $pdf->mytd_page_header = false;
 	    $pdf->SetFont('helvetica', '', 9);
 	}
 	if (!empty($data['WasteReport']['wasteReport'])) {
@@ -6944,12 +6942,6 @@ class Reports_admin extends Base_Admin_Controller
 	    $pdf->mytd_page_header = true;
 	    $pdf->AddPage();
 	    render_waste_report_pdf($pdf, $data);
-	    // Do NOT reset mytd_page_header here - Footer() for *this* page only actually fires
-	    // lazily, at the next AddPage()/Output() call, not here. For YTD (no Waste Trends page
-	    // follows), this is the last page, so resetting the flag before Output() made this
-	    // page's own footer silently fall back to the old style. Whatever runs next (Waste
-	    // Trends for Monthly, or a regression chart) already sets this flag itself before its
-	    // own AddPage(), so leaving it as `true` here is safe either way.
 	    $pdf->SetFont('helvetica', '', 9);
 	}
 	if (!empty($is_monthly_hidden_pdf) && !empty($data['WasteTrendsMonthly'])) {

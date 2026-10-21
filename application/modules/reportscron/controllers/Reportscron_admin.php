@@ -3755,7 +3755,6 @@ class Reportscron_admin extends Base_Admin_Controller
 				if (function_exists('render_carbon_footprint_new_pdf')) {
 					render_carbon_footprint_new_pdf($pdf, $data_for_carbon);
 				}
-				$pdf->mytd_page_header = false;
 			}
 
 			if ($result['chsb_reporting'] == 1 && !empty($data['monthly']['measures']) && !empty($data['measure_readings'])) {
@@ -3769,7 +3768,6 @@ class Reportscron_admin extends Base_Admin_Controller
 				$pdf->mytd_page_header = true;
 				$pdf->AddPage();
 				render_chsb_reporting_pdf($pdf, $chsb_data);
-				$pdf->mytd_page_header = false;
 				$pdf->SetFont('helvetica', '', 9);
 			}
 
@@ -4474,7 +4472,6 @@ class Reportscron_admin extends Base_Admin_Controller
 					if (function_exists('render_carbon_footprint_new_pdf')) {
 						render_carbon_footprint_new_pdf($pdf, $data_for_carbon);
 					}
-					$pdf->mytd_page_header = false;
 				}
 
 				if ($result['chsb_reporting'] == 1 && !empty($data['measures']) && !empty($data['measure_readings'])) {
@@ -4483,7 +4480,6 @@ class Reportscron_admin extends Base_Admin_Controller
 					$pdf->mytd_page_header = true;
 					$pdf->AddPage();
 					render_chsb_reporting_pdf($pdf, $data);
-					$pdf->mytd_page_header = false;
 					$pdf->SetFont('helvetica', '', 9);
 				}
 
