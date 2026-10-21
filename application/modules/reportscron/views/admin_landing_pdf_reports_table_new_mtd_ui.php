@@ -213,7 +213,7 @@ if (isset($pdf) && !empty($utility_cost_chart)) {
         $elecricity_act_bud_cost_diff = $currentBudgetActualData["total_electricity_cost_actual"] - $currentBudgetActualData["total_electricity_cost_budget"];
         $electricity_act_bud_pr_rn_diff = $electricity_per_room_night_actual - $electricity_per_room_night_budget;
 
-        $drawRow('Consumption (kWh)', ($total_sum_pre_data_electricity != 0) ? number_format($total_sum_data_electricity_kwh) : 0, number_format($total_sum_pre_data_electricity_kwh), number_format($currentBudgetActualData["total_electricity_kwh_budget"]),
+        $drawRow('Consumption (' . GetSiteUtilityUnitName($site_id, 'electricity') . ')', ($total_sum_pre_data_electricity != 0) ? number_format($total_sum_data_electricity_kwh) : 0, number_format($total_sum_pre_data_electricity_kwh), number_format($currentBudgetActualData["total_electricity_kwh_budget"]),
             number_format($electricity_consumption_difference), number_format($electricity_consumption_variation, $percentage_decimal) . '%', num_format_without_currency($electricity_ly, 0, $isLocal),
             number_format($electricity_actual_budget_diff), number_format($electricity_actual_budget_diff_pct, $percentage_decimal) . '%', $electricity_consumption_difference > 0, $electricity_actual_budget_diff > 0);
         $drawRow('Average tariff', num_format_without_currency($total_sum_data_electricity_tariff, $value_decimal, $isLocal), num_format_without_currency($total_sum_pre_data_electricity_tariff, $value_decimal, $isLocal), num_format_without_currency($electricity_tariff_budget, $value_decimal, $isLocal),
@@ -236,7 +236,7 @@ if (isset($pdf) && !empty($utility_cost_chart)) {
         $water_act_bud_cost_diff = $currentBudgetActualData["water_total_consumption_cost_actual"] - $currentBudgetActualData["water_total_consumption_cost_budget"];
         $water_act_bud_pr_rn_diff = $water_per_room_night_actual - $water_per_room_night_budget;
 
-        $drawRow('Consumption (m3)', number_format((float) $total_sum_data_water_consumption), number_format((float) $total_sum_pre_data_water_consumption), number_format((float) $currentBudgetActualData["water_total_consumption_budget"]),
+        $drawRow('Consumption (' . GetSiteUtilityUnitName($site_id, 'water') . ')', number_format((float) $total_sum_data_water_consumption), number_format((float) $total_sum_pre_data_water_consumption), number_format((float) $currentBudgetActualData["water_total_consumption_budget"]),
             number_format($water_consumption_difference), number_format($water_consumption_variation, $percentage_decimal) . '%', num_format_without_currency($water_ly, 0, $isLocal),
             number_format($water_act_bud_diff), number_format($water_act_bud_diff_pct, $percentage_decimal) . '%', $water_consumption_difference > 0, $water_act_bud_diff > 0);
         $drawRow('Average tariff', num_format_without_currency((float) $total_sum_data_water_tariff, $value_decimal, $isLocal), num_format_without_currency((float) $total_sum_pre_data_water_tariff, $value_decimal, $isLocal), num_format_without_currency($water_tariff_budget, $value_decimal, $isLocal),
@@ -260,7 +260,7 @@ if (isset($pdf) && !empty($utility_cost_chart)) {
         $district_cooling_act_bud_cost_variation = ($currentBudgetActualData["district_cooling_cost_budget"] != 0) ? ($district_cooling_act_bud_cost_diff * 100) / $currentBudgetActualData["district_cooling_cost_budget"] : 0;
         $district_cooling_act_bud_pr_rn_diff = $district_cooling_per_room_night_actual - $district_cooling_per_room_night_budget;
 
-        $drawRow('Consumption (RTH)', number_format($total_sum_data_cooling_district_consumption), number_format($total_sum_pre_data_cooling_district_consumption), number_format($currentBudgetActualData["district_cooling_budget"]),
+        $drawRow('Consumption (' . GetSiteUtilityUnitName($site_id, 'district_cooling') . ')', number_format($total_sum_data_cooling_district_consumption), number_format($total_sum_pre_data_cooling_district_consumption), number_format($currentBudgetActualData["district_cooling_budget"]),
             number_format($cooling_district_consumption_difference), number_format($cooling_district_consumption_variation, $percentage_decimal) . '%', num_format_without_currency($cooling_district_ly, 0, $isLocal),
             number_format($district_cooling_act_bud_diff), number_format($district_cooling_act_bud_diff_pct, $percentage_decimal) . '%', $cooling_district_consumption_difference > 0, $district_cooling_act_bud_diff > 0);
         $drawRow('Average tariff', num_format_without_currency($total_sum_data_cooling_district_tariff, $value_decimal, $isLocal), num_format_without_currency($total_sum_pre_data_cooling_district_tariff, $value_decimal, $isLocal), num_format_without_currency($district_cooling_tariff_budget, $value_decimal, $isLocal),
@@ -283,7 +283,7 @@ if (isset($pdf) && !empty($utility_cost_chart)) {
         $lpg_act_bud_cost_diff = $currentBudgetActualData["total_lpg_cost_actual"] - $currentBudgetActualData["total_lpg_cost_budget"];
         $lpg_act_bud_pr_rn_diff = $lpg_per_room_night_actual - $lpg_per_room_night_budget;
 
-        $drawRow('Consumption (Litres)', number_format($total_sum_data_lpg_consumption), number_format($total_sum_pre_data_lpg_consumption), number_format($currentBudgetActualData["total_lpg_budget"]),
+        $drawRow('Consumption (' . GetSiteUtilityUnitName($site_id, 'lpg') . ')', number_format($total_sum_data_lpg_consumption), number_format($total_sum_pre_data_lpg_consumption), number_format($currentBudgetActualData["total_lpg_budget"]),
             number_format($lpg_consumption_difference), number_format($lpg_consumption_variation, $percentage_decimal) . '%', num_format_without_currency($lpg_ly, 0, $isLocal),
             number_format($lpg_act_bud_diff), number_format($lpg_act_bud_diff_pct, $percentage_decimal) . '%', $lpg_consumption_difference > 0, $lpg_act_bud_diff > 0);
         $drawRow('Total Cost', num_format_without_currency($total_sum_data_lpg, 0, $isLocal), num_format_without_currency($total_sum_pre_data_lpg, 0, $isLocal), num_format_without_currency($currentBudgetActualData["total_lpg_cost_budget"], 0, $isLocal),
@@ -296,7 +296,6 @@ if (isset($pdf) && !empty($utility_cost_chart)) {
 
     if ($site_detail['show_utility_fuel_oil']) {
         $drawSection('Fuel', '#ED7D31');
-        $fuel_oil_unit = GetSiteUtilityUnitName($site_id, 'fuel_oil');
         $fuel_cl_cost_diff = $total_sum_data_fuel - $total_sum_pre_data_fuel;
         $fuel_oil_act_bud_diff = $currentBudgetActualData["total_fuel_oil_actual"] - $currentBudgetActualData["total_fuel_oil_budget"];
         $fuel_oil_act_bud_diff_pct = ($currentBudgetActualData["total_fuel_oil_budget"] != 0) ? $fuel_oil_act_bud_diff * 100 / $currentBudgetActualData["total_fuel_oil_budget"] : 0;
@@ -304,7 +303,7 @@ if (isset($pdf) && !empty($utility_cost_chart)) {
         $fuel_oil_act_bud_cost_diff = $currentBudgetActualData["total_fuel_oil_cost_actual"] - $currentBudgetActualData["total_fuel_oil_cost_budget"];
         $fuel_oil_act_bud_pr_rn_diff = $fuel_oil_per_room_night_actual - $fuel_oil_per_room_night_budget;
 
-        $drawRow('Consumption (' . $fuel_oil_unit . ')', number_format($total_sum_data_fuel_consumption), number_format($total_sum_pre_data_fuel_consumption), number_format($currentBudgetActualData["total_fuel_oil_budget"]),
+        $drawRow('Consumption (' . GetSiteUtilityUnitName($site_id, 'fuel_oil') . ')', number_format($total_sum_data_fuel_consumption), number_format($total_sum_pre_data_fuel_consumption), number_format($currentBudgetActualData["total_fuel_oil_budget"]),
             number_format($fuel_consumption_difference), number_format($fuel_consumption_variation, $percentage_decimal) . '%', num_format_without_currency($fuel_oil_ly, 0, $isLocal),
             number_format($fuel_oil_act_bud_diff), number_format($fuel_oil_act_bud_diff_pct, $percentage_decimal) . '%', $fuel_consumption_difference > 0, $fuel_oil_act_bud_diff > 0);
         $drawRow('Average tariff', num_format_without_currency($total_sum_data_fuel_tariff, $value_decimal, $isLocal), num_format_without_currency($total_sum_pre_data_fuel_tariff, $value_decimal, $isLocal), num_format_without_currency($fuel_oil_tariff_budget, $value_decimal, $isLocal),
@@ -320,7 +319,6 @@ if (isset($pdf) && !empty($utility_cost_chart)) {
 
     if ($site_detail['show_utility_natural_gas']) {
         $drawSection('Natural gas', '#4472C4');
-        $natural_gas_unit = GetSiteUtilityUnitName($site_id, 'natural_gas');
         $natural_gas_cl_cost_diff = $total_sum_data_natural_gas - $total_sum_pre_data_natural_gas;
         $natural_gas_act_bud_diff = $currentBudgetActualData["total_natural_gas_actual"] - $currentBudgetActualData["total_natural_gas_budget"];
         $natural_gas_act_bud_diff_pct = ($currentBudgetActualData["total_natural_gas_budget"] != 0) ? $natural_gas_act_bud_diff * 100 / $currentBudgetActualData["total_natural_gas_budget"] : 0;
@@ -328,7 +326,7 @@ if (isset($pdf) && !empty($utility_cost_chart)) {
         $natural_gas_act_bud_cost_diff = $currentBudgetActualData["total_natural_gas_cost_actual"] - $currentBudgetActualData["total_natural_gas_cost_budget"];
         $natural_gas_act_bud_pr_rn_diff = $natural_gas_per_room_night_actual - $natural_gas_per_room_night_budget;
 
-        $drawRow('Consumption (' . $natural_gas_unit . ')', number_format($total_sum_data_natural_gas_consumption), number_format($total_sum_pre_data_natural_gas_consumption), number_format($currentBudgetActualData["total_natural_gas_budget"]),
+        $drawRow('Consumption (' . GetSiteUtilityUnitName($site_id, 'natural_gas') . ')', number_format($total_sum_data_natural_gas_consumption), number_format($total_sum_pre_data_natural_gas_consumption), number_format($currentBudgetActualData["total_natural_gas_budget"]),
             number_format($natural_gas_consumption_difference), number_format($natural_gas_consumption_variation, $percentage_decimal) . '%', num_format_without_currency($natural_gas_ly, 0, $isLocal),
             number_format($natural_gas_act_bud_diff), number_format($natural_gas_act_bud_diff_pct, $percentage_decimal) . '%', $natural_gas_consumption_difference > 0, $natural_gas_act_bud_diff > 0);
         $drawRow('Average tariff', num_format_without_currency($total_sum_data_natural_gas_tariff, $value_decimal, $isLocal), num_format_without_currency($total_sum_pre_data_natural_gas_tariff, $value_decimal, $isLocal), num_format_without_currency($natural_gas_tariff_budget, $value_decimal, $isLocal),
@@ -344,7 +342,6 @@ if (isset($pdf) && !empty($utility_cost_chart)) {
 
     if ($site_detail['show_utility_district_heating']) {
         $drawSection('District heating', '#FF69B4');
-        $district_heating_unit = GetSiteUtilityUnitName($site_id, 'district_heating');
         $heating_district_cl_cost_diff = $total_sum_data_heating_district - $total_sum_pre_data_heating_district;
         $district_heating_act_bud_diff = $currentBudgetActualData["district_heating_actual"] - $currentBudgetActualData["district_heating_budget"];
         $district_heating_act_bud_diff_pct = ($currentBudgetActualData["district_heating_budget"] != 0) ? $district_heating_act_bud_diff * 100 / $currentBudgetActualData["district_heating_budget"] : 0;
@@ -352,7 +349,7 @@ if (isset($pdf) && !empty($utility_cost_chart)) {
         $district_heating_act_bud_cost_diff = $currentBudgetActualData["district_heating_cost_actual"] - $currentBudgetActualData["district_heating_cost_budget"];
         $district_heating_act_bud_pr_rn_diff = $district_heating_per_room_night_actual - $district_heating_per_room_night_budget;
 
-        $drawRow('Consumption (' . $district_heating_unit . ')', number_format($total_sum_data_heating_district_consumption), number_format($total_sum_pre_data_heating_district_consumption), number_format($currentBudgetActualData["district_heating_budget"]),
+        $drawRow('Consumption (' . GetSiteUtilityUnitName($site_id, 'district_heating') . ')', number_format($total_sum_data_heating_district_consumption), number_format($total_sum_pre_data_heating_district_consumption), number_format($currentBudgetActualData["district_heating_budget"]),
             number_format($heating_district_consumption_difference), number_format($heating_district_consumption_variation, $percentage_decimal) . '%', num_format_without_currency($heating_district_ly, 0, $isLocal),
             number_format($district_heating_act_bud_diff), number_format($district_heating_act_bud_diff_pct, $percentage_decimal) . '%', $heating_district_consumption_difference > 0, $district_heating_act_bud_diff > 0);
         $drawRow('Average tariff', num_format_without_currency($total_sum_data_heating_district_tariff, $value_decimal, $isLocal), num_format_without_currency($total_sum_pre_data_heating_district_tariff, $value_decimal, $isLocal), num_format_without_currency($district_heating_tariff_budget, $value_decimal, $isLocal),
