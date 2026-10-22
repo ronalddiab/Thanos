@@ -21,7 +21,7 @@ jobs:
             set net:max-retries 3;
             set net:reconnect-interval-base 5;
             set xfer:clobber on;
-            mirror -R --verbose \
+            mirror -R --verbose --parallel=5 \
               --exclude-glob .git/ \
               --exclude-glob .github/ \
               --exclude-glob core_modules/ \
@@ -29,6 +29,11 @@ jobs:
               --exclude-glob system/ \
               --exclude-glob user_guide/ \
               --exclude-glob vendor/ \
+              --exclude-glob assets/uploads/imported_excels/ \
+              --exclude-glob assets/imported_excels/ \
+              --exclude-glob application/third_party/ \
+              --exclude-glob application/logs/ \
+              --exclude-glob application/plugins/ \
               --exclude-glob .editorconfig \
               --exclude-glob annual_report.js \
               --exclude-glob contributing.md \
