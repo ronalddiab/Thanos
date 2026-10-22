@@ -7202,36 +7202,36 @@ class Reportscron_admin extends Base_Admin_Controller
 				if ((int) $value['month_id'] != $currentMonth || (int) $value['year_id'] != $currentYear) continue;
 				$electricity =
 					(!empty($value['electricity']) && !empty($value['room_night']))
-					? round(($value['electricity'] / $value['room_night']), 2)
+					? ($value['electricity'] / $value['room_night'])
 					: 0;
 
 				$gases =
 					(!empty($value['gases']) && !empty($value['room_night']))
-					? round(($value['gases'] / $value['room_night']), 2)
+					? ($value['gases'] / $value['room_night'])
 					: 0;
 
 				$others =
 					(!empty($value['others']) && !empty($value['room_night']))
-					? round(($value['others'] / $value['room_night']), 2)
+					? ($value['others'] / $value['room_night'])
 					: 0;
 
 				$electricityPerMeter =
 					(!empty($value['electricity']) && !empty($value['cooled_builtup_area']))
-					? round(($value['electricity'] / $value['cooled_builtup_area']), 2)
+					? ($value['electricity'] / $value['cooled_builtup_area'])
 					: 0;
 
 				$gasesPerMeter =
 					(!empty($value['gases']) && !empty($value['cooled_builtup_area']))
-					? round(($value['gases'] / $value['cooled_builtup_area']), 2)
+					? ($value['gases'] / $value['cooled_builtup_area'])
 					: 0;
 
 				$othersPerMeter =
 					(!empty($value['others']) && !empty($value['cooled_builtup_area']))
-					? round(($value['others'] / $value['cooled_builtup_area']), 2)
+					? ($value['others'] / $value['cooled_builtup_area'])
 					: 0;
 			}
-			$totalPerRoomNight = $electricity + $gases + $others;
-			$totalPerMeterSquare = $electricityPerMeter + $gasesPerMeter + $othersPerMeter;
+			$totalPerRoomNight = round($electricity + $gases + $others, 2);
+			$totalPerMeterSquare = round($electricityPerMeter + $gasesPerMeter + $othersPerMeter, 2);
 			$siteEui = $totalPerRoomNight;
 			$siteEuiPerMeter = $totalPerMeterSquare;
 			$allSiteRanking[] = ['site' => $site['site_location_name'], 'eui' => $siteEui, 'eui_per_meter' => $siteEuiPerMeter];

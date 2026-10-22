@@ -2803,7 +2803,7 @@ class Reports_model extends Base_Model
 				COALESCE(u.total_fuel_oil,0) * {$dataFactor['fuel_oil']} +
 				COALESCE(u.total_lpg,0) * {$dataFactor['lpg']} +
 				COALESCE(u.total_natural_gas,0) * {$dataFactor['natural_gas']}
-			) - SUM(COALESCE(u.onsite_generators_quantity,0)) AS energy,
+			) - SUM(COALESCE(u.total_renewable_energy_exported,0)) AS energy,
 
 			SUM(COALESCE(u.total_renewable_energy_production,0)) AS onsite_energy_generator_quantity,
 			SUM(COALESCE(u.water_total_consumption,0) * {$dataFactor['water']}) AS water,
@@ -2896,7 +2896,7 @@ class Reports_model extends Base_Model
 						(u.year_id='$endYear' AND (u.month_id<='$endMonth'))
 						)";
 
-		$query = "SELECT ((COALESCE(u.total_electricity_kwh,0) * " . $dataFactor['electricity'] . ") - COALESCE(u.onsite_generators_quantity,0) - COALESCE(u.total_renewable_energy_production,0)) as electricity,
+		$query = "SELECT ((COALESCE(u.total_electricity_kwh,0) - COALESCE(u.total_renewable_energy_exported,0)) * " . $dataFactor['electricity'] . ") as electricity,
 						((COALESCE(u.total_lpg,0) * " . $dataFactor['lpg'] . ") +
 			    (COALESCE(u.total_natural_gas,0) * " . $dataFactor['natural_gas'] . ")) as gases,
 			    ((COALESCE(u.district_heating,0) * " . $dataFactor['district_heating'] . ") +

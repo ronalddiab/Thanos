@@ -2933,7 +2933,9 @@ class Sites_model extends Base_Model
 			(COALESCE(district_cooling, 0) * ".($dataFactor['district_cooling'] ?? 0).") AS mmbtu_cooling_district,
 
 			-- RAW UTILITIES
-			COALESCE(total_electricity_kwh, 0) as electricity_raw,
+			-- Solar stays part of consumption (it was generated and used on-site) unless it was
+			-- exported back to the grid, in which case it was never actually consumed here.
+			(COALESCE(total_electricity_kwh, 0) - COALESCE(total_renewable_energy_exported, 0)) as electricity_raw,
 			COALESCE(total_fuel_oil, 0) as fuel_raw,
 			COALESCE(total_lpg, 0) as lpg_raw,
 			COALESCE(total_natural_gas, 0) as natural_gas_raw,
@@ -3236,7 +3238,8 @@ class Sites_model extends Base_Model
 				$util->utilities_year  = $currentYear;
 				$getUtilities = $util->getUtility();
 				$getUtilitiesYTD = $util->getUtilityYTD();
-				$data['sites'][$site_id]['dataUtilityCurrent']['total_electricity_kwh'] = (float) ($getUtilities['total_electricity_kwh'] * $dataFactor['electricity'] ?? 0);
+				// Solar stays part of consumption unless it was exported back to the grid.
+				$data['sites'][$site_id]['dataUtilityCurrent']['total_electricity_kwh'] = (float) ((($getUtilities['total_electricity_kwh'] ?? 0) - ($getUtilities['total_renewable_energy_exported'] ?? 0)) * $dataFactor['electricity']);
 				$data['sites'][$site_id]['dataUtilityCurrent']['total_lpg'] = (float) ($getUtilities['total_lpg'] * $dataFactor['lpg'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityCurrent']['total_fuel_oil'] = (float) ($getUtilities['total_fuel_oil'] * $dataFactor['fuel_oil'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityCurrent']['total_natural_gas'] = (float) ($getUtilities['total_natural_gas'] * $dataFactor['natural_gas'] ?? 0);
@@ -3244,7 +3247,7 @@ class Sites_model extends Base_Model
 				$data['sites'][$site_id]['dataUtilityCurrent']['district_cooling'] = (float) ($getUtilities['district_cooling'] * $dataFactor['district_cooling'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityCurrent']['water_total_consumption'] = (float) ($getUtilities['water_total_consumption'] * $dataFactor['water'] ?? 0);
 
-				$data['sites'][$site_id]['dataUtilityCurrentYTD']['total_electricity_kwh'] = (float) ($getUtilitiesYTD['total_electricity_kwh'] * $dataFactor['electricity'] ?? 0);
+				$data['sites'][$site_id]['dataUtilityCurrentYTD']['total_electricity_kwh'] = (float) ((($getUtilitiesYTD['total_electricity_kwh'] ?? 0) - ($getUtilitiesYTD['total_renewable_energy_exported'] ?? 0)) * $dataFactor['electricity']);
 				$data['sites'][$site_id]['dataUtilityCurrentYTD']['total_lpg'] = (float) ($getUtilitiesYTD['total_lpg'] * $dataFactor['lpg'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityCurrentYTD']['total_fuel_oil'] = (float) ($getUtilitiesYTD['total_fuel_oil'] * $dataFactor['fuel_oil'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityCurrentYTD']['total_natural_gas'] = (float) ($getUtilitiesYTD['total_natural_gas'] * $dataFactor['natural_gas'] ?? 0);
@@ -3255,7 +3258,7 @@ class Sites_model extends Base_Model
 				$util->utilities_year  = $lastYear;
 				$getUtilitiesLastYear = $util->getUtility();
 				$getUtilitiesLastYearYTD = $util->getUtilityYTD();
-				$data['sites'][$site_id]['dataUtilityLastYear']['total_electricity_kwh'] = (float) ($getUtilitiesLastYear['total_electricity_kwh'] * $dataFactor['electricity'] ?? 0);
+				$data['sites'][$site_id]['dataUtilityLastYear']['total_electricity_kwh'] = (float) ((($getUtilitiesLastYear['total_electricity_kwh'] ?? 0) - ($getUtilitiesLastYear['total_renewable_energy_exported'] ?? 0)) * $dataFactor['electricity']);
 				$data['sites'][$site_id]['dataUtilityLastYear']['total_lpg'] = (float) ($getUtilitiesLastYear['total_lpg'] * $dataFactor['lpg'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityLastYear']['total_fuel_oil'] = (float) ($getUtilitiesLastYear['total_fuel_oil'] * $dataFactor['fuel_oil'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityLastYear']['total_natural_gas'] = (float) ($getUtilitiesLastYear['total_natural_gas'] * $dataFactor['natural_gas'] ?? 0);
@@ -3263,7 +3266,7 @@ class Sites_model extends Base_Model
 				$data['sites'][$site_id]['dataUtilityLastYear']['district_cooling'] = (float) ($getUtilitiesLastYear['district_cooling'] * $dataFactor['district_cooling'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityLastYear']['water_total_consumption'] = (float) ($getUtilitiesLastYear['water_total_consumption'] * $dataFactor['water'] ?? 0);
 
-				$data['sites'][$site_id]['dataUtilityLastYearYTD']['total_electricity_kwh'] = (float) ($getUtilitiesLastYearYTD['total_electricity_kwh'] * $dataFactor['electricity'] ?? 0);
+				$data['sites'][$site_id]['dataUtilityLastYearYTD']['total_electricity_kwh'] = (float) ((($getUtilitiesLastYearYTD['total_electricity_kwh'] ?? 0) - ($getUtilitiesLastYearYTD['total_renewable_energy_exported'] ?? 0)) * $dataFactor['electricity']);
 				$data['sites'][$site_id]['dataUtilityLastYearYTD']['total_lpg'] = (float) ($getUtilitiesLastYearYTD['total_lpg'] * $dataFactor['lpg'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityLastYearYTD']['total_fuel_oil'] = (float) ($getUtilitiesLastYearYTD['total_fuel_oil'] * $dataFactor['fuel_oil'] ?? 0);
 				$data['sites'][$site_id]['dataUtilityLastYearYTD']['total_natural_gas'] = (float) ($getUtilitiesLastYearYTD['total_natural_gas'] * $dataFactor['natural_gas'] ?? 0);
