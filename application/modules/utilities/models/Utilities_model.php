@@ -235,6 +235,7 @@ class Utilities_model extends Base_Model
     public function getUtilityYTD()
     {
         $this->db->select('SUM(COALESCE(total_electricity_kwh, 0)) as total_electricity_kwh,
+            SUM(COALESCE(total_renewable_energy_exported, 0)) as total_renewable_energy_exported,
             SUM(COALESCE(total_lpg, 0)) as total_lpg,
             SUM(COALESCE(total_fuel_oil, 0)) as total_fuel_oil,
             SUM(COALESCE(total_natural_gas, 0)) as total_natural_gas,
