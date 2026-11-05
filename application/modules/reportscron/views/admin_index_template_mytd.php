@@ -1999,7 +1999,7 @@ $colorFleetPetrol = $chart_legend_colors['Fleet_Petrol'];
 
 			<?php if ($totalFleetPetrol || $totalFleetPetrolConsumption) { ?>
 
-				arrTitle.push('<?php echo lang("fleet_petrol"); ?>');
+				arrTitle.push('<?php echo lang("fleet-petrol"); ?>');
 
 			<?php } ?>
 

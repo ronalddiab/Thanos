@@ -124,6 +124,16 @@ if (!function_exists('buildMenu')) {
 		    continue;
 		}
 
+
+		if($menuData['items'][$itemId]['m']['link'] == 'dashboard/sites' && in_array($ci->session->userdata['admin']['role_id'], array(1, 6))) {
+		    continue;
+		}
+
+
+		if($menuData['items'][$itemId]['m']['link'] == 'corporate_dashboard' && !in_array($ci->session->userdata['admin']['role_id'], array(1, 6))) {
+		    continue;
+		}
+
 		// For Front Menu
 		if ($menuData['items'][$itemId]['m']['menu_name'] == 'front_menu') {
 

@@ -207,12 +207,18 @@
                             <?php
 
                             $if_site_header = true;
+                            $if_corporate_dashboard = false;
 
 
 
                             if($ci->uri->segment(1) == 'dashboard' && $ci->uri->segment(2) == 'sites'){
 
                                 $if_site_header = false;
+
+                            }
+                            if($ci->uri->segment(1) == 'corporate_dashboard' ){
+
+                                $if_corporate_dashboard = true;
 
                             }
 
@@ -306,34 +312,9 @@ if(document.getElementById("menu46") != null) {
                             </script>
 
                             <?php 
-
-                            if($if_site_header){
-
-                                if ($ci->session->userdata[$ci->theme->get('section_name')]['site_id'] == 0) {
-
-                                    $header_logo_src = site_url() . NOT_AVAILABLE_SITE_LOGO;
-
-                                } else {
-
-                                    if (file_exists(BASE_PATH_CUSTOM . "/assets/uploads/" . $ci->session->userdata[$ci->theme->get('section_name')]['site_logo'])) {
-
-                                        $header_logo_src = site_url() . "assets/uploads/" . $ci->session->userdata[$ci->theme->get('section_name')]['site_logo'];
-
-                                    } else {
-
-                                        $header_logo_src = site_url() . NOT_AVAILABLE_SITE_LOGO;
-
-                                    }
-
-                                }                              
-
-
-
-                                $hotel_display_name = $site_name;
-
-                            }else{
-
-                                if (file_exists(BASE_PATH_CUSTOM . "/assets/uploads/" . $ci->session->userdata[$ci->theme->get('section_name')]['hotel_logo'])) {
+                            if($if_corporate_dashboard)
+                            { 
+                                 if (file_exists(BASE_PATH_CUSTOM . "/assets/uploads/" .$ci->session->userdata[$ci->theme->get('section_name')]['hotel_logo'])) {
 
                                     $header_logo_src = site_url() . "assets/uploads/" . $ci->session->userdata[$ci->theme->get('section_name')]['hotel_logo'];
 
@@ -342,25 +323,78 @@ if(document.getElementById("menu46") != null) {
                                     $header_logo_src = site_url() . NOT_AVAILABLE_SITE_LOGO;
 
                                 }
-
-
-
                                 $hotel_display_name = $hotel_name;
+                                ?>
+                                <div class="csd-root">
+                                    <div class="topbar">
+                                        <div class="brand">
+                                        <span class="hotel-logo">
+                                            <img class="siteImage" alt="" src="<?php echo $header_logo_src; ?>">
+                                        </span>
+                                        <div>
+                                            <h1><?php echo $hotel_display_name; ?></h1>
+                                            <span>Corporate Sustainability Dashboard — Group Portfolio</span>
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php }
+                            else{
+                                if($if_site_header){
 
-                            }
+                                    if ($ci->session->userdata[$ci->theme->get('section_name')]['site_id'] == 0) {
 
-                            ?>
+                                        $header_logo_src = site_url() . NOT_AVAILABLE_SITE_LOGO;
 
-                            <span class="hotel-logo">
+                                    } else {
 
-                                <img class="siteImage" alt="" src="<?php echo $header_logo_src; ?>">
+                                        if (file_exists(BASE_PATH_CUSTOM . "/assets/uploads/" . $ci->session->userdata[$ci->theme->get('section_name')]['site_logo'])) {
 
-                            </span>
+                                            $header_logo_src = site_url() . "assets/uploads/" . $ci->session->userdata[$ci->theme->get('section_name')]['site_logo'];
 
-                            <h5><?php echo $hotel_display_name; ?>
+                                        } else {
 
-                            </h5>
+                                            $header_logo_src = site_url() . NOT_AVAILABLE_SITE_LOGO;
 
+                                        }
+
+                                    }                              
+
+
+
+                                    $hotel_display_name = $site_name;
+
+                                }else{
+
+                                    if (file_exists(BASE_PATH_CUSTOM . "/assets/uploads/" . $ci->session->userdata[$ci->theme->get('section_name')]['hotel_logo'])) {
+
+                                        $header_logo_src = site_url() . "assets/uploads/" . $ci->session->userdata[$ci->theme->get('section_name')]['hotel_logo'];
+
+                                    } else {
+
+                                        $header_logo_src = site_url() . NOT_AVAILABLE_SITE_LOGO;
+
+                                    }
+
+
+
+                                    $hotel_display_name = $hotel_name;
+
+                                }
+
+                                ?>
+
+                                <span class="hotel-logo">
+
+                                    <img class="siteImage" alt="" src="<?php echo $header_logo_src; ?>">
+
+                                </span>
+
+                                <h5><?php echo $hotel_display_name; ?>
+
+                                </h5>
+
+                            <?php } ?>
                         </div>
 
                         <div class="col-sm-6">

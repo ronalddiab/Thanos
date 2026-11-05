@@ -244,6 +244,7 @@ class Reports_model extends Base_Model
 
 
 	$query = "SELECT COALESCE(u.total_electricity_kwh, 0) as electricity, COALESCE(u.electricity_total_budget, 0) as electricity_budget, COALESCE(u.total_fuel_oil, 0) as fuel_oil, COALESCE(u.fuel_total_budget, 0) as fuel_budget,
+			    COALESCE(u.fleet_petrol, 0) as fleet_petrol,
 			    COALESCE(u.total_lpg, 0) as lpg, COALESCE(u.lpg_total_budget, 0) as lpg_budget,
 
 			    COALESCE(u.total_natural_gas, 0) as natural_gas, COALESCE(u.natural_gas_total_budget, 0) as natural_gas_budget,

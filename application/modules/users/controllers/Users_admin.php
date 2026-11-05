@@ -258,6 +258,12 @@ class Users_admin extends Base_Admin_Controller {
 		redirect(BASE_ADMIN_URL_CUSTOM . 'forum');
 	    } else if ($this->section_name == "admin" && $loginuserdata[$this->section_name]['role_id'] == 2) {
 		redirect(BASE_ADMIN_URL_CUSTOM . 'dashboard/sites');
+		} else if ($this->section_name == "admin" && in_array($loginuserdata[$this->section_name]['role_id'], array(1, 6))) {
+			if (check_user_permission_by_label('admin.corporate_dashboard.index')) {
+				redirect(BASE_ADMIN_URL_CUSTOM . 'corporate_dashboard');
+			} else {
+				redirect(BASE_ADMIN_URL_CUSTOM . 'dashboard');
+			}
 	    } else {
 		//redirect($this->section_name . '/dashboard/index');
 		redirect(BASE_ADMIN_URL_CUSTOM . 'dashboard');
@@ -319,6 +325,13 @@ class Users_admin extends Base_Admin_Controller {
 				$site_permission = check_user_permission_by_label('admin.dashboard.sites');
 				if($site_permission){
 				    redirect(BASE_ADMIN_URL_CUSTOM . 'dashboard/sites');
+				} else {
+				    redirect(BASE_ADMIN_URL_CUSTOM . 'dashboard');
+				}
+				} else if (in_array($newdata['role_id'], array(1, 6))) {
+				$corporate_dashboard_permission = check_user_permission_by_label('admin.corporate_dashboard.index');
+				if ($corporate_dashboard_permission) {
+				    redirect(BASE_ADMIN_URL_CUSTOM . 'corporate_dashboard');
 				} else {
 				    redirect(BASE_ADMIN_URL_CUSTOM . 'dashboard');
 				}
@@ -443,10 +456,26 @@ class Users_admin extends Base_Admin_Controller {
 			$this->users_model->update_last_login($result[0]['u']['id']);
 			if ($newdata['role_id'] == 5) {
 			    $redirectUrl = base_url() . 'forum';
-			} else if ($newdata['role_id'] == 2 || $newdata['role_id'] == 6) {
+			} else if ($newdata['role_id'] == 2) {
 			    $site_permission = check_user_permission_by_label('admin.dashboard.sites');
 			    if($site_permission){
 				$redirectUrl = base_url() . 'dashboard/sites';
+			    } else {
+				$site_permission = check_user_permission_by_label('admin.dashboard.index');
+				if($site_permission){
+				    $redirectUrl = base_url() . 'dashboard';
+				} else {
+				    $this->session->unset_userdata($this->section_name);
+				    $this->theme->set_message(lang('permission-not-allowed'), "error");
+				    $resultArray = array('status' => 0, 'redirect' => base_url() . 'users/login');
+				    echo json_encode($resultArray);
+				    exit;
+				}
+			    }
+			} else if (in_array($newdata['role_id'], array(1, 6))) {
+			    $corporate_dashboard_permission = check_user_permission_by_label('admin.corporate_dashboard.index');
+			    if($corporate_dashboard_permission){
+				$redirectUrl = base_url() . 'corporate_dashboard';
 			    } else {
 				$site_permission = check_user_permission_by_label('admin.dashboard.index');
 				if($site_permission){
