@@ -66,8 +66,14 @@
       font-family: Georgia, serif
     }
 
+    .csd-root .siteImage{
+      height: unset;
+      width: unset;
+    }
+
     .csd-root .brand h1 {
       margin: 0;
+      display: none;
       font-size: 17.5px;
       font-weight: 700;
       letter-spacing: .6px;
@@ -76,7 +82,7 @@
 
     .csd-root .brand span {
       display: block;
-      font-size: 14px;
+      font-size: 18px;
       color: var(--muted);
       font-weight: 400;
       letter-spacing: .2px
@@ -641,7 +647,7 @@
 include('widgets/_helpers.php');
 ?>
   <div class="tabs">
-    <div class="tab on" data-tab="summary">Portfolio Summary</div>
+    <div class="tab on" data-tab="summary">Utilities and Carbon</div>
     <div class="tab" data-tab="quality" style="display: none;">Data Quality</div>
   </div>
   <div class="wrap">
