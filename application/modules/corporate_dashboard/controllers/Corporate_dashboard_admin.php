@@ -76,7 +76,7 @@ class Corporate_dashboard_admin extends Base_Admin_Controller
             ? (int) $meta['prior_year']
             : ($cur_year - 1);
 
-        $filename = 'Rotana_Portfolio_YTD_' . $cur_year . '.csv';
+        $filename = 'Thanos_Portfolio_YTD_' . $cur_year . '.csv';
 
         // Clear any output that may already exist.
         while (ob_get_level() > 0) {
