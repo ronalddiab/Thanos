@@ -118,9 +118,11 @@ class Utilities_admin extends Base_Admin_Controller
                         }
                     }
                 }
+                redirect("/utilities");
             }
         }
 
+        $this->utilities_model->site_id = $site_id;
         $this->utilities_model->utilities_month = $month;
         $this->utilities_model->utilities_year  = $year;
 

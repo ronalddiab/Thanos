@@ -488,11 +488,11 @@ class Utilities_model extends Base_Model
     {
 	$data           = array();
 	$decimal_places = 4;
-	$utilityCheck        = $this->getUtility();
 	$this->site_id    = $postdata['site_id'];
 	$this->project_id = 0;
 	$this->utilities_year    = $postdata['year'];
 	$this->utilities_month   = $postdata['month'];
+	$utilityCheck        = $this->getUtility();
 	$utility        = $this->getUtilityForExportToMonth($postdata['id']);
 
 	// Auto set
@@ -871,9 +871,10 @@ class Utilities_model extends Base_Model
 				$data['water_invoice_scan'] = $utilityCheck['water_invoice_scan'];
 			}
 
-	    $data['id'] = $postdata['id'];
+	    $data['id'] = $utilityCheck['id'];
 	    $this->db->set('modify_on', 'NOW()', false);
-	    $this->db->where('id', $postdata['id']);
+	    $this->db->where('id', $utilityCheck['id']);
+	    $this->db->where('site_id', $data['site_id']);
 	    $this->db->where('month_id', $postdata['month']);
 	    $this->db->where('year_id', $postdata['year']);
 	    $this->db->update($this->_tbl_utilities, $data);
